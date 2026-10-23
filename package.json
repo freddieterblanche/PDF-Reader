@@ -1,7 +1,7 @@
 {
   "name": "pdf-reader",
   "productName": "PDF Reader",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "PDF Reader: side-by-side reading and fast printing",
   "author": "Freddie Terblanche",
   "main": "main.js",

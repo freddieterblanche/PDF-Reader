@@ -265,7 +265,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Documents">
     <div class="rail-head">
-      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v2.2</button>
+      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v2.2.1</button>
         <button class="icon collapse" id="collapseBtn" type="button" aria-label="Hide sidebar" title="Hide sidebar (Ctrl+\)">«</button></div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="rail-title"><h1>Documents</h1><span class="count" id="count">0</span></div>
@@ -411,7 +411,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
       this.stage = this.el.querySelector(".stage"); this.sel = this.el.querySelector(".docsel");
       this.stage.innerHTML = emptyHTML();
       this.pageInput = this.el.querySelector(".pageinput");
-      this.doc = null; this.scale = 1; this.fit = true; this.page = 1; this.tasks = new Map(); this.obs = null; this.restoring = false;
+      this.doc = null; this.scale = 1; this.fit = true; this.page = 1; this.vis = new Set(); this.cur = null; this.busy = false; this.pending = false; this.obs = null; this.restoring = false;
       this.el.addEventListener("pointerdown", () => setActive(this));
       this.el.addEventListener("focusin", () => setActive(this));
       this.thumbs = this.el.querySelector(".thumbs"); this.findbar = this.el.querySelector(".findbar"); this.findinput = this.el.querySelector(".findinput");
@@ -496,7 +496,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
     clear(){
       if (this.org) this.org.close();
       this.find = null; this.thumbs.innerHTML = ""; this.thumbDoc = null;
-      this.doc = null; this.tasks.forEach(t => t.cancel()); this.tasks.clear(); if (this.obs) this.obs.disconnect();
+      this.doc = null; this.cancelRender(); this.pending = false; if (this.obs) this.obs.disconnect();
       this.stage.innerHTML = emptyHTML();
       this.el.querySelector(".total").textContent = "/ 0"; this.pageInput.value = "0"; this.refreshSelect();
     }
@@ -504,14 +504,21 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
     async layout(keepPlace, restore){
       const d = this.doc; if (!d || !d.pdf) return;
       const place = restore || (keepPlace ? this.currentPlace() : { page: 1, offset: 0 });
-      this.tasks.forEach(t => t.cancel()); this.tasks.clear(); if (this.obs) this.obs.disconnect();
+      this.cancelRender(); if (this.obs) this.obs.disconnect();
       const first = await d.pdf.getPage(1); if (d !== this.doc) return;
       const base = first.getViewport({ scale: 1 });
       if (this.fit){ this.scale = Math.max(0.25, Math.min(4, (this.stage.clientWidth - 32) / base.width)); }
       this.el.querySelector(".zoom").textContent = Math.round(this.scale*100) + "%";
       this.el.querySelector(".total").textContent = "/ " + d.pdf.numPages;
       this.stage.innerHTML = "";
-      this.obs = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) this.draw(en.target); }), { root: this.stage, rootMargin: "600px 0px" });
+      this.vis = new Set();
+      this.obs = new IntersectionObserver(es => {
+        es.forEach(en => {
+          if (en.isIntersecting) this.vis.add(en.target);
+          else { this.vis.delete(en.target); if (this.cur && this.cur.el === en.target && this.cur.task) this.cur.task.cancel(); }
+        });
+        this.schedule();
+      }, { root: this.stage, rootMargin: "300px 0px" });
       for (let n = 1; n <= d.pdf.numPages; n++){
         const p = document.createElement("div"); p.className = "page"; p.dataset.n = n;
         p.dataset.bw = base.width; p.dataset.bh = base.height;
@@ -524,19 +531,65 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
       this.scrollToPlace(place.page || 1, place.offset || 0, true);
       requestAnimationFrame(() => { this.restoring = false; this.onScroll(true); });
     }
-    async draw(el){
-      if (el.dataset.drawn === String(this.scale)) return;
-      el.dataset.drawn = String(this.scale);
+    /* ---- page drawing: one page at a time, the page nearest the middle of the window first.
+       Pages that scroll away are cancelled; text layers follow once the visible pages are drawn;
+       pages far from the reading position are released so long documents stay light. ---- */
+    cancelRender(){ if (this.cur && this.cur.task){ try { this.cur.task.cancel(); } catch(e){} } }
+    schedule(delay){ clearTimeout(this.schedT); this.schedT = setTimeout(() => this.pump(), delay === undefined ? 30 : delay); }
+    async pump(){
+      if (this.busy) return;
+      if (!this.doc || !this.doc.pdf){ this.pending = false; return; }
+      const sc = String(this.scale), st = this.stage, top = st.scrollTop, bottom = top + st.clientHeight;
+      /* pages on screen first, top to bottom; then those just above or below, nearest first */
+      const dist = el => { const a = el.offsetTop, b = a + el.offsetHeight; return (b > top && a < bottom) ? a - top - 1e7 : Math.min(Math.abs(a - bottom), Math.abs(b - top)); };
+      const vis = [...this.vis].filter(el => el.isConnected).sort((a, b) => dist(a) - dist(b));
+      const next = vis.find(el => el.dataset.drawn !== sc);
+      const textNext = next ? null : vis.find(el => el._tl !== sc);
+      this.pending = !!(next || textNext); this.pendingAt = Date.now();
+      if (!this.pending){ this.evict(); lowQ.run(); return; }
+      this.busy = true;
+      try { if (next) await this.drawPage(next); else await this.drawTextFor(textNext); }
+      catch(e){}
+      finally { this.busy = false; }
+      this.pump();
+    }
+    async drawPage(el){
       const d = this.doc, n = +el.dataset.n, scale = this.scale;
-      const page = await d.pdf.getPage(n); if (d !== this.doc || scale !== this.scale) return;
-      const vp = page.getViewport({ scale });
-      const r = window.devicePixelRatio || 1, c = document.createElement("canvas");
-      c.width = Math.floor(vp.width*r); c.height = Math.floor(vp.height*r);
-      const task = page.render({ canvasContext: c.getContext("2d"), viewport: vp, transform: r !== 1 ? [r,0,0,r,0,0] : null });
-      this.tasks.set(n, task);
-      try { await task.promise; const old = el.querySelector("canvas"); old ? old.replaceWith(c) : el.prepend(c); this.drawText(el, vp, d); }
-      catch(e){ el.dataset.drawn = ""; }
-      finally { this.tasks.delete(n); }
+      el.dataset.drawn = String(scale);
+      try {
+        const page = await d.pdf.getPage(n);
+        if (d !== this.doc || scale !== this.scale || !this.vis.has(el)){ el.dataset.drawn = ""; return; }
+        const vp = page.getViewport({ scale });
+        let r = window.devicePixelRatio || 1;
+        const maxPx = 16e6; if (vp.width * vp.height * r * r > maxPx) r = Math.sqrt(maxPx / (vp.width * vp.height));
+        const c = document.createElement("canvas"); c.width = Math.floor(vp.width * r); c.height = Math.floor(vp.height * r);
+        const task = page.render({ canvasContext: c.getContext("2d"), viewport: vp, transform: r !== 1 ? [r,0,0,r,0,0] : null });
+        this.cur = { el, task };
+        await task.promise;
+        const old = el.querySelector("canvas");
+        if (old){ old.replaceWith(c); old.width = old.height = 0; } else el.prepend(c);
+      } catch(e){ el.dataset.drawn = ""; }
+      finally { this.cur = null; }
+    }
+    async drawTextFor(el){
+      const d = this.doc, scale = this.scale; el._tl = String(scale);
+      try {
+        const page = await d.pdf.getPage(+el.dataset.n);
+        if (d !== this.doc || scale !== this.scale) return;
+        await this.drawText(el, page.getViewport({ scale }), d);
+      } catch(e){ el._tl = null; }
+    }
+    evict(){
+      const pages = this.stage.querySelectorAll(".page"); if (pages.length <= 24) return;
+      pages.forEach(el => {
+        const n = +el.dataset.n;
+        if (Math.abs(n - this.page) <= 8 || this.vis.has(el)) return;
+        if (!el.dataset.drawn && !el._tl) return;
+        const c = el.querySelector("canvas"); if (c){ c.width = c.height = 0; c.remove(); }
+        el.querySelectorAll(".textLayer").forEach(x => x.remove());
+        el.dataset.drawn = ""; el._tl = null; el._divs = null;
+        const d = this.doc; if (d && d.pdf) d.pdf.getPage(n).then(p => p.cleanup()).catch(() => {});
+      });
     }
     currentPlace(){
       const top = this.stage.scrollTop + 24; let page = 1, offset = 0;
@@ -711,8 +764,13 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
       this.thumbDoc = d; this.thumbs.innerHTML = "";
       if (this.thumbObs) this.thumbObs.disconnect();
       this.thumbObs = new IntersectionObserver(es => es.forEach(en => {
-        if (en.isIntersecting){ this.thumbObs.unobserve(en.target); renderThumb(d, +en.target.dataset.n, en.target.querySelector(".tbox"), { width: 104 }); }
-      }), { root: this.thumbs, rootMargin: "400px 0px" });
+        const b = en.target; b._vis = en.isIntersecting;
+        if (en.isIntersecting && !b._queued && !b._done){
+          b._queued = true;
+          lowQ.add({ wanted: () => { b._queued = false; return b._vis && b.isConnected && this.thumbDoc === d; },
+            run: () => renderThumb(d, +b.dataset.n, b.querySelector(".tbox"), { width: 104 }).then(c => { if (c) b._done = true; }) });
+        }
+      }), { root: this.thumbs, rootMargin: "150px 0px" });
       for (let n = 1; n <= d.pdf.numPages; n++){
         const b = document.createElement("button"); b.type = "button"; b.className = "thumb"; b.dataset.n = n;
         b.setAttribute("aria-label", "Page " + n);
@@ -742,8 +800,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
       new Organiser(this, items, { title: "Organise pages", doc: d });
     }
     redrawVisible(){
-      const st = this.stage, top = st.scrollTop - 600, bottom = st.scrollTop + st.clientHeight + 600;
-      st.querySelectorAll(".page").forEach(p => { if (p.offsetTop + p.offsetHeight >= top && p.offsetTop <= bottom) this.draw(p); });
+      this.schedule(0);
     }
   }
 
@@ -794,6 +851,20 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
     renderList();
   }
 
+  /* Low-priority work (thumbnails, organiser cards): one job at a time, newest first,
+     and only while no reading pane is drawing a visible page. */
+  const lowQ = { jobs: [], running: false,
+    add(job){ this.jobs.push(job); this.run(); },
+    async run(){
+      if (this.running) return; this.running = true;
+      try {
+        while (this.jobs.length){
+          if (visiblePanes().some(p => p.busy || (p.pending && Date.now() - (p.pendingAt || 0) < 4000))){ await new Promise(r => setTimeout(r, 120)); continue; }
+          const job = this.jobs.pop();
+          if (job.wanted()) await job.run().catch(() => {});
+        }
+      } finally { this.running = false; }
+    } };
   /* ---- text, thumbnails and PDF building shared by all panes ---- */
   function textFor(d, n){ d.tc = d.tc || {}; return d.tc[n] || (d.tc[n] = d.pdf.getPage(n).then(p => p.getTextContent())); }
   function pageModel(tc){
@@ -884,7 +955,13 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
       this.grid.addEventListener("click", e => { if (e.target === this.grid){ this.sel.clear(); this.refreshSel(); } });
       this.grid.addEventListener("dragover", e => { if (this.drag){ e.preventDefault(); e.stopPropagation(); } });
       this.grid.addEventListener("drop", e => { if (this.drag && e.target === this.grid){ e.preventDefault(); e.stopPropagation(); this.moveTo(null, true); } });
-      this.obs = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting){ this.obs.unobserve(en.target); this.drawCard(en.target); } }), { root: this.grid, rootMargin: "500px 0px" });
+      this.obs = new IntersectionObserver(es => es.forEach(en => {
+        const c = en.target; c._vis = en.isIntersecting;
+        if (en.isIntersecting && !c._queued && !c._done){
+          c._queued = true;
+          lowQ.add({ wanted: () => { c._queued = false; return c._vis && c.isConnected; }, run: () => this.drawCard(c).then(() => { c._done = true; }) });
+        }
+      }), { root: this.grid, rootMargin: "200px 0px" });
       pane.el.appendChild(el); pane.org = this;
       this.render(); el.focus();
     }
