@@ -16,7 +16,11 @@ The installer is written to `dist/PDF-Reader-Setup-<version>.exe`.
 
 ## Releasing an update
 
-Bump `version` in `package.json` and the version label in `src/index.html`, build, then publish a GitHub release tagged `v<version>` with the installer attached. Installed copies check the latest release and offer to update.
+1. Bump `version` in `package.json` and the version label in `src/index.html`, then build the installer.
+2. Replace the single commit on the `updates` branch with the new installer and an updated `latest.json` (version, file, size, sha256, notes), and force-push it. Keeping one commit stops the repository growing with old installers.
+3. The `Publish release` workflow on that branch creates the GitHub release `v<version>` with the installer attached.
+
+Installed copies check the latest release when they open (and every 6 hours) and show an Update now banner.
 
 ## Bundled components
 
