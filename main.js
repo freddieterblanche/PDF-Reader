@@ -314,6 +314,48 @@ if (!app.requestSingleInstanceLock()) {
       return target;
     });
 
+    /* OCR: recognises text on scanned pages, offline, with Tesseract (English). A small pool of workers
+       runs in the background; the reader sends one page image at a time and gets words with positions. */
+    let ocrPool = null;
+    function ocrScheduler() {
+      if (ocrPool) return ocrPool;
+      ocrPool = (async () => {
+        const base = app.isPackaged ? path.join(process.resourcesPath, "app.asar.unpacked", "node_modules") : path.join(__dirname, "node_modules");
+        const { createScheduler, createWorker } = require(path.join(base, "tesseract.js"));
+        const langPath = path.join(base, "@tesseract.js-data", "eng", "4.0.0_best_int");
+        const cachePath = path.join(app.getPath("userData"), "ocr-cache");
+        fs.mkdirSync(cachePath, { recursive: true });
+        // Unpack the language data into the cache ourselves; the engine's own first-time load stalls inside Electron
+        const cached = path.join(cachePath, "eng.traineddata");
+        if (!fs.existsSync(cached) || fs.statSync(cached).size < 1e6) {
+          const raw = require("zlib").gunzipSync(fs.readFileSync(path.join(langPath, "eng.traineddata.gz")));
+          fs.writeFileSync(cached + ".tmp", raw); fs.renameSync(cached + ".tmp", cached);
+        }
+        const s = createScheduler();
+        const n = Math.max(1, Math.min(3, os.cpus().length - 1));
+        const withLimit = (p, ms, what) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(what)), ms))]);
+        for (let i = 0; i < n; i++) {
+          let fail; const failed = new Promise((_, rej) => { fail = rej; });
+          const w = await withLimit(Promise.race([createWorker("eng", 1, { langPath, cachePath, gzip: true, logger: () => {}, errorHandler: e => fail(e) }), failed]), 90000, "The OCR engine did not start.");
+          s.addWorker(w);
+        }
+        return s;
+      })();
+      ocrPool.catch(() => { ocrPool = null; });
+      return ocrPool;
+    }
+    ipcMain.handle("ocr-page", async (_e, data) => {
+      const s = await ocrScheduler();
+      const { data: r } = await Promise.race([s.addJob("recognize", Buffer.from(data), {}, { blocks: true, text: false }),
+        new Promise((_, rej) => setTimeout(() => rej(new Error("Text recognition took too long on one page.")), 300000))]);
+      const words = []; let line = 0;
+      (r.blocks || []).forEach(b => (b.paragraphs || []).forEach(p => (p.lines || []).forEach(l => { line++; (l.words || []).forEach(w => {
+        if (w.text && w.text.trim() && w.confidence > 25) words.push({ text: w.text, line, x0: w.bbox.x0, y0: w.bbox.y0, x1: w.bbox.x1, y1: w.bbox.y1 });
+      }); })));
+      return words;
+    });
+    app.on("before-quit", () => { if (ocrPool) ocrPool.then(s => s.terminate()).catch(() => {}); });
+
     ipcMain.handle("app-version", () => app.getVersion());
     ipcMain.handle("check-update", () => checkForUpdate(true));
     ipcMain.handle("install-update", () => installUpdate());

@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld("pdfReader", {
   printDialog: opts => ipcRenderer.invoke("print-dialog", opts),
   pathForFile: file => { try { return webUtils.getPathForFile(file) || ""; } catch (e) { return ""; } },
   onOpenFiles: cb => ipcRenderer.on("open-files", (_e, files) => cb(files)),
+  ocrPage: data => ipcRenderer.invoke("ocr-page", data),
   saveDialog: opts => ipcRenderer.invoke("save-dialog", opts),
   chooseFolder: opts => ipcRenderer.invoke("choose-folder", opts),
   writePdf: opts => ipcRenderer.invoke("write-pdf", opts),

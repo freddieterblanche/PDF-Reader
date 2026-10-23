@@ -32,6 +32,9 @@ html,body{height:100%;margin:0}
 .brand .ver:hover{border-color:var(--accent)}
 .update{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 10px;border:1px solid var(--accent);border-radius:8px;background:var(--accent-soft);font-size:13px}
 .update .btn{padding:4px 10px}
+.ocr-badge{color:var(--accent);font-family:var(--sans);font-weight:500}
+@keyframes paneflash{from{box-shadow:inset 0 0 0 3px var(--accent)}to{box-shadow:inset 0 0 0 3px transparent}}
+.pane.flash{animation:paneflash 1.2s ease-out}
 .openrow{display:flex;gap:8px}
 .openrow #openBtn{flex:1}
 .pane .body{flex:1;display:flex;min-height:0;min-width:0}
@@ -265,7 +268,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Documents">
     <div class="rail-head">
-      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v2.2.1</button>
+      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v2.3</button>
         <button class="icon collapse" id="collapseBtn" type="button" aria-label="Hide sidebar" title="Hide sidebar (Ctrl+\)">«</button></div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="rail-title"><h1>Documents</h1><span class="count" id="count">0</span></div>
@@ -280,6 +283,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
         </div>
       </div>
       <label class="check" id="linkWrap" hidden><input type="checkbox" id="linkPages"> Keep page numbers in step</label>
+      <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
       <p class="drop-hint" id="hint">Or drag PDF files onto this panel. Files stay in your browser and are not uploaded. Each document reopens where you left off.</p>
     </div>
     <div class="list" id="list" role="list"></div>
@@ -479,6 +483,13 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
       docs.forEach(d => { const o = document.createElement("option"); o.value = d.id; o.textContent = d.name; if (d === this.doc) o.selected = true; this.sel.appendChild(o); });
     }
     async show(d){
+      const other = d && visiblePanes().find(q => q !== this && q.doc === d);
+      if (other){
+        setActive(other);
+        other.el.classList.remove("flash"); void other.el.offsetWidth; other.el.classList.add("flash");
+        toast(d.name + " is already open in pane " + other.label + ".");
+        return;
+      }
       if (this.org && d !== this.doc){
         if (this.org.dirty){ toast("Save or close Organise pages first."); return; }
         this.org.close();
@@ -835,10 +846,10 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
       if (i < n){
         if (!p.el.isConnected) panesEl.appendChild(p.el);
         if (i >= was){
-          if (!p.doc){
-            const used = panes.slice(0, i).map(q => q.doc);
-            const pick = docs.find(d => !used.includes(d) && !d.error) || panes[0].doc;
-            pick ? p.show(pick) : p.clear();
+          const used = panes.slice(0, i).map(q => q.doc).filter(Boolean);
+          if (!p.doc || used.includes(p.doc) || !docs.includes(p.doc)){
+            const pick = docs.find(d => !used.includes(d) && !d.error);
+            if (pick){ p.doc = null; p.show(pick); } else p.clear();
           }
         }
       } else if (p.el.isConnected){ p.savePos(); p.el.remove(); }
@@ -865,6 +876,107 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
         }
       } finally { this.running = false; }
     } };
+  /* ---- OCR: scanned pages are recognised in the background, the text is written into the PDF as an
+     invisible layer (as Acrobat does), the original is backed up, and the document reloads in place. ---- */
+  const ocrEnabled = () => { try { return localStorage.getItem("ocrAuto") !== "0"; } catch(e){ return true; } };
+  const waitIdle = async () => { const t = Date.now(); while (visiblePanes().some(p => p.busy) && Date.now() - t < 5000) await new Promise(r => setTimeout(r, 100)); };
+  function ocrText(t){
+    return String(t).replace(/[‘’‚′]/g, "'").replace(/[“”„″]/g, '"').replace(/[–—−]/g, "-").replace(/…/g, "...")
+      .replace(/[^\x20-\x7e\xa0-\xff]/g, "").trim();
+  }
+  async function ocrPage(d, n){
+    await waitIdle();
+    const page = await d.pdf.getPage(n);
+    const v1 = page.getViewport({ scale: 1 });
+    let sc = 250 / 72; const maxPx = 12e6;
+    if (v1.width * v1.height * sc * sc > maxPx) sc = Math.sqrt(maxPx / (v1.width * v1.height));
+    const vp = page.getViewport({ scale: sc });
+    const c = document.createElement("canvas"); c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
+    const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    const blob = await new Promise(r => c.toBlob(r, "image/png"));
+    c.width = c.height = 0;
+    const words = await window.pdfReader.ocrPage(new Uint8Array(await blob.arrayBuffer()));
+    return words.map(w => ({ text: w.text, line: w.line, bl: vp.convertToPdfPoint(w.x0, w.y1), br: vp.convertToPdfPoint(w.x1, w.y1), tl: vp.convertToPdfPoint(w.x0, w.y0) }));
+  }
+  async function addTextLayer(src, results){
+    const doc = await PDFLib.PDFDocument.load(src, { ignoreEncryption: true, updateMetadata: false });
+    const font = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+    const pages = doc.getPages();
+    const { pushGraphicsState, popGraphicsState, setTextRenderingMode, TextRenderingMode, setCharacterSqueeze, degrees } = PDFLib;
+    let count = 0;
+    for (const [n, words] of results){
+      const pg = pages[n - 1]; if (!pg || !words.length) continue;
+      pg.pushOperators(pushGraphicsState(), setTextRenderingMode(TextRenderingMode.Invisible));
+      for (let wi = 0; wi < words.length; wi++){
+        const w = words[wi], text = ocrText(w.text); if (!text) continue;
+        const sameLine = wi + 1 < words.length && words[wi + 1].line === w.line;
+        const [x, y] = w.bl, [x2, y2] = w.br, [x3, y3] = w.tl;
+        const width = Math.hypot(x2 - x, y2 - y), h = Math.hypot(x3 - x, y3 - y);
+        if (width < 0.5 || h < 0.5) continue;
+        const size = h / 0.95;
+        let nat; try { nat = font.widthOfTextAtSize(text, size); } catch(e){ continue; }
+        if (!nat) continue;
+        pg.pushOperators(setCharacterSqueeze(Math.max(10, Math.min(400, 100 * width / nat))));
+        pg.drawText(sameLine ? text + " " : text, { x: x + (x3 - x) * 0.22, y: y + (y3 - y) * 0.22, size, font, rotate: degrees(Math.atan2(y2 - y, x2 - x) * 180 / Math.PI) });
+        count++;
+      }
+      pg.pushOperators(popGraphicsState());
+    }
+    return { bytes: await doc.save({ useObjectStreams: true }), count };
+  }
+  async function autoOcr(d){
+    if (!window.pdfReader || !ocrEnabled() || !d.pdf || d.ocr || !docs.includes(d)) return;
+    d.ocr = { status: "checking" };
+    try {
+      const need = [];
+      for (let n = 1; n <= d.pdf.numPages; n++){
+        if (d.ocrCancel) return;
+        const tc = await textFor(d, n);
+        const chars = tc.items.reduce((a, it) => a + (it.str ? it.str.replace(/\s/g, "").length : 0), 0);
+        if (chars < 15) need.push(n);
+      }
+      if (!need.length){ d.ocr = { status: "none" }; return; }
+      d.ocr = { status: "running", total: need.length, done: 0 }; renderList();
+      const results = new Map(); let next = 0;
+      const lane = async () => {
+        while (next < need.length && !d.ocrCancel){
+          const n = need[next++];
+          try { results.set(n, await ocrPage(d, n)); } catch(e){ results.set(n, []); }
+          d.ocr.done++; if (!editingDoc) renderList();
+        }
+      };
+      await Promise.all([lane(), lane(), lane()]);
+      if (d.ocrCancel || !docs.includes(d)) return;
+      d.ocr.status = "saving"; renderList();
+      const src = await d.pdf.getData();
+      const head = new TextDecoder("latin1").decode(src.subarray(0, Math.min(src.length, 4e6))) + new TextDecoder("latin1").decode(src.subarray(Math.max(0, src.length - 4e6)));
+      const signed = /\/ByteRange\s*\[/.test(head) || /\/Type\s*\/Sig\b/.test(head), encrypted = /\/Encrypt\b/.test(head);
+      const { bytes, count } = await addTextLayer(src, results);
+      if (!count){ d.ocr = { status: "nothing" }; renderList(); return; }
+      while (panes.some(p => p.doc === d && p.org)) await new Promise(r => setTimeout(r, 1000));
+      if (d.ocrCancel || !docs.includes(d)) return;
+      let note = "";
+      if (!d.path) note = " The text works in PDF Reader; use Organise, Save as copy to keep it.";
+      else if (signed) note = " It is digitally signed, so the file was left unchanged; the text works in PDF Reader.";
+      else if (encrypted) note = " It is password-protected, so the file was left unchanged; the text works in PDF Reader.";
+      else {
+        try { await window.pdfReader.writePdf({ path: d.path, data: bytes.slice(), mode: "overwrite" }); note = " Saved into the file; a backup of the original was kept."; }
+        catch(e){ note = " The file could not be updated (" + errText(e) + "); the text works in PDF Reader."; }
+      }
+      const newSize = bytes.byteLength;
+      const fresh = await lib.getDocument({ data: bytes }).promise;
+      const old = d.pdf; d.pdf = fresh; d.tc = {}; if (d.path && note.includes("Saved into the file")) d.size = newSize;
+      d.ocr = { status: "done", pages: need.length };
+      panes.forEach(p => { if (p.doc === d){ p.thumbDoc = null; const q = p.find && p.find.q; p.find = null; p.layout(true); if (q && !p.findbar.hidden) setTimeout(() => p.runSearch(q), 300); } });
+      setTimeout(() => { try { old.destroy(); } catch(e){} }, 2000);
+      renderList();
+      toast(d.name + ": text recognised on " + need.length + (need.length === 1 ? " scanned page." : " scanned pages.") + note);
+    } catch(e){
+      d.ocr = { status: "failed" }; renderList();
+      toast("Could not recognise the text in " + d.name + ": " + errText(e));
+    }
+  }
   /* ---- text, thumbnails and PDF building shared by all panes ---- */
   function textFor(d, n){ d.tc = d.tc || {}; return d.tc[n] || (d.tc[n] = d.pdf.getPage(n).then(p => p.getTextContent())); }
   function pageModel(tc){
@@ -1102,8 +1214,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
         try {
           const bytes = await buildPdf(this.items);
           await D.writePdf({ path: d.path, data: bytes.slice(), mode: "overwrite" });
+          const newSize = bytes.byteLength;
           const fresh = await lib.getDocument({ data: bytes }).promise;
-          const old = d.pdf; d.pdf = fresh; d.size = bytes.byteLength; d.tc = {}; d.error = null;
+          const old = d.pdf; d.pdf = fresh; d.size = newSize; d.tc = {}; d.error = null; d.ocr = d.ocr || { status: "done" };
           this.close();
           panes.forEach(p => { if (p.doc === d){ p.thumbDoc = null; p.find = null; p.layout(true); } });
           setTimeout(() => { try { old.destroy(); } catch(e){} }, 1000);
@@ -1166,6 +1279,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
       txt.textContent = d.error ? "Could not open" : !d.pdf ? "Opening" :
         (pos ? "p. " + pos.page + " of " + d.pdf.numPages : d.pdf.numPages + (d.pdf.numPages === 1 ? " page" : " pages")) + " · " + fmtSize(d.size);
       meta.appendChild(txt);
+      if (d.ocr && (d.ocr.status === "running" || d.ocr.status === "saving")){
+        const o = document.createElement("span"); o.className = "ocr-badge";
+        o.textContent = d.ocr.status === "saving" ? "Saving searchable text…" : "Recognising text " + d.ocr.done + " of " + d.ocr.total;
+        meta.appendChild(o);
+      }
       const x = document.createElement("span"); x.className = "icon"; x.setAttribute("role","button"); x.tabIndex = 0;
       x.setAttribute("aria-label", "Close " + d.name); x.textContent = "×";
       const close = e => { e.stopPropagation(); removeDoc(d); };
@@ -1407,7 +1525,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
     if (customNames[keyOf(d)]) d.name = customNames[keyOf(d)];
     docs.push(d); renderList();
     try { d.pdf = await lib.getDocument({ data: bytes }).promise; } catch(e){ d.error = (e && e.message) || "Unreadable file"; }
-    renderList(); return d;
+    renderList();
+    if (d.pdf) setTimeout(() => autoOcr(d), 1500);
+    return d;
   }
 
   function removeDoc(d){
@@ -1415,7 +1535,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
     panes.forEach(p => { if (p.doc === d) p.savePos(); });
     savePositions();
     docs.splice(i, 1);
-    panes.forEach(p => { if (p.doc === d){ p.doc = null; const n = docs.find(x => !panes.some(q => q !== p && q.doc === x)) || docs[0]; n ? p.show(n) : p.clear(); } });
+    panes.forEach(p => { if (p.doc === d){ p.doc = null; const n = docs.find(x => !panes.some(q => q !== p && q.doc === x)); n ? p.show(n) : p.clear(); } });
+    d.ocrCancel = true;
     if (d.pdf) d.pdf.destroy();
     renderList();
   }
@@ -1507,6 +1628,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
   let saved = 1; try { saved = parseInt(localStorage.getItem("paneCount") || (localStorage.getItem("compareMode") === "1" ? "2" : "1"), 10) || 1; } catch(e){}
   setPaneCount(saved);
   $("combineBtn").hidden = !window.pdfReader;
+  $("ocrAuto").checked = ocrEnabled();
+  $("ocrAuto").addEventListener("change", e => {
+    try { localStorage.setItem("ocrAuto", e.target.checked ? "1" : "0"); } catch(err){}
+    if (e.target.checked) docs.forEach(d => autoOcr(d)); else docs.forEach(d => { if (d.ocr && d.ocr.status === "running") d.ocrCancel = true; });
+  });
   if (!window.pdfReader) document.body.classList.add("no-desktop");
   if (window.pdfReader){
     const D = window.pdfReader;
