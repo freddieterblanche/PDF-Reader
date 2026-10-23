@@ -1,0 +1,1459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self' blob: data:">
+<title>PDF Reader</title>
+
+<style>
+/* Layout: document rail on the left; one, two or three reading panes side by side */
+:root{
+  --bg:#eef0f2; --rail:#f8f9fa; --surface:#ffffff; --ink:#1c232b; --muted:#5f6b78;
+  --line:#d6dbe0; --accent:#1f5f78; --accent-soft:#dcebf1; --danger:#9b2c2c; --desk:#dfe3e7;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14191e; --rail:#1a2026; --surface:#222a31; --ink:#e4e8ec; --muted:#97a3ae;
+  --line:#2e3841; --accent:#6fb3cc; --accent-soft:#1d3440; --danger:#e08585; --desk:#0f1317; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14191e; --rail:#1a2026; --surface:#222a31; --ink:#e4e8ec; --muted:#97a3ae;
+  --line:#2e3841; --accent:#6fb3cc; --accent-soft:#1d3440; --danger:#e08585; --desk:#0f1317; color-scheme:dark}
+@font-face{font-family:"IBM Plex Sans";font-weight:400;font-display:swap;src:url(fonts/ibm-plex-sans-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-weight:500;font-display:swap;src:url(fonts/ibm-plex-sans-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-weight:600;font-display:swap;src:url(fonts/ibm-plex-sans-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-weight:400;font-display:swap;src:url(fonts/ibm-plex-mono-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-weight:500;font-display:swap;src:url(fonts/ibm-plex-mono-latin-500-normal.woff2) format("woff2")}
+html,body{height:100%;margin:0}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+.brand .ver{cursor:pointer;background:none;font-family:var(--mono)}
+.brand .ver:hover{border-color:var(--accent)}
+.update{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 10px;border:1px solid var(--accent);border-radius:8px;background:var(--accent-soft);font-size:13px}
+.update .btn{padding:4px 10px}
+.openrow{display:flex;gap:8px}
+.openrow #openBtn{flex:1}
+.pane .body{flex:1;display:flex;min-height:0;min-width:0}
+.pane .body .stage{min-width:0}
+.tools{margin-left:auto}
+.findbar{display:flex;align-items:center;gap:6px;padding:6px 16px;border-bottom:1px solid var(--line);background:var(--rail)}
+.findinput{flex:1;min-width:120px;max-width:340px;font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.findbar .btn{padding:4px 9px}
+.findcount{min-width:90px;text-align:left}
+.thumbs{flex:none;width:144px;overflow:auto;background:var(--rail);border-right:1px solid var(--line);padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.thumb{border:2px solid transparent;border-radius:4px;background:none;padding:2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);font:inherit;font-family:var(--mono);font-size:11px}
+.thumb .tbox{display:block;width:104px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.thumb .tbox:empty{height:134px}
+.thumb .tbox canvas{display:block}
+.thumb:hover{border-color:var(--line)}
+.thumb.current{border-color:var(--accent);color:var(--accent)}
+.textLayer{position:absolute;text-align:initial;inset:0;overflow:hidden;line-height:1;-webkit-text-size-adjust:none;text-size-adjust:none;forced-color-adjust:none;transform-origin:0 0;z-index:2}
+.textLayer :is(span,br){color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0% 0%}
+.textLayer span.markedContent{top:0;height:0}
+.textLayer .highlight{position:static;margin:-1px;padding:1px;background-color:rgba(255,205,0,.42);border-radius:3px}
+.textLayer .highlight.selected{background-color:rgba(255,120,0,.6)}
+.textLayer ::selection{background:rgba(31,95,120,.3)}
+.textLayer br::selection{background:transparent}
+.textLayer .endOfContent{display:block;position:absolute;inset:100% 0 0;z-index:-1;cursor:default;user-select:none}
+.textLayer.selecting .endOfContent{top:0}
+.organiser{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;background:var(--desk);outline:none}
+.org-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+.org-title{font-weight:600}
+.org-status{flex:1;text-align:left;min-width:160px}
+.org-actions,.org-save{display:flex;flex-wrap:wrap;gap:6px}
+.org-actions .btn,.org-save .btn{padding:5px 10px}
+.org-save{margin-left:auto}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:disabled:hover{border-color:var(--line)}
+.org-grid{flex:1;overflow:auto;padding:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(156px,1fr));gap:18px;align-content:start}
+.card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 6px;border:2px solid transparent;border-radius:8px;cursor:pointer;user-select:none;position:relative}
+.card:hover{background:var(--surface)}
+.card.selected{border-color:var(--accent);background:var(--accent-soft)}
+.card.dragging{opacity:.35}
+.card.drop-before::before,.card.drop-after::after{content:"";position:absolute;top:6px;bottom:6px;width:3px;background:var(--accent);border-radius:2px}
+.card.drop-before::before{left:-11px}
+.card.drop-after::after{right:-11px}
+.cbox{width:132px;height:140px;display:flex;align-items:center;justify-content:center}
+.cbox canvas{box-shadow:0 1px 4px rgba(0,0,0,.25);background:#fff;max-width:132px;max-height:140px}
+.clabel{display:flex;flex-direction:column;align-items:center;gap:1px;font-size:12px;text-align:center;max-width:150px}
+.cpos{font-weight:600;font-family:var(--mono)}
+.csrc{color:var(--muted);font-size:11px;overflow-wrap:anywhere}
+.combine-list{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow:auto}
+.combine-list label{display:flex;gap:8px;align-items:flex-start;overflow-wrap:anywhere}
+.no-desktop .desktop-only{display:none!important}
+.pgrid{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;padding-top:12px;border-top:1px solid var(--line)}
+.pgrid label{font-size:13px;color:var(--muted)}
+.pgrid select,.pgrid input{font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);min-width:0;width:100%}
+.pgrid input[type="number"]{width:80px}
+.modal .foot .more{margin-right:auto}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:30;max-width:min(560px,calc(100% - 32px));
+  background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.25);font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px}
+.app{height:100%;display:grid;grid-template-columns:var(--rail-w,280px) 6px 1fr;min-height:0}
+.rail{background:var(--rail);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;min-width:0;
+  padding-left:max(0px,env(safe-area-inset-left,0px))}
+.rail-head{padding:16px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid var(--line)}
+.rail-title{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.rail-title h1{font-size:13px;font-weight:600;margin:0;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.brand .app-name{font-size:17px;font-weight:600;letter-spacing:.01em}
+.brand .app-name{flex:1}
+.icon.collapse{font-size:18px;color:var(--muted)}
+.icon.collapse:hover{color:var(--accent)}
+.app{transition:grid-template-columns .2s ease}
+.app.collapsed{grid-template-columns:0 0 1fr}
+.app.collapsed .rail{visibility:hidden;overflow:hidden;border-right:0}
+.app.collapsed .resizer{pointer-events:none}
+.app.collapsed .pane:first-child .toggle{display:inline-flex}
+.pane:not(:first-child) .toggle{display:none!important}
+.brand .ver{font-family:var(--mono);font-size:11px;color:var(--accent);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.count{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.btn{font:inherit;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;
+  padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1.2}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,.doc:focus-visible,.icon:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.row{display:flex;gap:8px}
+.row .btn{flex:1}
+.check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.drop-hint{font-size:12px;color:var(--muted);margin:0;line-height:1.45}
+.list{flex:1;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:2px;min-height:0}
+.doc{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:9px 8px;border-radius:6px;cursor:pointer;
+  border:1px solid transparent;background:none;text-align:left;color:inherit;font:inherit;width:100%}
+.doc:hover{background:var(--accent-soft)}
+.doc.in-active{background:var(--accent-soft);border-color:var(--accent)}
+.doc-ico{width:28px;height:34px;border:1px solid var(--line);border-radius:3px;background:var(--surface);position:relative;
+  font-family:var(--mono);font-size:8px;color:var(--danger);display:flex;align-items:flex-end;justify-content:center;padding-bottom:3px}
+.doc-ico::before{content:"";position:absolute;top:-1px;right:-1px;width:8px;height:8px;background:var(--rail);border-left:1px solid var(--line);border-bottom:1px solid var(--line)}
+.doc-text{min-width:0}
+.doc-name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc.editing{cursor:default;background:var(--accent-soft);border-color:var(--accent);margin:0}
+.rename-input{width:100%;font:inherit;font-weight:500;padding:3px 6px;border:1px solid var(--accent);border-radius:4px;background:var(--surface);color:var(--ink);margin-bottom:2px}
+.doc.editing .icon{opacity:1}
+.icon.ok:hover{color:var(--accent)}
+.doc-meta{font-family:var(--mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;display:flex;gap:6px;flex-wrap:wrap}
+.pane-badge{font-family:var(--sans);font-size:10px;font-weight:600;color:var(--surface);background:var(--accent);border-radius:3px;padding:0 4px}
+.tag{font-family:var(--sans);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-left:6px}
+.icon{border:0;background:none;color:var(--muted);cursor:pointer;width:26px;height:26px;border-radius:4px;font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.icon:hover{color:var(--danger);background:var(--surface)}
+.doc{grid-template-columns:10px 28px 1fr auto}
+.grip{width:10px;height:18px;cursor:grab;opacity:.45;background-image:radial-gradient(var(--muted) 1.2px,transparent 1.4px);background-size:5px 6px}
+.doc:hover .grip{opacity:.9}
+.actions{display:flex;align-items:center;gap:0}
+.actions .move{opacity:0}
+.doc:hover .move,.doc:focus-within .move{opacity:1}
+.icon.move:hover{color:var(--accent)}
+@media (hover:none){.actions .move{opacity:1}}
+[role="listitem"]{position:relative}
+[role="listitem"].dragging{opacity:.4}
+[role="listitem"].drop-before::before,[role="listitem"].drop-after::after{content:"";position:absolute;left:6px;right:6px;height:2px;background:var(--accent);border-radius:2px}
+[role="listitem"].drop-before::before{top:-2px}
+[role="listitem"].drop-after::after{bottom:-2px}
+.modal-back{position:fixed;inset:0;background:rgba(10,14,18,.45);display:flex;align-items:center;justify-content:center;z-index:20;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.modal{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;width:min(420px,100%);padding:20px;
+  display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal h2{margin:0;font-size:16px;font-weight:600}
+.modal .sub{margin:0;color:var(--muted);font-size:13px;word-break:break-word}
+.modal fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.modal label{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.modal input[type="number"]{width:64px;font:inherit;font-family:var(--mono);padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.modal .foot{display:flex;justify-content:flex-end;gap:8px}
+.modal .note{margin:0;font-size:12px;color:var(--muted);line-height:1.45}
+.modal .progress{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.modal .progress > span{display:block;height:100%;width:0;background:var(--accent);transition:width .15s}
+#printArea{display:none}
+@media print{
+  @page{margin:0}
+  html,body{height:auto;background:#fff}
+  .app,.modal-back{display:none!important}
+  #printArea{display:block}
+  #printArea img{display:block;width:100%;height:auto;max-height:100vh;object-fit:contain;page-break-after:always;break-after:page}
+  #printArea img:last-child{page-break-after:auto;break-after:auto}
+}
+.titlebar{flex:1 1 100%;display:flex;align-items:flex-start;gap:8px;min-width:0}
+.titlebar .pane-label{padding-top:2px}
+.docname{flex:1;min-width:0;font-weight:600;line-height:1.35;overflow-wrap:anywhere;padding-top:1px}
+.titlebar .docsel{flex:none;width:30px;min-width:30px;height:26px;padding:0;cursor:pointer;color:transparent;border:1px solid var(--line);border-radius:6px;
+  background:var(--surface) no-repeat center/10px 6px;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-size:5px 5px,5px 5px;background-position:calc(50% - 2.5px) 55%,calc(50% + 2.5px) 55%;appearance:none;-webkit-appearance:none}
+.titlebar .docsel:hover{border-color:var(--accent)}
+.titlebar .docsel option{color:var(--ink);background:var(--surface)}
+.titlebar .toggle{margin-top:-3px}
+.empty{padding:24px 12px;color:var(--muted);font-size:13px;text-align:center}
+.rail.drag{outline:2px dashed var(--accent);outline-offset:-6px}
+.resizer{cursor:col-resize;background:transparent}
+.resizer:hover,.resizer.active{background:var(--accent-soft)}
+.panes{display:grid;grid-template-columns:1fr;min-width:0;min-height:0}
+.panes.n2{grid-template-columns:1fr 1fr}
+.panes.n3{grid-template-columns:1fr 1fr 1fr}
+.panes.n3 .toolbar{padding-left:10px;padding-right:10px;gap:6px}
+.panes.n3 .group .btn{padding:5px 7px;min-width:28px}
+.viewrow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.viewlabel{font-size:13px;color:var(--muted)}
+.seg{display:flex}
+.seg .btn{border-radius:0;padding:5px 12px;font-family:var(--mono);margin-left:-1px}
+.seg .btn:first-child{border-radius:6px 0 0 6px;margin-left:0}
+.seg .btn:last-child{border-radius:0 6px 6px 0}
+.seg .btn[aria-pressed="true"]{position:relative;z-index:1}
+.pane{display:flex;flex-direction:column;min-width:0;min-height:0;border-top:3px solid transparent}
+.panes.compare .pane + .pane{border-left:1px solid var(--line)}
+.panes.compare .pane.active{border-top-color:var(--accent)}
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--surface)}
+.pane:last-child .toolbar{padding-right:max(16px,env(safe-area-inset-right,0px))}
+.pane-label{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--accent);display:none}
+.panes.compare .pane-label{display:inline}
+.docsel{flex:1;min-width:120px;max-width:100%;font:inherit;font-weight:600;color:var(--ink);background:transparent;border:1px solid transparent;border-radius:6px;padding:5px 4px;text-overflow:ellipsis}
+.docsel:hover{border-color:var(--line)}
+.group{display:flex;align-items:center;gap:4px}
+.group .btn{padding:5px 9px;min-width:32px}
+.pageinput{width:46px;font:inherit;font-family:var(--mono);text-align:center;padding:5px 4px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.mono{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:44px;text-align:center}
+.stage{position:relative;flex:1;overflow:auto;background:var(--desk);padding:24px 16px;display:flex;flex-direction:column;align-items:flex-start;gap:24px;min-height:0}
+.page{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18),0 6px 18px rgba(0,0,0,.08);position:relative;flex:none;margin-inline:auto}
+.stage > .empty-state,.stage > .placeholder{align-self:center}
+.page canvas{display:block;width:100%;height:100%}
+.page .num{position:absolute;bottom:-18px;right:0;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.placeholder{margin:auto;color:var(--muted);text-align:center;max-width:320px;line-height:1.5}
+.empty-state{margin:auto;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;color:var(--muted);max-width:300px;line-height:1.5}
+.empty-state .sheet{width:56px;height:70px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface);position:relative}
+.empty-state .sheet::before{content:"";position:absolute;top:-1.5px;right:-1.5px;width:16px;height:16px;background:var(--desk);border-left:1.5px solid var(--line);border-bottom:1.5px solid var(--line)}
+.empty-state .sheet::after{content:"";position:absolute;left:10px;right:10px;top:30px;height:22px;background:repeating-linear-gradient(var(--line) 0 2px,transparent 2px 7px)}
+.empty-state p{margin:0}
+.empty-state strong{color:var(--ink);font-weight:600}
+.toggle{display:none}
+.pane{position:relative}
+.pane .dropzone{position:absolute;inset:0;z-index:4;pointer-events:none;display:none;align-items:center;justify-content:center;
+  background:color-mix(in srgb,var(--accent-soft) 78%,transparent);outline:2px dashed var(--accent);outline-offset:-8px}
+.pane.dropping .dropzone{display:flex}
+.pane .dropzone span{background:var(--surface);color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:10px 16px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.15);max-width:80%;text-align:center;overflow-wrap:anywhere}
+/* Sidebar names: shown in full, wrapping over as many lines as needed; row buttons float over the right edge on hover */
+.doc{position:relative;grid-template-columns:10px 28px 1fr;align-items:start}
+.doc .grip,.doc .doc-ico{margin-top:2px}
+.doc-name{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;line-height:1.35}
+.doc-meta > span:not(.pane-badge){white-space:nowrap}
+.doc .actions{position:absolute;top:4px;right:4px;display:none;background:var(--surface);border:1px solid var(--line);border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.doc:hover .actions,.doc:focus-within .actions{display:flex}
+.doc .actions .move{opacity:1}
+@media (hover:none){
+  .doc{grid-template-columns:10px 28px 1fr auto}
+  .doc .actions{position:static;display:flex;background:none;border:0;box-shadow:none}
+}
+.err{color:var(--danger)}
+@media (max-width:700px){
+  .app,.app.collapsed{grid-template-columns:1fr}
+  .app.collapsed .rail{visibility:visible;border-right:1px solid var(--line)}
+  .resizer{display:none}
+  .rail{position:fixed;inset:0 auto 0 0;width:min(86vw,320px);z-index:5;transform:translateX(-100%);transition:transform .2s;
+    padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .app.open .rail{transform:none;box-shadow:0 0 40px rgba(0,0,0,.3)}
+  .toggle{display:inline-flex}
+  .toolbar{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .panes.n2,.panes.n3{grid-template-columns:1fr;grid-auto-rows:minmax(0,1fr)}
+  .panes.compare .pane + .pane{border-left:0}
+}
+@media (prefers-reduced-motion:reduce){.rail{transition:none}}
+</style>
+</head>
+<body>
+
+
+<div class="app" id="app">
+  <aside class="rail" id="rail" aria-label="Documents">
+    <div class="rail-head">
+      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v2.2</button>
+        <button class="icon collapse" id="collapseBtn" type="button" aria-label="Hide sidebar" title="Hide sidebar (Ctrl+\)">«</button></div>
+      <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
+      <div class="rail-title"><h1>Documents</h1><span class="count" id="count">0</span></div>
+      <div class="openrow"><button class="btn primary" id="openBtn" type="button">Open PDFs</button><button class="btn" id="combineBtn" type="button" title="Combine open PDFs into one document" hidden>Combine</button></div>
+      <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple hidden>
+      <div class="viewrow">
+        <span class="viewlabel" id="viewLabel">Side by side</span>
+        <div class="seg" id="viewSeg" role="group" aria-labelledby="viewLabel">
+          <button class="btn" type="button" data-n="1" aria-pressed="true" aria-label="One document">1</button>
+          <button class="btn" type="button" data-n="2" aria-pressed="false" aria-label="Two documents side by side">2</button>
+          <button class="btn" type="button" data-n="3" aria-pressed="false" aria-label="Three documents side by side">3</button>
+        </div>
+      </div>
+      <label class="check" id="linkWrap" hidden><input type="checkbox" id="linkPages"> Keep page numbers in step</label>
+      <p class="drop-hint" id="hint">Or drag PDF files onto this panel. Files stay in your browser and are not uploaded. Each document reopens where you left off.</p>
+    </div>
+    <div class="list" id="list" role="list"></div>
+  </aside>
+  <div class="resizer" id="resizer" role="separator" aria-orientation="vertical" aria-label="Resize document panel"></div>
+  <div class="panes" id="panes"></div>
+</div>
+
+<div class="modal-back" id="printModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="printTitle">
+    <h2 id="printTitle">Print document</h2>
+    <p class="sub" id="printDocName"></p>
+    <fieldset id="printOpts">
+      <label><input type="radio" name="printRange" id="prAll" value="all" checked> All pages <span class="mono" id="prAllCount"></span></label>
+      <label><input type="radio" name="printRange" id="prCurrent" value="current"> Current page <span class="mono" id="prCurNum"></span></label>
+      <label><input type="radio" name="printRange" id="prRange" value="range"> Pages
+        <input type="number" id="prFrom" min="1" value="1" aria-label="From page"> to
+        <input type="number" id="prTo" min="1" value="1" aria-label="To page"></label>
+    </fieldset>
+    <div class="pgrid" id="nativeOpts" hidden>
+      <label for="prEngine">Method</label><select id="prEngine"><option value="fast">Fast: text and shapes, like Adobe</option><option value="standard">Standard: each page as a picture</option></select>
+      <label for="prPrinter">Printer</label><select id="prPrinter"></select>
+      <label for="prCopies">Copies</label><input type="number" id="prCopies" min="1" max="99" value="1">
+      <label for="prSides">Sides</label><select id="prSides"><option value="">Printer default</option><option value="simplex">One-sided</option><option value="duplexlong">Double-sided, long edge</option><option value="duplexshort">Double-sided, short edge</option></select>
+      <label for="prColor" class="colorRow">Colour</label><select id="prColor" class="colorRow"><option value="">Printer default</option><option value="color">Colour</option><option value="monochrome">Black and white</option></select>
+      <label for="prScale">Scaling</label><select id="prScale"><option value="fit">Fit to page</option><option value="shrink">Shrink large pages only</option><option value="noscale">Actual size</option></select>
+    </div>
+    <div class="progress" id="printProgress" hidden><span></span></div>
+    <p class="note" id="printNote">The next window is your system print dialog, where you choose the printer, copies and paper size, or save as PDF.</p>
+    <div class="foot">
+      <button class="btn more" type="button" id="printMore" hidden title="Open the full Windows print dialog for paper trays, stapling and other printer options">More settings…</button>
+      <button class="btn" type="button" id="printCancel">Cancel</button>
+      <button class="btn primary" type="button" id="printGo">Print</button>
+    </div>
+  </div>
+</div>
+<div class="modal-back" id="confirmModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <h2 id="confirmTitle"></h2>
+    <p class="sub" id="confirmText"></p>
+    <div class="foot"><button class="btn" type="button" id="confirmNo">Cancel</button><button class="btn primary" type="button" id="confirmYes">OK</button></div>
+  </div>
+</div>
+<div class="modal-back" id="combineModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="combineTitle">
+    <h2 id="combineTitle">Combine PDFs</h2>
+    <p class="sub">Tick the documents to combine. They are joined in the order shown in the sidebar; you can reorder pages before saving.</p>
+    <div class="combine-list" id="combineList"></div>
+    <div class="foot"><button class="btn" type="button" id="combineNo">Cancel</button><button class="btn primary" type="button" id="combineYes">Combine</button></div>
+  </div>
+</div>
+<div id="printArea" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<template id="paneTpl">
+  <section class="pane">
+    <div class="toolbar">
+      <div class="titlebar">
+        <button class="btn toggle" type="button" data-act="toggle" aria-label="Show documents">☰</button>
+        <span class="pane-label"></span>
+        <span class="docname"></span>
+        <select class="docsel" aria-label="Switch document in this pane" title="Switch document"></select>
+      </div>
+      <div class="group">
+        <button class="btn" type="button" data-act="prev" aria-label="Previous page">‹</button>
+        <input class="pageinput" type="text" inputmode="numeric" aria-label="Page number" value="0">
+        <span class="mono total">/ 0</span>
+        <button class="btn" type="button" data-act="next" aria-label="Next page">›</button>
+      </div>
+      <div class="group">
+        <button class="btn" type="button" data-act="out" aria-label="Zoom out">−</button>
+        <span class="mono zoom">100%</span>
+        <button class="btn" type="button" data-act="in" aria-label="Zoom in">+</button>
+        <button class="btn" type="button" data-act="fit">Fit width</button>
+      </div>
+      <button class="btn" type="button" data-act="print" aria-label="Print document">Print</button>
+      <div class="group tools">
+        <button class="btn" type="button" data-act="find" title="Find in document (Ctrl+F)">Find</button>
+        <button class="btn" type="button" data-act="thumbs" aria-pressed="false" title="Show page thumbnails">Pages</button>
+        <button class="btn desktop-only" type="button" data-act="organise" title="Delete, reorder, rotate, extract, insert and split pages">Organise</button>
+      </div>
+    </div>
+    <div class="findbar" hidden>
+      <input class="findinput" type="search" placeholder="Find in document" aria-label="Find in document">
+      <span class="mono findcount"></span>
+      <button class="btn" type="button" data-act="findprev" aria-label="Previous match" title="Previous match (Shift+Enter)">&#8593;</button>
+      <button class="btn" type="button" data-act="findnext" aria-label="Next match" title="Next match (Enter)">&#8595;</button>
+      <button class="icon" type="button" data-act="findclose" aria-label="Close find" title="Close (Esc)">&#215;</button>
+    </div>
+    <div class="body">
+      <div class="thumbs" hidden></div>
+      <div class="stage" tabindex="-1"></div>
+    </div>
+  </section>
+</template>
+
+<script src="pdf.min.js"></script>
+<script src="pdf-lib.min.js"></script>
+<script>
+(function(){
+  const lib = window.pdfjsLib;
+  if (lib) lib.GlobalWorkerOptions.workerSrc = "pdf.worker.min.js";
+  const $ = id => document.getElementById(id);
+  const docs = []; let nextId = 1;
+  const fmtSize = b => b < 1048576 ? Math.max(1,Math.round(b/1024)) + " KB" : (b/1048576).toFixed(1) + " MB";
+
+  /* Reading positions: kept per document (by file name and size) so the same file reopens where you left off */
+  const POS_KEY = "readingPositions";
+  let positions = {};
+  try { positions = JSON.parse(localStorage.getItem(POS_KEY) || "{}") || {}; } catch(e){ positions = {}; }
+  function savePositions(){ try { localStorage.setItem(POS_KEY, JSON.stringify(positions)); } catch(e){} }
+  function emptyHTML(){
+    return docs.length
+      ? '<div class="empty-state"><span class="sheet" aria-hidden="true"></span><p>Choose a document from the left panel, drag one here, or drop a PDF file here.</p><button class="btn" type="button" data-open>Open PDFs</button></div>'
+      : '<div class="empty-state"><span class="sheet" aria-hidden="true"></span><p><strong>No documents open</strong></p><p>Open one or more PDFs, or drag them here or onto the sidebar.</p><button class="btn primary" type="button" data-open>Open PDFs</button></div>';
+  }
+  document.addEventListener("click", e => { if (e.target.closest("[data-open]")) openFiles(); });
+  const keyOf = d => d.orig + "|" + d.size;
+  /* Custom names, keyed by the original file name and size, so a renamed file keeps its name when reopened */
+  const NAME_KEY = "documentNames";
+  let customNames = {};
+  try { customNames = JSON.parse(localStorage.getItem(NAME_KEY) || "{}") || {}; } catch(e){ customNames = {}; }
+  function saveNames(){ try { localStorage.setItem(NAME_KEY, JSON.stringify(customNames)); } catch(e){} }
+
+  class Pane {
+    constructor(label){
+      this.el = $("paneTpl").content.firstElementChild.cloneNode(true);
+      this.label = label; this.el.querySelector(".pane-label").textContent = label;
+      this.stage = this.el.querySelector(".stage"); this.sel = this.el.querySelector(".docsel");
+      this.stage.innerHTML = emptyHTML();
+      this.pageInput = this.el.querySelector(".pageinput");
+      this.doc = null; this.scale = 1; this.fit = true; this.page = 1; this.tasks = new Map(); this.obs = null; this.restoring = false;
+      this.el.addEventListener("pointerdown", () => setActive(this));
+      this.el.addEventListener("focusin", () => setActive(this));
+      this.thumbs = this.el.querySelector(".thumbs"); this.findbar = this.el.querySelector(".findbar"); this.findinput = this.el.querySelector(".findinput");
+      this.thumbsOn = false; this.find = null; this.org = null;
+      const onAct = e => {
+        const a = e.target.closest("[data-act]"); if (!a) return;
+        const f = ({ prev:()=>this.goTo(this.page-1), next:()=>this.goTo(this.page+1), in:()=>this.zoom(1.2), out:()=>this.zoom(1/1.2),
+           fit:()=>{ this.fit = true; this.layout(true); }, print:()=>openPrint(this), toggle:()=>toggleRail(),
+           find:()=>this.openFind(), findnext:()=>this.stepMatch(1), findprev:()=>this.stepMatch(-1), findclose:()=>this.closeFind(),
+           thumbs:()=>this.toggleThumbs(), organise:()=>this.openOrganise() })[a.dataset.act];
+        if (f) f();
+      };
+      this.el.querySelector(".toolbar").addEventListener("click", onAct);
+      this.findbar.addEventListener("click", onAct);
+      this.findinput.addEventListener("input", () => { clearTimeout(this.findT); this.findT = setTimeout(() => this.runSearch(this.findinput.value), 250); });
+      this.findinput.addEventListener("keydown", e => {
+        if (e.key === "Enter"){ e.preventDefault(); clearTimeout(this.findT);
+          if (!this.find || this.find.q !== this.findinput.value) this.runSearch(this.findinput.value); else this.stepMatch(e.shiftKey ? -1 : 1); }
+        if (e.key === "Escape"){ e.preventDefault(); this.closeFind(); }
+      });
+      try { if (localStorage.getItem("thumbsOn") === "1"){ this.thumbsOn = true; this.thumbs.hidden = false; this.el.querySelector('[data-act="thumbs"]').setAttribute("aria-pressed", "true"); } } catch(e){}
+      this.pageInput.addEventListener("change", () => this.goTo(parseInt(this.pageInput.value,10)||1));
+      this.sel.addEventListener("change", () => { const d = docs.find(x => String(x.id) === this.sel.value); if (d) this.show(d); });
+      /* Drop target: PDF files from the computer, or a document dragged from the sidebar, open in this pane */
+      const dz = document.createElement("div"); dz.className = "dropzone"; dz.setAttribute("aria-hidden","true");
+      dz.innerHTML = "<span></span>"; this.el.appendChild(dz); this.dzText = dz.firstChild;
+      const accepts = e => dragDoc || (e.dataTransfer && [...e.dataTransfer.types].includes("Files"));
+      const over = e => {
+        if (!accepts(e)) return;
+        e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = "copy";
+        rail.classList.remove("drag");
+        if (!this.el.classList.contains("dropping")){
+          panes.forEach(q => q.el.classList.remove("dropping"));
+          this.dzText.textContent = (dragDoc ? "Show \u201c" + dragDoc.name + "\u201d" : "Open PDF") + (comparing ? " in pane " + this.label : " here");
+          this.el.classList.add("dropping");
+        }
+      };
+      this.el.addEventListener("dragenter", over); this.el.addEventListener("dragover", over);
+      this.el.addEventListener("dragleave", e => { if (!e.relatedTarget || !this.el.contains(e.relatedTarget)) this.el.classList.remove("dropping"); });
+      this.el.addEventListener("drop", e => {
+        if (!accepts(e)) return;
+        e.preventDefault(); e.stopPropagation();
+        panes.forEach(q => q.el.classList.remove("dropping")); rail.classList.remove("drag");
+        setActive(this);
+        if (dragDoc){ const d = dragDoc; dragDoc = null; clearDropMarks(); this.show(d); return; }
+        if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files, this);
+      });
+      this.stage.addEventListener("wheel", e => {
+        if (!(e.ctrlKey || e.metaKey)) return;
+        e.preventDefault();
+        const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY;
+        this.zoomAt(Math.exp(-dy * 0.0015), e.clientX, e.clientY);
+      }, { passive: false });
+      this.stage.addEventListener("scroll", () => {
+        cancelAnimationFrame(this.raf); this.raf = requestAnimationFrame(() => this.onScroll());
+      });
+    }
+    refreshSelect(){
+      const dn = this.el.querySelector(".docname");
+      dn.textContent = this.doc ? this.doc.name : (docs.length ? "Choose a document" : "No document");
+      dn.title = this.doc && this.doc.name !== this.doc.orig ? "Original file: " + this.doc.orig : "";
+      this.sel.hidden = !docs.length;
+      this.sel.innerHTML = "";
+      if (!this.doc){ const o = document.createElement("option"); o.textContent = docs.length ? "Choose a document" : "No document"; o.value = ""; this.sel.appendChild(o); }
+      docs.forEach(d => { const o = document.createElement("option"); o.value = d.id; o.textContent = d.name; if (d === this.doc) o.selected = true; this.sel.appendChild(o); });
+    }
+    async show(d){
+      if (this.org && d !== this.doc){
+        if (this.org.dirty){ toast("Save or close Organise pages first."); return; }
+        this.org.close();
+      }
+      this.savePos();
+      const changed = d !== this.doc;
+      this.doc = d; this.refreshSelect(); renderList();
+      if (changed && this.find){ this.find = null; this.el.querySelector(".findcount").textContent = ""; if (!this.findbar.hidden && this.findinput.value.trim()) setTimeout(() => this.runSearch(this.findinput.value), 50); }
+      if (d.error){ this.stage.innerHTML = '<p class="placeholder err"></p>'; this.stage.firstChild.textContent = "This file could not be opened as a PDF. " + d.error; return; }
+      if (!d.pdf){ this.stage.innerHTML = '<p class="placeholder">Opening…</p>'; return; }
+      const p = positions[keyOf(d)];
+      this.fit = p ? !!p.fit : true; if (p && p.scale) this.scale = p.scale;
+      await this.layout(false, p);
+    }
+    clear(){
+      if (this.org) this.org.close();
+      this.find = null; this.thumbs.innerHTML = ""; this.thumbDoc = null;
+      this.doc = null; this.tasks.forEach(t => t.cancel()); this.tasks.clear(); if (this.obs) this.obs.disconnect();
+      this.stage.innerHTML = emptyHTML();
+      this.el.querySelector(".total").textContent = "/ 0"; this.pageInput.value = "0"; this.refreshSelect();
+    }
+    /* restore: {page, offset} where offset is the fraction of that page scrolled past the top */
+    async layout(keepPlace, restore){
+      const d = this.doc; if (!d || !d.pdf) return;
+      const place = restore || (keepPlace ? this.currentPlace() : { page: 1, offset: 0 });
+      this.tasks.forEach(t => t.cancel()); this.tasks.clear(); if (this.obs) this.obs.disconnect();
+      const first = await d.pdf.getPage(1); if (d !== this.doc) return;
+      const base = first.getViewport({ scale: 1 });
+      if (this.fit){ this.scale = Math.max(0.25, Math.min(4, (this.stage.clientWidth - 32) / base.width)); }
+      this.el.querySelector(".zoom").textContent = Math.round(this.scale*100) + "%";
+      this.el.querySelector(".total").textContent = "/ " + d.pdf.numPages;
+      this.stage.innerHTML = "";
+      this.obs = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) this.draw(en.target); }), { root: this.stage, rootMargin: "600px 0px" });
+      for (let n = 1; n <= d.pdf.numPages; n++){
+        const p = document.createElement("div"); p.className = "page"; p.dataset.n = n;
+        p.dataset.bw = base.width; p.dataset.bh = base.height;
+        p.style.width = Math.floor(base.width*this.scale) + "px"; p.style.height = Math.floor(base.height*this.scale) + "px";
+        p.innerHTML = '<span class="num">' + n + '</span>';
+        this.stage.appendChild(p); this.obs.observe(p);
+      }
+      this.buildThumbs();
+      this.restoring = true;
+      this.scrollToPlace(place.page || 1, place.offset || 0, true);
+      requestAnimationFrame(() => { this.restoring = false; this.onScroll(true); });
+    }
+    async draw(el){
+      if (el.dataset.drawn === String(this.scale)) return;
+      el.dataset.drawn = String(this.scale);
+      const d = this.doc, n = +el.dataset.n, scale = this.scale;
+      const page = await d.pdf.getPage(n); if (d !== this.doc || scale !== this.scale) return;
+      const vp = page.getViewport({ scale });
+      const r = window.devicePixelRatio || 1, c = document.createElement("canvas");
+      c.width = Math.floor(vp.width*r); c.height = Math.floor(vp.height*r);
+      const task = page.render({ canvasContext: c.getContext("2d"), viewport: vp, transform: r !== 1 ? [r,0,0,r,0,0] : null });
+      this.tasks.set(n, task);
+      try { await task.promise; const old = el.querySelector("canvas"); old ? old.replaceWith(c) : el.prepend(c); this.drawText(el, vp, d); }
+      catch(e){ el.dataset.drawn = ""; }
+      finally { this.tasks.delete(n); }
+    }
+    currentPlace(){
+      const top = this.stage.scrollTop + 24; let page = 1, offset = 0;
+      for (const p of this.stage.querySelectorAll(".page")){
+        if (p.offsetTop <= top + 1){ page = +p.dataset.n; offset = Math.min(1, Math.max(0, (top - p.offsetTop) / p.offsetHeight)); } else break;
+      }
+      return { page, offset };
+    }
+    scrollToPlace(page, offset, instant){
+      const el = this.stage.querySelector('.page[data-n="'+page+'"]'); if (!el) return;
+      this.stage.scrollTo({ top: el.offsetTop - 24 + offset * el.offsetHeight, behavior: instant ? "auto" : "smooth" });
+    }
+    onScroll(silent){
+      if (!this.doc || !this.doc.pdf || this.restoring) return;
+      const prev = this.page, place = this.currentPlace();
+      const mid = this.stage.scrollTop + this.stage.clientHeight/3; let vis = 1;
+      this.stage.querySelectorAll(".page").forEach(p => { if (p.offsetTop <= mid) vis = +p.dataset.n; });
+      this.page = vis;
+      if (document.activeElement !== this.pageInput) this.pageInput.value = vis;
+      this.markThumb();
+      this.savePos(place);
+      if (!silent && vis !== prev && linked() && !this.following) followOther(this, vis);
+    }
+    savePos(place){
+      if (!this.doc || !this.doc.pdf || this.restoring) return;
+      place = place || this.currentPlace();
+      positions[keyOf(this.doc)] = { page: place.page, offset: +place.offset.toFixed(4), scale: +this.scale.toFixed(4), fit: this.fit, at: Date.now() };
+      clearTimeout(this.saveT); this.saveT = setTimeout(() => { savePositions(); renderList(); }, 400);
+    }
+    goTo(n, instant){
+      if (!this.doc || !this.doc.pdf) return;
+      n = Math.max(1, Math.min(this.doc.pdf.numPages, n|0));
+      this.scrollToPlace(n, 0, instant); this.page = n; this.pageInput.value = n;
+    }
+    zoom(f){ const r = this.stage.getBoundingClientRect(); this.zoomAt(f, r.left + r.width/2, r.top + r.height/3); }
+    /* Zoom around a point on screen (the mouse pointer for Ctrl + scroll). Page boxes resize at once,
+       the existing images stretch to fit, and sharp pages are redrawn a moment after zooming stops. */
+    zoomAt(f, cx, cy){
+      if (!this.doc || !this.doc.pdf) return;
+      const ns = Math.max(0.25, Math.min(4, this.scale * f));
+      if (Math.abs(ns - this.scale) < 0.001) return;
+      const st = this.stage, r = st.getBoundingClientRect();
+      const y = cy - r.top + st.scrollTop, x = cx - r.left + st.scrollLeft;
+      const pages = st.querySelectorAll(".page");
+      let anchor = null;
+      for (const p of pages){ if (p.offsetTop + p.offsetHeight >= y){ anchor = { p, fy: (y - p.offsetTop) / p.offsetHeight, fx: (x - p.offsetLeft) / p.offsetWidth }; break; } }
+      this.fit = false; this.scale = ns;
+      pages.forEach(p => { p.style.width = Math.floor(p.dataset.bw * ns) + "px"; p.style.height = Math.floor(p.dataset.bh * ns) + "px"; p.style.setProperty("--scale-factor", ns); });
+      if (anchor){
+        st.scrollTop = anchor.p.offsetTop + anchor.fy * anchor.p.offsetHeight - (cy - r.top);
+        st.scrollLeft = anchor.p.offsetLeft + anchor.fx * anchor.p.offsetWidth - (cx - r.left);
+      }
+      this.el.querySelector(".zoom").textContent = Math.round(ns * 100) + "%";
+      clearTimeout(this.zoomT);
+      this.zoomT = setTimeout(() => { this.redrawVisible(); this.savePos(); }, 180);
+    }
+    /* ---- selectable text ---- */
+    async drawText(el, vp, d){
+      try {
+        const n = +el.dataset.n, tc = await textFor(d, n);
+        if (d !== this.doc || !el.isConnected) return;
+        el.querySelectorAll(".textLayer").forEach(x => x.remove());
+        const tl = document.createElement("div"); tl.className = "textLayer";
+        el.style.setProperty("--scale-factor", vp.scale);
+        el.appendChild(tl);
+        const divs = [], strs = [];
+        await lib.renderTextLayer({ textContentSource: tc, container: tl, viewport: vp, textDivs: divs, textContentItemsStr: strs }).promise;
+        el._divs = divs; el._strs = strs; el._offs = pageModel(tc).offs;
+        tl.addEventListener("mousedown", () => tl.classList.add("selecting"));
+        document.addEventListener("mouseup", () => tl.classList.remove("selecting"), { once: true });
+        this.applyHighlights(el);
+      } catch(e){}
+    }
+    /* ---- find ---- */
+    openFind(){
+      if (!this.doc || !this.doc.pdf) return;
+      this.findbar.hidden = false;
+      const sel = String(window.getSelection() || "").trim();
+      if (sel && sel.length < 80 && !sel.includes("\n")) this.findinput.value = sel;
+      this.findinput.focus(); this.findinput.select();
+      if (this.findinput.value.trim() && (!this.find || this.find.q !== this.findinput.value)) this.runSearch(this.findinput.value);
+    }
+    closeFind(){
+      this.findbar.hidden = true; this.findToken = null; this.find = null; this.pendingMatch = false;
+      this.el.querySelector(".findcount").textContent = "";
+      this.refreshHighlights(); this.stage.focus();
+    }
+    countText(extra){ const f = this.find; return (f.cur + 1) + " of " + f.matches.length + (extra || ""); }
+    async runSearch(q){
+      const d = this.doc, token = {}; this.findToken = token;
+      const cnt = this.el.querySelector(".findcount");
+      this.find = { q, matches: [], cur: -1 }; this.refreshHighlights();
+      if (!d || !d.pdf || !q.trim()){ cnt.textContent = ""; return; }
+      const re = new RegExp(q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+"), "gi");
+      const n = d.pdf.numPages, start = this.page;
+      cnt.textContent = "Searching…";
+      for (let p = 1; p <= n; p++){
+        const tc = await textFor(d, p);
+        if (this.findToken !== token) return;
+        const { s } = pageModel(tc);
+        re.lastIndex = 0; let m;
+        while ((m = re.exec(s))){
+          if (!m[0].length){ re.lastIndex++; continue; }
+          this.find.matches.push({ page: p, start: m.index, end: m.index + m[0].length });
+          if (this.find.cur < 0 && p >= start){ this.find.cur = this.find.matches.length - 1; this.showMatch(); }
+        }
+        if (p % 10 === 0 && p < n) cnt.textContent = (this.find.cur >= 0 ? this.countText("") + " so far" : "Searching") + ", page " + p + " of " + n;
+      }
+      if (this.find.cur < 0 && this.find.matches.length){ this.find.cur = 0; this.showMatch(); }
+      cnt.textContent = this.find.matches.length ? this.countText("") : "No matches";
+      this.refreshHighlights();
+    }
+    stepMatch(dir){
+      const f = this.find; if (!f || !f.matches.length) return;
+      f.cur = (f.cur + dir + f.matches.length) % f.matches.length;
+      this.el.querySelector(".findcount").textContent = this.countText("");
+      this.showMatch();
+    }
+    showMatch(){
+      const f = this.find; if (!f || f.cur < 0) return;
+      const m = f.matches[f.cur];
+      this.refreshHighlights();
+      const el = this.stage.querySelector('.page[data-n="' + m.page + '"]');
+      const hl = el && el.querySelector(".highlight.selected");
+      if (hl) this.scrollToEl(hl);
+      else { this.pendingMatch = true; this.goTo(m.page, true); }
+    }
+    scrollToEl(hl){
+      const r = hl.getBoundingClientRect(), sr = this.stage.getBoundingClientRect();
+      if (r.top < sr.top + 40 || r.bottom > sr.bottom - 40) this.stage.scrollTop += (r.top - sr.top) - sr.height / 3;
+      if (r.left < sr.left || r.right > sr.right) this.stage.scrollLeft += (r.left - sr.left) - sr.width / 3;
+    }
+    refreshHighlights(){ this.stage.querySelectorAll(".page").forEach(el => this.applyHighlights(el)); }
+    applyHighlights(el){
+      if (!el._divs) return;
+      el._divs.forEach((div, i) => { if (div._hl){ div.textContent = el._strs[i]; div._hl = false; } });
+      const f = this.find; if (!f || !f.matches.length) return;
+      const n = +el.dataset.n;
+      const ms = []; f.matches.forEach((m, i) => { if (m.page === n) ms.push({ start: m.start, end: m.end, sel: i === f.cur }); });
+      if (!ms.length) return;
+      el._divs.forEach((div, i) => {
+        const t = el._strs[i] || "", a = el._offs[i]; if (a === undefined || !t.length) return;
+        const b = a + t.length, rs = [];
+        ms.forEach(m => { const x = Math.max(a, m.start), y = Math.min(b, m.end); if (x < y) rs.push([x - a, y - a, m.sel]); });
+        if (!rs.length) return;
+        rs.sort((p, q) => p[0] - q[0]);
+        div.textContent = ""; let last = 0;
+        rs.forEach(([x, y, sel]) => {
+          if (x < last) return;
+          if (x > last) div.append(t.slice(last, x));
+          const h = document.createElement("span"); h.className = "highlight" + (sel ? " selected" : ""); h.textContent = t.slice(x, y);
+          div.append(h); last = y;
+        });
+        if (last < t.length) div.append(t.slice(last));
+        div._hl = true;
+      });
+      if (this.pendingMatch){ const hl = el.querySelector(".highlight.selected"); if (hl){ this.pendingMatch = false; this.scrollToEl(hl); } }
+    }
+    /* ---- page thumbnails ---- */
+    toggleThumbs(){
+      this.thumbsOn = !this.thumbsOn;
+      this.thumbs.hidden = !this.thumbsOn;
+      this.el.querySelector('[data-act="thumbs"]').setAttribute("aria-pressed", String(this.thumbsOn));
+      try { localStorage.setItem("thumbsOn", this.thumbsOn ? "1" : "0"); } catch(e){}
+      this.buildThumbs();
+      if (this.fit && this.doc) setTimeout(() => this.layout(true), 0);
+    }
+    buildThumbs(){
+      const d = this.doc;
+      if (!this.thumbsOn || !d || !d.pdf){ return; }
+      if (this.thumbDoc === d && this.thumbs.childElementCount){ this.markThumb(); return; }
+      this.thumbDoc = d; this.thumbs.innerHTML = "";
+      if (this.thumbObs) this.thumbObs.disconnect();
+      this.thumbObs = new IntersectionObserver(es => es.forEach(en => {
+        if (en.isIntersecting){ this.thumbObs.unobserve(en.target); renderThumb(d, +en.target.dataset.n, en.target.querySelector(".tbox"), { width: 104 }); }
+      }), { root: this.thumbs, rootMargin: "400px 0px" });
+      for (let n = 1; n <= d.pdf.numPages; n++){
+        const b = document.createElement("button"); b.type = "button"; b.className = "thumb"; b.dataset.n = n;
+        b.setAttribute("aria-label", "Page " + n);
+        b.innerHTML = '<span class="tbox"></span><span class="tnum">' + n + '</span>';
+        b.addEventListener("click", () => this.goTo(n, true));
+        this.thumbs.appendChild(b); this.thumbObs.observe(b);
+      }
+      this.markThumb();
+    }
+    markThumb(){
+      if (!this.thumbsOn) return;
+      const cur = this.thumbs.querySelector(".thumb.current");
+      if (cur && +cur.dataset.n === this.page) return;
+      if (cur) cur.classList.remove("current");
+      const t = this.thumbs.querySelector('.thumb[data-n="' + this.page + '"]');
+      if (t){
+        t.classList.add("current");
+        const r = t.getBoundingClientRect(), pr = this.thumbs.getBoundingClientRect();
+        if (r.top < pr.top || r.bottom > pr.bottom) this.thumbs.scrollTop += r.top - pr.top - pr.height / 3;
+      }
+    }
+    /* ---- organise ---- */
+    openOrganise(){
+      if (!window.pdfReader || !this.doc || !this.doc.pdf || this.org) return;
+      const d = this.doc, items = [];
+      for (let i = 0; i < d.pdf.numPages; i++) items.push({ key: orgKey++, src: d, idx: i, rot: 0 });
+      new Organiser(this, items, { title: "Organise pages", doc: d });
+    }
+    redrawVisible(){
+      const st = this.stage, top = st.scrollTop - 600, bottom = st.scrollTop + st.clientHeight + 600;
+      st.querySelectorAll(".page").forEach(p => { if (p.offsetTop + p.offsetHeight >= top && p.offsetTop <= bottom) this.draw(p); });
+    }
+  }
+
+  const panesEl = $("panes");
+  const panes = [new Pane("A"), new Pane("B"), new Pane("C")];
+  let active = panes[0], comparing = false, paneCount = 1;
+  panesEl.appendChild(panes[0].el);
+  const visiblePanes = () => panes.slice(0, paneCount);
+
+  function setActive(p){
+    if (active === p) return; active = p;
+    panes.forEach(x => x.el.classList.toggle("active", x === p)); renderList();
+  }
+  const linked = () => comparing && $("linkPages").checked;
+  function followOther(src, page){
+    visiblePanes().forEach(other => {
+      if (other === src || !other.doc || !other.doc.pdf) return;
+      other.following = true; other.goTo(page, true);
+      setTimeout(() => { other.following = false; }, 120);
+    });
+  }
+
+  /* View: 1, 2 or 3 panes side by side. Hidden panes keep their document and place. */
+  function setPaneCount(n){
+    n = Math.max(1, Math.min(3, n|0));
+    const was = paneCount; paneCount = n; comparing = n > 1;
+    document.querySelectorAll("#viewSeg .btn").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.n === n)));
+    $("linkWrap").hidden = !comparing;
+    panesEl.classList.remove("n1","n2","n3"); panesEl.classList.add("n" + n);
+    panesEl.classList.toggle("compare", comparing);
+    panes.forEach((p, i) => {
+      if (i < n){
+        if (!p.el.isConnected) panesEl.appendChild(p.el);
+        if (i >= was){
+          if (!p.doc){
+            const used = panes.slice(0, i).map(q => q.doc);
+            const pick = docs.find(d => !used.includes(d) && !d.error) || panes[0].doc;
+            pick ? p.show(pick) : p.clear();
+          }
+        }
+      } else if (p.el.isConnected){ p.savePos(); p.el.remove(); }
+    });
+    if (!visiblePanes().includes(active)) active = panes[n - 1];
+    if (n > was) active = panes[n - 1];
+    panes.forEach(p => p.el.classList.toggle("active", comparing && p === active));
+    try { localStorage.setItem("paneCount", String(n)); } catch(e){}
+    requestAnimationFrame(() => visiblePanes().forEach(p => { if (p.doc) p.layout(true); }));
+    renderList();
+  }
+
+  /* ---- text, thumbnails and PDF building shared by all panes ---- */
+  function textFor(d, n){ d.tc = d.tc || {}; return d.tc[n] || (d.tc[n] = d.pdf.getPage(n).then(p => p.getTextContent())); }
+  function pageModel(tc){
+    let s = ""; const offs = [];
+    tc.items.forEach(it => { if (it.str === undefined) return; offs.push(s.length); s += it.str; if (it.hasEOL) s += " "; });
+    return { s, offs };
+  }
+  async function renderThumb(d, n, box, o){
+    try {
+      const page = await d.pdf.getPage(n), rot = ((page.rotate + (o.rot || 0)) % 360 + 360) % 360;
+      const v1 = page.getViewport({ scale: 1, rotation: rot });
+      const css = o.fit ? o.fit / Math.max(v1.width, v1.height) : o.width / v1.width, r = window.devicePixelRatio || 1;
+      const vp = page.getViewport({ scale: css * r, rotation: rot });
+      const c = document.createElement("canvas"); c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
+      c.style.width = Math.floor(v1.width * css) + "px"; c.style.height = Math.floor(v1.height * css) + "px";
+      await page.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
+      box.innerHTML = ""; box.appendChild(c);
+      return c;
+    } catch(e){ return null; }
+  }
+  async function buildPdf(items){
+    const out = await PDFLib.PDFDocument.create();
+    const bySrc = new Map();
+    items.forEach(it => { if (!bySrc.has(it.src)) bySrc.set(it.src, []); bySrc.get(it.src).push(it); });
+    const copied = new Map();
+    for (const [src, list] of bySrc){
+      const doc = await PDFLib.PDFDocument.load(await src.pdf.getData(), { ignoreEncryption: true });
+      const pages = await out.copyPages(doc, list.map(it => it.idx));
+      list.forEach((it, i) => copied.set(it, pages[i]));
+    }
+    items.forEach(it => {
+      const pg = copied.get(it);
+      if (it.rot) pg.setRotation(PDFLib.degrees(((pg.getRotation().angle + it.rot) % 360 + 360) % 360));
+      out.addPage(pg);
+    });
+    return out.save();
+  }
+  const cleanName = n => String(n || "document").replace(/\.pdf$/i, "").replace(/[\\/:*?"<>|]/g, "-").trim() || "document";
+  const dirOf = p => p ? p.replace(/[\\/][^\\/]*$/, "") : "";
+  const joinPath = (dir, name) => dir ? dir + (dir.includes("\\") ? "\\" : "/") + name : name;
+  const errText = e => String((e && e.message) || "unknown error").replace(/^Error invoking remote method '[^']+': (Error: )?/, "");
+  function askConfirm(title, text, ok){
+    return new Promise(res => {
+      $("confirmTitle").textContent = title; $("confirmText").textContent = text; $("confirmYes").textContent = ok || "OK";
+      $("confirmModal").hidden = false; $("confirmYes").focus();
+      const done = v => { $("confirmModal").hidden = true; $("confirmYes").onclick = $("confirmNo").onclick = null; document.removeEventListener("keydown", key, true); res(v); };
+      const key = e => { if (e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); done(false); } };
+      document.addEventListener("keydown", key, true);
+      $("confirmYes").onclick = () => done(true); $("confirmNo").onclick = () => done(false);
+    });
+  }
+  async function openSaved(path, bytes, pane){
+    const name = path.split(/[\\/]/).pop();
+    const d = await addDoc(name, bytes, false, path);
+    if (pane) pane.show(d);
+    return d;
+  }
+
+  let orgKey = 1;
+  class Organiser {
+    constructor(pane, items, opts){
+      this.pane = pane; this.items = items; this.opts = opts; this.sel = new Set(); this.anchor = null; this.dirty = !!opts.dirty; this.busy = false;
+      const el = this.el = document.createElement("div"); el.className = "organiser"; el.tabIndex = -1;
+      el.innerHTML = '<div class="org-bar"><span class="org-title"></span><span class="org-status mono"></span>' +
+        '<div class="org-actions">' +
+          '<button class="btn" type="button" data-org="all">Select all</button>' +
+          '<button class="btn" type="button" data-org="rotl" data-needsel title="Rotate selected pages left">&#10226; Rotate left</button>' +
+          '<button class="btn" type="button" data-org="rotr" data-needsel title="Rotate selected pages right">&#10227; Rotate right</button>' +
+          '<button class="btn" type="button" data-org="delete" data-needsel title="Delete selected pages (Delete key)">Delete</button>' +
+          '<button class="btn" type="button" data-org="insert" title="Insert the pages of another PDF after the selection">Insert PDF…</button>' +
+          '<button class="btn" type="button" data-org="extract" data-needsel title="Save the selected pages as a new PDF">Extract…</button>' +
+          '<button class="btn" type="button" data-org="split" data-needsel title="Start a new file at each selected page">Split…</button>' +
+        '</div><div class="org-save">' +
+          '<button class="btn" type="button" data-org="close">Close</button>' +
+          '<button class="btn" type="button" data-org="saveas">Save as copy…</button>' +
+          '<button class="btn primary" type="button" data-org="save" title="Replace the original file. A backup is kept.">Save</button>' +
+        '</div></div><div class="org-grid" aria-label="Pages"></div>';
+      el.querySelector(".org-title").textContent = opts.title;
+      el.querySelector('[data-org="save"]').hidden = !(opts.doc && opts.doc.path);
+      this.grid = el.querySelector(".org-grid");
+      el.addEventListener("click", e => { const b = e.target.closest("[data-org]"); if (b && !b.disabled) this.act(b.dataset.org); });
+      el.addEventListener("keydown", e => {
+        if (e.target.closest("input")) return;
+        if (e.key === "Delete"){ e.preventDefault(); this.act("delete"); }
+        else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a"){ e.preventDefault(); this.act("all"); }
+        else if (e.key === "Escape" && $("confirmModal").hidden){ e.preventDefault(); this.act("close"); }
+      });
+      this.grid.addEventListener("click", e => { if (e.target === this.grid){ this.sel.clear(); this.refreshSel(); } });
+      this.grid.addEventListener("dragover", e => { if (this.drag){ e.preventDefault(); e.stopPropagation(); } });
+      this.grid.addEventListener("drop", e => { if (this.drag && e.target === this.grid){ e.preventDefault(); e.stopPropagation(); this.moveTo(null, true); } });
+      this.obs = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting){ this.obs.unobserve(en.target); this.drawCard(en.target); } }), { root: this.grid, rootMargin: "500px 0px" });
+      pane.el.appendChild(el); pane.org = this;
+      this.render(); el.focus();
+    }
+    render(){
+      this.obs.disconnect(); this.grid.innerHTML = "";
+      const multi = new Set(this.items.map(i => i.src)).size > 1;
+      this.items.forEach((it, i) => {
+        const c = document.createElement("div"); c.className = "card"; c.draggable = true; c.dataset.key = it.key;
+        c.innerHTML = '<div class="cbox"></div><div class="clabel"><span class="cpos"></span><span class="csrc"></span></div>';
+        c.querySelector(".cpos").textContent = i + 1;
+        c.querySelector(".csrc").textContent = (multi ? cleanName(it.src.name) + ", " : "") + "page " + (it.idx + 1) + (it.rot ? ", rotated" : "");
+        c.addEventListener("click", e => this.clickCard(it.key, e));
+        c.addEventListener("dragstart", e => {
+          this.drag = this.sel.has(it.key) ? this.items.filter(x => this.sel.has(x.key)).map(x => x.key) : [it.key];
+          e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", "pages");
+          this.drag.forEach(k => { const el = this.grid.querySelector('.card[data-key="' + k + '"]'); if (el) el.classList.add("dragging"); });
+        });
+        c.addEventListener("dragend", () => { this.drag = null; this.grid.querySelectorAll(".dragging,.drop-before,.drop-after").forEach(x => x.classList.remove("dragging","drop-before","drop-after")); });
+        c.addEventListener("dragover", e => {
+          if (!this.drag) return; e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = "move";
+          const r = c.getBoundingClientRect(), after = e.clientX > r.left + r.width / 2;
+          this.grid.querySelectorAll(".drop-before,.drop-after").forEach(x => x.classList.remove("drop-before","drop-after"));
+          c.classList.add(after ? "drop-after" : "drop-before"); this.dropAfter = after;
+        });
+        c.addEventListener("drop", e => { if (!this.drag) return; e.preventDefault(); e.stopPropagation(); this.moveTo(it.key, this.dropAfter); });
+        this.grid.appendChild(c); this.obs.observe(c);
+      });
+      this.refreshSel();
+    }
+    async drawCard(c){
+      const it = this.items.find(x => String(x.key) === c.dataset.key); if (!it) return;
+      const box = c.querySelector(".cbox");
+      if (it.canvas && it.canvasRot === it.rot){ box.innerHTML = ""; box.appendChild(it.canvas); return; }
+      const cv = await renderThumb(it.src, it.idx + 1, box, { fit: 132, rot: it.rot });
+      if (cv){ it.canvas = cv; it.canvasRot = it.rot; }
+    }
+    refreshSel(){
+      this.grid.querySelectorAll(".card").forEach(c => c.classList.toggle("selected", this.sel.has(+c.dataset.key)));
+      const n = this.items.length, k = this.sel.size;
+      this.el.querySelector(".org-status").textContent = n + (n === 1 ? " page" : " pages") + (k ? ", " + k + " selected" : "") + (this.dirty ? ", unsaved changes" : "") + (k ? "" : ". Click a page to select it (Ctrl or Shift for more), drag to move.");
+      this.el.querySelectorAll("[data-needsel]").forEach(b => b.disabled = !k || this.busy);
+      this.el.querySelectorAll('[data-org="insert"],[data-org="saveas"],[data-org="save"]').forEach(b => b.disabled = this.busy);
+      this.el.querySelector('[data-org="all"]').textContent = k === n && n ? "Select none" : "Select all";
+    }
+    clickCard(key, e){
+      if (e.shiftKey && this.anchor !== null){
+        const a = this.items.findIndex(x => x.key === this.anchor), b = this.items.findIndex(x => x.key === key);
+        if (!(e.ctrlKey || e.metaKey)) this.sel.clear();
+        for (let i = Math.min(a, b); i <= Math.max(a, b); i++) this.sel.add(this.items[i].key);
+      } else if (e.ctrlKey || e.metaKey){
+        this.sel.has(key) ? this.sel.delete(key) : this.sel.add(key); this.anchor = key;
+      } else { this.sel.clear(); this.sel.add(key); this.anchor = key; }
+      this.refreshSel();
+    }
+    moveTo(targetKey, after){
+      const moving = this.items.filter(x => this.drag.includes(x.key));
+      this.drag = null;
+      if (targetKey !== null && moving.some(x => x.key === targetKey)){ this.render(); return; }
+      const rest = this.items.filter(x => !moving.includes(x));
+      let at = targetKey === null ? rest.length : rest.findIndex(x => x.key === targetKey) + (after ? 1 : 0);
+      rest.splice(at, 0, ...moving);
+      this.items = rest; this.dirty = true; this.render();
+    }
+    selected(){ return this.items.filter(x => this.sel.has(x.key)); }
+    setBusy(on, msg){ this.busy = on; this.refreshSel(); if (msg) this.el.querySelector(".org-status").textContent = msg; }
+    async act(cmd){
+      if (this.busy) return;
+      const D = window.pdfReader, base = this.opts.doc ? cleanName(this.opts.doc.name) : "Combined";
+      const dir = this.opts.doc ? dirOf(this.opts.doc.path) : dirOf((this.items[0] && this.items[0].src.path) || "");
+      if (cmd === "all"){ if (this.sel.size === this.items.length) this.sel.clear(); else this.items.forEach(x => this.sel.add(x.key)); this.refreshSel(); return; }
+      if (cmd === "rotl" || cmd === "rotr"){ this.selected().forEach(x => { x.rot = ((x.rot + (cmd === "rotr" ? 90 : 270)) % 360); }); this.dirty = true; this.render(); return; }
+      if (cmd === "delete"){
+        if (!this.sel.size) return;
+        if (this.sel.size >= this.items.length){ toast("A PDF must keep at least one page."); return; }
+        this.items = this.items.filter(x => !this.sel.has(x.key)); this.sel.clear(); this.dirty = true; this.render(); return;
+      }
+      if (cmd === "insert"){
+        const list = await D.openDialog(); if (!list || !list.length) return;
+        const sel = this.selected(); let at = sel.length ? this.items.indexOf(sel[sel.length - 1]) + 1 : this.items.length;
+        const added = [];
+        for (const f of list){
+          const d = await addDoc(f.name, f.data, false, f.path);
+          if (!d.pdf){ toast(f.name + " could not be opened as a PDF."); continue; }
+          for (let i = 0; i < d.pdf.numPages; i++) added.push({ key: orgKey++, src: d, idx: i, rot: 0 });
+        }
+        if (!added.length) return;
+        this.items.splice(at, 0, ...added); this.sel = new Set(added.map(x => x.key)); this.dirty = true; this.render();
+        toast("Inserted " + added.length + (added.length === 1 ? " page" : " pages") + ". Drag to move them if needed.");
+        return;
+      }
+      if (cmd === "extract"){
+        const sel = this.selected(); if (!sel.length) return;
+        const label = sel.length === 1 ? "page " + (this.items.indexOf(sel[0]) + 1) : sel.length + " pages";
+        const path = await D.saveDialog({ title: "Save extracted pages", defaultPath: joinPath(dir, base + " (" + label + ").pdf") }); if (!path) return;
+        this.setBusy(true, "Saving extracted pages…");
+        try {
+          const bytes = await buildPdf(sel);
+          const saved = await D.writePdf({ path, data: bytes.slice(), mode: "new" });
+          await openSaved(saved, bytes, null);
+          toast("Saved " + label + " as " + saved.split(/[\\/]/).pop() + ". It is open in the sidebar.");
+        } catch(e){ toast("Could not save: " + errText(e)); }
+        this.setBusy(false); return;
+      }
+      if (cmd === "split"){
+        const starts = [0]; this.items.forEach((x, i) => { if (i > 0 && this.sel.has(x.key)) starts.push(i); });
+        if (starts.length < 2){ toast("Select the first page of each new part (other than page 1), then choose Split."); return; }
+        const folder = await D.chooseFolder({ title: "Choose a folder for the split files", defaultPath: dir }); if (!folder) return;
+        this.setBusy(true, "Splitting…");
+        try {
+          const paths = [];
+          for (let k = 0; k < starts.length; k++){
+            const part = this.items.slice(starts[k], starts[k + 1] === undefined ? this.items.length : starts[k + 1]);
+            const bytes = await buildPdf(part);
+            paths.push(await D.writePdf({ path: joinPath(folder, base + " (part " + (k + 1) + ").pdf"), data: bytes, mode: "part" }));
+          }
+          toast("Split into " + paths.length + " files in " + folder.split(/[\\/]/).pop() + ".");
+          D.showInFolder(paths[0]);
+        } catch(e){ toast("Could not split: " + errText(e)); }
+        this.setBusy(false); return;
+      }
+      if (cmd === "saveas"){
+        const path = await D.saveDialog({ title: "Save as copy", defaultPath: joinPath(dir, base + (this.opts.doc ? " (edited)" : "") + ".pdf") }); if (!path) return;
+        this.setBusy(true, "Saving…");
+        try {
+          const bytes = await buildPdf(this.items);
+          const saved = await D.writePdf({ path, data: bytes.slice(), mode: "new" });
+          this.close(); await openSaved(saved, bytes, this.pane);
+          toast("Saved " + saved.split(/[\\/]/).pop() + ". The original is unchanged.");
+        } catch(e){ toast("Could not save: " + errText(e)); this.setBusy(false); }
+        return;
+      }
+      if (cmd === "save"){
+        const d = this.opts.doc; if (!d || !d.path) return;
+        if (!this.dirty){ toast("There are no changes to save."); return; }
+        const ok = await askConfirm("Replace the original file?", "This saves your changes over " + d.path.split(/[\\/]/).pop() + ". A backup copy of the original is kept in PDF Reader's backup folder for 30 days.", "Replace original");
+        if (!ok){ this.el.focus(); return; }
+        this.setBusy(true, "Saving…");
+        try {
+          const bytes = await buildPdf(this.items);
+          await D.writePdf({ path: d.path, data: bytes.slice(), mode: "overwrite" });
+          const fresh = await lib.getDocument({ data: bytes }).promise;
+          const old = d.pdf; d.pdf = fresh; d.size = bytes.byteLength; d.tc = {}; d.error = null;
+          this.close();
+          panes.forEach(p => { if (p.doc === d){ p.thumbDoc = null; p.find = null; p.layout(true); } });
+          setTimeout(() => { try { old.destroy(); } catch(e){} }, 1000);
+          renderList();
+          toast("Saved. A backup of the original was kept.");
+        } catch(e){ toast("Could not save: " + errText(e)); this.setBusy(false); }
+        return;
+      }
+      if (cmd === "close"){
+        if (this.dirty && !(await askConfirm("Close without saving?", "Your page changes have not been saved and will be lost.", "Close without saving"))){ this.el.focus(); return; }
+        this.close(); return;
+      }
+    }
+    close(){ this.obs.disconnect(); this.el.remove(); if (this.pane.org === this) this.pane.org = null; this.pane.stage.focus(); }
+  }
+
+  /* Combine open PDFs */
+  function openCombine(){
+    const ready = docs.filter(d => d.pdf);
+    if (ready.length < 2){ toast("Open the PDFs you want to combine first. You can also use Insert PDF in Organise."); return; }
+    if (active.org){ toast("Save or close Organise pages first."); return; }
+    const list = $("combineList"); list.innerHTML = "";
+    ready.forEach(d => {
+      const l = document.createElement("label"); const c = document.createElement("input"); c.type = "checkbox"; c.checked = true; c.value = d.id;
+      l.append(c, document.createTextNode(d.name + " (" + d.pdf.numPages + (d.pdf.numPages === 1 ? " page)" : " pages)"))); list.appendChild(l);
+    });
+    $("combineModal").hidden = false; $("combineYes").focus();
+  }
+  $("combineNo").addEventListener("click", () => { $("combineModal").hidden = true; });
+  $("combineYes").addEventListener("click", () => {
+    const ids = [...$("combineList").querySelectorAll("input:checked")].map(c => c.value);
+    const chosen = docs.filter(d => d.pdf && ids.includes(String(d.id)));
+    if (chosen.length < 2){ toast("Tick at least two documents."); return; }
+    $("combineModal").hidden = true;
+    const items = []; chosen.forEach(d => { for (let i = 0; i < d.pdf.numPages; i++) items.push({ key: orgKey++, src: d, idx: i, rot: 0 }); });
+    new Organiser(active, items, { title: "Combine " + chosen.length + " documents", doc: null, dirty: true });
+  });
+  $("combineBtn").addEventListener("click", openCombine);
+
+  function renderList(force){
+    if (editingDoc && !force) return;  /* don't rebuild the list while a name is being typed */
+    document.title = (active.doc ? active.doc.name + " \u00b7 " : "") + "PDF Reader";
+    const list = $("list"); list.innerHTML = ""; $("count").textContent = docs.length;
+    panes.forEach(p => p.refreshSelect());
+    if (!docs.length){ list.innerHTML = '<p class="empty">No documents open.</p>'; return; }
+    docs.forEach(d => {
+      const row = document.createElement("div"); row.setAttribute("role","listitem");
+      if (d === editingDoc){ row.appendChild(renameRow(d)); list.appendChild(row); return; }
+      const b = document.createElement("button"); b.className = "doc" + (active.doc === d ? " in-active" : ""); b.type = "button";
+      b.innerHTML = '<span class="grip" aria-hidden="true"></span><span class="doc-ico">PDF</span><span class="doc-text"><div class="doc-name"></div><div class="doc-meta"></div></span>';
+      b.dataset.id = d.id; b.title = "Drag to reorder. Double-click the name or press F2 to rename.";
+      const nm = b.querySelector(".doc-name"); nm.textContent = d.name;
+      nm.title = d.name !== d.orig ? d.name + "\nOriginal file: " + d.orig : d.name;
+      nm.addEventListener("dblclick", e => { e.preventDefault(); e.stopPropagation(); startRename(d); });
+      if (d.example){ const t = document.createElement("span"); t.className = "tag"; t.textContent = "Example"; nm.appendChild(t); }
+      const meta = b.querySelector(".doc-meta");
+      if (comparing) visiblePanes().forEach(p => { if (p.doc === d){ const s = document.createElement("span"); s.className = "pane-badge"; s.textContent = p.label; meta.appendChild(s); } });
+      const pos = positions[keyOf(d)];
+      const txt = document.createElement("span");
+      txt.textContent = d.error ? "Could not open" : !d.pdf ? "Opening" :
+        (pos ? "p. " + pos.page + " of " + d.pdf.numPages : d.pdf.numPages + (d.pdf.numPages === 1 ? " page" : " pages")) + " · " + fmtSize(d.size);
+      meta.appendChild(txt);
+      const x = document.createElement("span"); x.className = "icon"; x.setAttribute("role","button"); x.tabIndex = 0;
+      x.setAttribute("aria-label", "Close " + d.name); x.textContent = "×";
+      const close = e => { e.stopPropagation(); removeDoc(d); };
+      x.addEventListener("click", close); x.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") close(e); });
+      const acts = document.createElement("span"); acts.className = "actions";
+      const idx = docs.indexOf(d);
+      const mk = (label, sym, dir, disabled) => {
+        const m = document.createElement("span"); m.className = "icon move"; m.setAttribute("role","button"); m.textContent = sym;
+        m.setAttribute("aria-label", label + " " + d.name);
+        if (disabled){ m.style.visibility = "hidden"; return m; }
+        m.tabIndex = 0;
+        const go = e => { e.stopPropagation(); moveDoc(d, idx + dir, true); };
+        m.addEventListener("click", go); m.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") go(e); });
+        return m;
+      };
+      const ren = document.createElement("span"); ren.className = "icon move"; ren.setAttribute("role","button"); ren.tabIndex = 0;
+      ren.setAttribute("aria-label", "Rename " + d.name); ren.textContent = "✎";
+      const goRen = e => { e.stopPropagation(); startRename(d); };
+      ren.addEventListener("click", goRen); ren.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") goRen(e); });
+      acts.append(ren, mk("Move up", "↑", -1, idx === 0), mk("Move down", "↓", 1, idx === docs.length - 1), x);
+      b.appendChild(acts);
+      b.addEventListener("click", () => { active.show(d); $("app").classList.remove("open"); });
+      b.addEventListener("keydown", e => {
+        if (e.key === "F2"){ e.preventDefault(); startRename(d); return; }
+        if (e.altKey && (e.key === "ArrowUp" || e.key === "ArrowDown")){ e.preventDefault(); e.stopPropagation(); moveDoc(d, idx + (e.key === "ArrowUp" ? -1 : 1), true); }
+      });
+      row.draggable = true;
+      row.addEventListener("dragstart", e => {
+        dragDoc = d; row.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "copyMove"; e.dataTransfer.setData("text/plain", d.name);
+      });
+      row.addEventListener("dragend", () => { dragDoc = null; row.classList.remove("dragging"); clearDropMarks(); });
+      row.addEventListener("dragover", e => {
+        if (!dragDoc) return;
+        e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = "move";
+        const r = row.getBoundingClientRect(), after = e.clientY > r.top + r.height/2;
+        clearDropMarks(); row.classList.add(after ? "drop-after" : "drop-before"); row.dataset.after = after ? "1" : "";
+      });
+      row.addEventListener("drop", e => {
+        if (!dragDoc) return;
+        e.preventDefault(); e.stopPropagation();
+        let to = docs.indexOf(d) + (row.dataset.after ? 1 : 0);
+        if (docs.indexOf(dragDoc) < to) to--;
+        const moved = dragDoc; dragDoc = null; clearDropMarks(); moveDoc(moved, to, false);
+      });
+      row.appendChild(b); list.appendChild(row);
+    });
+    $("hint").textContent = comparing
+      ? "Click a document to load it into the highlighted pane (" + active.label + "), or drag a document or PDF file onto any pane. Each document reopens where you left off."
+      : window.pdfReader
+        ? "Or drag PDF files onto this panel or the reading pane. Each document reopens where you left off."
+        : "Or drag PDF files onto this panel or the reading pane. Files stay in your browser and are not uploaded. Each document reopens where you left off.";
+  }
+
+  /* Printing: render the chosen pages to images, then open the system print dialog */
+  const embedded = (() => { try { return window.self !== window.top; } catch(e){ return true; } })();
+  let printPane = null, printing = false;
+  function openPrint(p){
+    if (!p.doc || !p.doc.pdf) return;
+    printPane = p; const n = p.doc.pdf.numPages;
+    $("printDocName").textContent = p.doc.name;
+    $("prAllCount").textContent = "(" + n + ")";
+    $("prCurNum").textContent = "(p. " + p.page + ")";
+    $("prFrom").max = $("prTo").max = n; $("prFrom").value = 1; $("prTo").value = n;
+    $("prAll").checked = true;
+    $("printProgress").hidden = true; $("printProgress").firstElementChild.style.width = "0";
+    $("printGo").disabled = embedded; $("printOpts").disabled = false;
+    $("printNote").textContent = embedded
+      ? "Printing is blocked inside this preview. Open the downloaded PDF Reader file in your browser to print."
+      : "The next window is your system print dialog, where you choose the printer, copies and paper size, or save as PDF.";
+    $("printModal").hidden = false; $("printGo").focus();
+    if (window.pdfReader) setupNativePrint();
+  }
+  function closePrint(){ if (printing) { printing = false; } $("printModal").hidden = true; if (printPane) printPane.stage.focus(); }
+  async function runPrint(){
+    if (window.pdfReader) return runNativePrint(false);
+    const p = printPane; if (!p || !p.doc || !p.doc.pdf || printing) return;
+    const n = p.doc.pdf.numPages; let from = 1, to = n;
+    const mode = document.querySelector('input[name="printRange"]:checked').value;
+    if (mode === "current"){ from = to = p.page; }
+    if (mode === "range"){
+      from = Math.max(1, Math.min(n, parseInt($("prFrom").value,10) || 1));
+      to = Math.max(from, Math.min(n, parseInt($("prTo").value,10) || n));
+    }
+    printing = true; $("printGo").disabled = true; $("printOpts").disabled = true;
+    const bar = $("printProgress"); bar.hidden = false;
+    $("printNote").textContent = "Preparing " + (to - from + 1) + (to === from ? " page" : " pages") + "…";
+    const area = $("printArea"); area.innerHTML = "";
+    const pdf = p.doc.pdf;
+    for (let i = from; i <= to; i++){
+      if (!printing) { area.innerHTML = ""; return; }
+      const page = await pdf.getPage(i);
+      const vp = page.getViewport({ scale: 2 });
+      const c = document.createElement("canvas"); c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
+      await page.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
+      const blob = await new Promise(r => c.toBlob(r, "image/png"));
+      const img = new Image(); img.src = URL.createObjectURL(blob); img.alt = "";
+      await img.decode().catch(() => {});
+      area.appendChild(img);
+      bar.firstElementChild.style.width = Math.round((i - from + 1) / (to - from + 1) * 100) + "%";
+    }
+    printing = false; $("printModal").hidden = true;
+    const cleanup = () => { area.querySelectorAll("img").forEach(im => URL.revokeObjectURL(im.src)); area.innerHTML = ""; window.removeEventListener("afterprint", cleanup); };
+    window.addEventListener("afterprint", cleanup);
+    setTimeout(() => window.print(), 50);
+  }
+  let printerInfo = null;
+  function loadPrintPrefs(){ try { return JSON.parse(localStorage.getItem("printPrefs") || "{}") || {}; } catch(e){ return {}; } }
+  function savePrintPrefs(p){ try { localStorage.setItem("printPrefs", JSON.stringify(p)); } catch(e){} }
+  let toastT;
+  let printJobs = 0;
+  function toast(msg, sticky){ const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); if (!sticky) toastT = setTimeout(() => { t.hidden = true; }, 5000); }
+  async function setupNativePrint(){
+    $("nativeOpts").hidden = false; $("printMore").hidden = false; $("printMore").disabled = false; $("printGo").disabled = false;
+    $("printNote").textContent = "Printing runs in the background, so you can keep reading. More settings opens the full Windows print dialog.";
+    const prefs = loadPrintPrefs();
+    $("prEngine").value = prefs.engine || "fast"; syncEngine();
+    $("prCopies").value = 1; $("prSides").value = prefs.sides || ""; $("prColor").value = prefs.color || ""; $("prScale").value = prefs.scale || "fit";
+    const sel = $("prPrinter");
+    if (!printerInfo){
+      sel.innerHTML = '<option value="">Finding printers…</option>';
+      try { printerInfo = await window.pdfReader.getPrinters(); } catch(e){ printerInfo = { printers: [], defaultPrinter: "" }; }
+    }
+    sel.innerHTML = "";
+    const def = printerInfo.defaultPrinter;
+    const o0 = document.createElement("option"); o0.value = ""; o0.textContent = def ? "Default printer (" + def + ")" : "Default printer"; sel.appendChild(o0);
+    printerInfo.printers.forEach(p => { const o = document.createElement("option"); o.value = p.name; o.textContent = p.displayName + (p.name === def ? " (default)" : ""); sel.appendChild(o); });
+    if (prefs.printer && printerInfo.printers.some(p => p.name === prefs.printer)) sel.value = prefs.printer;
+  }
+  function syncEngine(){ const std = $("prEngine").value === "standard"; document.querySelectorAll(".colorRow").forEach(el => el.hidden = !std); }
+  $("prEngine").addEventListener("change", syncEngine);
+  async function runNativePrint(more){
+    const p = printPane; if (!p || !p.doc || !p.doc.pdf || printing) return;
+    const D = window.pdfReader, n = p.doc.pdf.numPages; let from = 1, to = n;
+    const mode = document.querySelector('input[name="printRange"]:checked').value;
+    if (mode === "current"){ from = to = p.page; }
+    if (mode === "range"){
+      from = Math.max(1, Math.min(n, parseInt($("prFrom").value,10) || 1));
+      to = Math.max(from, Math.min(n, parseInt($("prTo").value,10) || n));
+    }
+    const opts = { printer: $("prPrinter").value, copies: Math.max(1, Math.min(99, parseInt($("prCopies").value,10) || 1)),
+      sides: $("prSides").value, color: $("prColor").value, scale: $("prScale").value,
+      pages: mode === "all" ? "" : (from === to ? String(from) : from + "-" + to),
+      from: mode === "all" ? 0 : from, to: mode === "all" ? 0 : to, engine: $("prEngine").value };
+    savePrintPrefs({ printer: opts.printer, sides: opts.sides, color: opts.color, scale: opts.scale, engine: opts.engine });
+    printing = true; $("printGo").disabled = true; $("printMore").disabled = true; $("printOpts").disabled = true;
+    $("printNote").textContent = more ? "Opening the Windows print dialog…" : "Sending to the printer…";
+    const docName = p.doc.name;
+    try {
+      opts.file = p.doc.path || await D.writeTemp(p.doc.orig, await p.doc.pdf.getData());
+      if (more){
+        printing = false; $("printModal").hidden = true;
+        toast("Opening the Windows print dialog for " + docName);
+        await D.printDialog(opts);
+      } else {
+        /* Print in the background: the dialog closes at once and reading carries on */
+        printing = false; $("printModal").hidden = true;
+        const pages = to - from + 1;
+        const where = opts.printer || (printerInfo && printerInfo.defaultPrinter) || "the default printer";
+        const what = pages + (pages === 1 ? " page" : " pages") + (opts.copies > 1 ? ", " + opts.copies + " copies," : "");
+        printJobs++; toast("Printing " + what + " of " + docName + " to " + where + "…", true);
+        D.print(opts).then(
+          () => toast("Sent " + what + " to " + where),
+          e => toast("Printing " + docName + " failed: " + String((e && e.message) || "unknown error").replace(/^Error invoking remote method '[^']+': (Error: )?/, ""))
+        ).finally(() => { printJobs--; });
+      }
+    } catch(e){
+      printing = false;
+      const msg = String((e && e.message) || "unknown error").replace(/^Error invoking remote method '[^']+': (Error: )?/, "");
+      if ($("printModal").hidden) toast("Printing failed: " + msg);
+      else $("printNote").textContent = "Printing failed: " + msg + " Check that the printer is on, then try again or use More settings.";
+    } finally {
+      $("printGo").disabled = false; $("printMore").disabled = false; $("printOpts").disabled = false;
+    }
+  }
+  $("printMore").addEventListener("click", () => runNativePrint(true));
+  $("printCancel").addEventListener("click", closePrint);
+  $("printGo").addEventListener("click", runPrint);
+  $("printModal").addEventListener("click", e => { if (e.target.id === "printModal") closePrint(); });
+  ["prFrom","prTo"].forEach(id => $(id).addEventListener("focus", () => { $("prRange").checked = true; }));
+  document.addEventListener("keydown", e => {
+    if ($("printModal").hidden) return;
+    if (e.key === "Escape") closePrint();
+    if (e.key === "Enter" && !$("printGo").disabled && e.target.tagName !== "BUTTON") runPrint();
+  }, true);
+
+  /* Renaming: changes the name shown in this viewer only, never the file on your computer */
+  let editingDoc = null;
+  function startRename(d){ if (editingDoc && editingDoc !== d) finishRename(true); editingDoc = d; renderList(true); }
+  function finishRename(save, value){
+    const d = editingDoc; if (!d) return; editingDoc = null;
+    if (save && value !== undefined){
+      const v = value.trim();
+      d.name = v || d.orig;
+      if (d.name === d.orig) delete customNames[keyOf(d)]; else customNames[keyOf(d)] = d.name;
+      saveNames();
+      panes.forEach(p => { if (p.doc === d) p.refreshSelect(); });
+    }
+    renderList();
+    const el = $("list").querySelector('.doc[data-id="' + d.id + '"]'); if (el) el.focus();
+  }
+  function renameRow(d){
+    const w = document.createElement("form"); w.className = "doc editing";
+    w.innerHTML = '<span class="grip" aria-hidden="true"></span><span class="doc-ico">PDF</span>' +
+      '<span class="doc-text"><input class="rename-input" type="text" aria-label="Document name"><div class="doc-meta"></div></span>' +
+      '<span class="actions"><button class="icon ok" type="submit" aria-label="Save name">✓</button><button class="icon" type="button" aria-label="Cancel rename">×</button></span>';
+    const inp = w.querySelector("input"); inp.id = "rename-" + d.id; inp.value = d.name;
+    w.querySelector(".doc-meta").textContent = d.name !== d.orig ? "Original: " + d.orig + " · clear to restore" : "Enter to save · Esc to cancel";
+    let done = false;
+    const commit = () => { if (done) return; done = true; finishRename(true, inp.value); };
+    const cancel = () => { if (done) return; done = true; finishRename(false); };
+    w.addEventListener("submit", e => { e.preventDefault(); commit(); });
+    w.querySelector('button[type="button"]').addEventListener("mousedown", e => e.preventDefault());
+    w.querySelector('button[type="button"]').addEventListener("click", cancel);
+    w.querySelector('button[type="submit"]').addEventListener("mousedown", e => e.preventDefault());
+    inp.addEventListener("keydown", e => { if (e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); cancel(); } });
+    inp.addEventListener("blur", () => setTimeout(commit, 0));
+    requestAnimationFrame(() => {
+      inp.focus();
+      const dot = inp.value.toLowerCase().lastIndexOf(".pdf");
+      inp.setSelectionRange(0, dot > 0 ? dot : inp.value.length);
+    });
+    return w;
+  }
+
+  let dragDoc = null;
+  function clearDropMarks(){ document.querySelectorAll(".drop-before,.drop-after").forEach(el => el.classList.remove("drop-before","drop-after")); }
+  function moveDoc(d, to, keepFocus){
+    const from = docs.indexOf(d); to = Math.max(0, Math.min(docs.length - 1, to));
+    if (from < 0 || from === to){ renderList(); return; }
+    docs.splice(from, 1); docs.splice(to, 0, d);
+    renderList();
+    if (keepFocus){ const el = $("list").querySelector('.doc[data-id="' + d.id + '"]'); if (el) el.focus(); }
+  }
+
+  async function addDoc(name, bytes, example, filePath){
+    if (filePath){ const same = docs.find(x => x.path && x.path.toLowerCase() === filePath.toLowerCase()); if (same) return same; }
+    const d = { id: nextId++, name, orig: name, path: filePath || "", size: bytes.byteLength, example: !!example, pdf: null, error: null };
+    if (customNames[keyOf(d)]) d.name = customNames[keyOf(d)];
+    docs.push(d); renderList();
+    try { d.pdf = await lib.getDocument({ data: bytes }).promise; } catch(e){ d.error = (e && e.message) || "Unreadable file"; }
+    renderList(); return d;
+  }
+
+  function removeDoc(d){
+    const i = docs.indexOf(d); if (i < 0) return;
+    panes.forEach(p => { if (p.doc === d) p.savePos(); });
+    savePositions();
+    docs.splice(i, 1);
+    panes.forEach(p => { if (p.doc === d){ p.doc = null; const n = docs.find(x => !panes.some(q => q !== p && q.doc === x)) || docs[0]; n ? p.show(n) : p.clear(); } });
+    if (d.pdf) d.pdf.destroy();
+    renderList();
+  }
+
+  function handleFiles(files, target){
+    const pdfs = [...files].filter(f => f.type === "application/pdf" || /\.pdf$/i.test(f.name));
+    const D = window.pdfReader;
+    Promise.all(pdfs.map(async f => {
+      const fp = D ? D.pathForFile(f) : "";
+      if (fp){ const got = await D.readFiles([fp]); if (got[0]) return addDoc(got[0].name, got[0].data, false, got[0].path); }
+      return addDoc(f.name, new Uint8Array(await f.arrayBuffer()));
+    })).then(added => showAdded(added, target));
+  }
+  function showAdded(added, target){
+    const ok = added.filter(d => !d.error);
+    if (target){ const first = ok[0] || added[0]; if (first) target.show(first); return; }
+    if (!ok.length && added[0]) { active.show(added[0]); return; }
+    if (comparing && ok.length >= 2){ visiblePanes().forEach((p, i) => { if (ok[i]) p.show(ok[i]); }); }
+    else if (ok[0]) active.show(ok[0]);
+  }
+  function openNative(list, target){
+    Promise.all((list || []).map(f => addDoc(f.name, f.data, false, f.path))).then(added => showAdded(added, target));
+  }
+  function openFiles(){
+    if (window.pdfReader) window.pdfReader.openDialog().then(l => openNative(l));
+    else $("fileInput").click();
+  }
+
+  $("openBtn").addEventListener("click", () => openFiles());
+  $("fileInput").addEventListener("change", e => { handleFiles(e.target.files); e.target.value = ""; });
+  $("viewSeg").addEventListener("click", e => { const b = e.target.closest("[data-n]"); if (b) setPaneCount(+b.dataset.n); });
+  const rail = $("rail");
+  const isFileDrag = e => !dragDoc && e.dataTransfer && [...e.dataTransfer.types].includes("Files");
+  ["dragenter","dragover"].forEach(t => document.addEventListener(t, e => { if (!isFileDrag(e)) return; e.preventDefault(); rail.classList.add("drag"); }));
+  ["dragleave","drop"].forEach(t => document.addEventListener(t, e => { if (!isFileDrag(e)) return; e.preventDefault(); if (t === "drop" || !e.relatedTarget) rail.classList.remove("drag"); }));
+  document.addEventListener("drop", e => { panes.forEach(q => q.el.classList.remove("dropping")); if (e.dataTransfer && e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
+  document.addEventListener("dragleave", e => { if (!e.relatedTarget) panes.forEach(q => q.el.classList.remove("dropping")); });
+  document.addEventListener("dragend", () => panes.forEach(q => q.el.classList.remove("dropping")));
+  rail.addEventListener("dragover", () => panes.forEach(q => q.el.classList.remove("dropping")));
+  document.addEventListener("keydown", e => {
+    if (!$("confirmModal").hidden || !$("combineModal").hidden){ if (e.key === "Escape" && !$("combineModal").hidden) $("combineModal").hidden = true; return; }
+    if (e.target.closest && e.target.closest(".organiser")){ if ((e.ctrlKey || e.metaKey) && /^[pwfo]$/i.test(e.key)) e.preventDefault(); return; }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f" && active.doc && active.doc.pdf){ e.preventDefault(); active.openFind(); return; }
+    if (e.key === "F3" && active.find){ e.preventDefault(); active.stepMatch(e.shiftKey ? -1 : 1); return; }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p" && active.doc && active.doc.pdf){ e.preventDefault(); openPrint(active); return; }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "o"){ e.preventDefault(); openFiles(); return; }
+    if ((e.ctrlKey || e.metaKey) && (e.key === "=" || e.key === "+")){ e.preventDefault(); active.zoom(1.2); return; }
+    if ((e.ctrlKey || e.metaKey) && (e.key === "-" || e.key === "_")){ e.preventDefault(); active.zoom(1/1.2); return; }
+    if ((e.ctrlKey || e.metaKey) && e.key === "0" && active.doc){ e.preventDefault(); active.fit = true; active.layout(true); return; }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "w" && active.doc && !e.target.closest("input")){ e.preventDefault(); removeDoc(active.doc); return; }
+    if (!$("printModal").hidden || e.target.closest("input,select")) return;
+    if (e.key === "ArrowRight" || e.key === "PageDown"){ active.goTo(active.page+1); e.preventDefault(); }
+    if (e.key === "ArrowLeft" || e.key === "PageUp"){ active.goTo(active.page-1); e.preventDefault(); }
+  });
+  document.addEventListener("wheel", e => { if (e.ctrlKey || e.metaKey) e.preventDefault(); }, { passive: false });
+  window.addEventListener("pagehide", () => { panes.forEach(p => p.savePos()); savePositions(); });
+  let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => panes.forEach(p => { if (p.fit && p.doc) p.layout(true); }), 150); });
+
+  const app = $("app"), rz = $("resizer");
+  /* Sidebar: collapses on wide screens, slides over the page on phones */
+  const narrow = () => window.matchMedia("(max-width: 700px)").matches;
+  function setCollapsed(on){
+    app.classList.toggle("collapsed", on);
+    document.querySelectorAll(".pane .toggle").forEach(t => { t.setAttribute("aria-label", "Show sidebar"); t.title = "Show sidebar (Ctrl+\\)"; });
+    try { localStorage.setItem("sidebarCollapsed", on ? "1" : "0"); } catch(e){}
+    setTimeout(() => visiblePanes().forEach(p => { if (p.fit && p.doc) p.layout(true); }), 230);
+    if (on){ const t = panes[0].el.querySelector(".toggle"); if (t && document.activeElement === $("collapseBtn")) t.focus(); }
+    else if (document.activeElement && document.activeElement.classList.contains("toggle")) $("collapseBtn").focus();
+  }
+  function toggleRail(){
+    if (narrow()) app.classList.toggle("open");
+    else setCollapsed(!app.classList.contains("collapsed"));
+  }
+  $("collapseBtn").addEventListener("click", () => { if (narrow()) app.classList.remove("open"); else setCollapsed(true); });
+  document.addEventListener("keydown", e => { if ((e.ctrlKey || e.metaKey) && e.key === "\\"){ e.preventDefault(); toggleRail(); } });
+  try { if (localStorage.getItem("sidebarCollapsed") === "1") { app.style.transition = "none"; app.classList.add("collapsed"); requestAnimationFrame(() => { app.style.transition = ""; }); } } catch(e){}
+  try { const w = localStorage.getItem("railWidth"); if (w) app.style.setProperty("--rail-w", w + "px"); } catch(e){}
+  rz.addEventListener("pointerdown", e => {
+    rz.classList.add("active"); rz.setPointerCapture(e.pointerId);
+    const move = ev => app.style.setProperty("--rail-w", Math.max(200, Math.min(520, ev.clientX)) + "px");
+    const up = () => { rz.classList.remove("active"); rz.removeEventListener("pointermove", move); rz.removeEventListener("pointerup", up);
+      try { localStorage.setItem("railWidth", parseInt(getComputedStyle(app).getPropertyValue("--rail-w"))); } catch(e){}
+      panes.forEach(p => { if (p.fit && p.doc) p.layout(true); }); };
+    rz.addEventListener("pointermove", move); rz.addEventListener("pointerup", up);
+  });
+
+  if (!lib){ panes[0].stage.innerHTML = '<p class="placeholder err">The PDF engine did not load. Check your connection and reload the page.</p>'; renderList(); return; }
+  renderList();
+  let saved = 1; try { saved = parseInt(localStorage.getItem("paneCount") || (localStorage.getItem("compareMode") === "1" ? "2" : "1"), 10) || 1; } catch(e){}
+  setPaneCount(saved);
+  $("combineBtn").hidden = !window.pdfReader;
+  if (!window.pdfReader) document.body.classList.add("no-desktop");
+  if (window.pdfReader){
+    const D = window.pdfReader;
+    let updating = false;
+    D.onUpdateAvailable(info => { $("updateText").textContent = "PDF Reader " + info.version + " is available."; $("updateBar").hidden = false; });
+    D.onUpdateProgress(pct => { $("updateText").textContent = "Downloading update… " + pct + "%"; });
+    $("updateBtn").addEventListener("click", async () => {
+      if (updating) return; updating = true; $("updateBtn").disabled = true;
+      panes.forEach(p => p.savePos()); savePositions();
+      $("updateText").textContent = "Downloading update…";
+      try { await D.installUpdate(); $("updateText").textContent = "Installing. PDF Reader will reopen in a moment."; }
+      catch(e){ updating = false; $("updateBtn").disabled = false; $("updateText").textContent = "Update failed: " + String((e && e.message) || "").replace(/^Error invoking remote method '[^']+': (Error: )?/, ""); }
+    });
+    $("appVersion").addEventListener("click", async () => {
+      toast("Checking for updates…", true);
+      const r = await D.checkUpdate();
+      if (r.error) toast("Could not check for updates: " + r.error);
+      else if (r.available) toast("PDF Reader " + r.version + " is available. Use Update now in the sidebar.");
+      else toast("You have the latest version (" + r.current + ").");
+    });
+    window.pdfReader.onOpenFiles(list => openNative(list));
+    window.pdfReader.initialFiles().then(list => { if (list && list.length) openNative(list); });
+  }
+})();
+</script>
+</body>
+</html>

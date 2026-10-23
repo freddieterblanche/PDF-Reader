@@ -1,0 +1,78 @@
+{
+  "name": "pdf-reader",
+  "productName": "PDF Reader",
+  "version": "2.2.0",
+  "description": "PDF Reader: side-by-side reading and fast printing",
+  "author": "Freddie Terblanche",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "dist": "electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8",
+    "resedit": "2.0.2"
+  },
+  "build": {
+    "appId": "za.co.terblanchelaw.pdfreader",
+    "productName": "PDF Reader",
+    "copyright": "Terblanche Inc.",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "!src/v19-source.html",
+      "!src/*.bak"
+    ],
+    "extraResources": [
+      {
+        "from": "vendor/SumatraPDF.exe",
+        "to": "SumatraPDF.exe"
+      },
+      {
+        "from": "build/pdf.ico",
+        "to": "pdf.ico"
+      },
+      {
+        "from": "vendor/poppler",
+        "to": "poppler"
+      }
+    ],
+    "electronLanguages": [
+      "en-US",
+      "en-GB"
+    ],
+    "compression": "maximum",
+    "afterPack": "build/afterPack.js",
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "PDF Reader",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "include": "build/installer.nsh",
+      "artifactName": "PDF-Reader-Setup-${version}.exe",
+      "runAfterFinish": true
+    }
+  }
+}
