@@ -17,7 +17,31 @@ function readPdf(p) {
   const full = path.resolve(p);
   const data = fs.readFileSync(full);
   known.add(full);
+  noteRecent(full);
   return { path: full, name: path.basename(full), data };
+}
+
+/* Recently opened documents (kept in recent.json in the app's data folder). Pinned ones always stay. */
+let recent = null;
+const recentFile = () => path.join(app.getPath("userData"), "recent.json");
+function loadRecent() {
+  if (recent) return recent;
+  try { recent = JSON.parse(fs.readFileSync(recentFile(), "utf8")); if (!Array.isArray(recent)) recent = []; } catch (e) { recent = []; }
+  return recent;
+}
+function saveRecent(changed) {
+  try { fs.writeFileSync(recentFile(), JSON.stringify(recent)); } catch (e) {}
+  if (changed !== false && win) win.webContents.send("recent-changed");
+}
+function noteRecent(full) {
+  if (full.startsWith(path.join(os.tmpdir(), "pdf-reader-print"))) return;
+  loadRecent();
+  let r = recent.find(x => x.path.toLowerCase() === full.toLowerCase());
+  if (!r) { r = { path: full, pinned: false, count: 0 }; recent.push(r); }
+  r.name = path.basename(full); r.last = Date.now(); r.count = (r.count || 0) + 1;
+  recent = recent.filter(x => x.pinned).concat(recent.filter(x => !x.pinned).sort((a, b) => b.last - a.last).slice(0, 40));
+  saveRecent();
+  try { app.addRecentDocument(full); } catch (e) {}
 }
 
 function sumatraPath() {
@@ -314,6 +338,7 @@ if (!app.requestSingleInstanceLock()) {
         throw e;
       }
       known.add(target);
+      if (o.mode === "new") noteRecent(target);
       return target;
     });
 
@@ -358,6 +383,19 @@ if (!app.requestSingleInstanceLock()) {
       return words;
     });
     app.on("before-quit", () => { if (ocrPool) ocrPool.then(s => s.terminate()).catch(() => {}); });
+
+    ipcMain.handle("recent-list", () => loadRecent()
+      .map(r => ({ path: r.path, name: r.name, last: r.last, count: r.count, pinned: !!r.pinned, folder: path.dirname(r.path), exists: fs.existsSync(r.path) }))
+      .sort((a, b) => (b.pinned - a.pinned) || (b.last - a.last)));
+    const findRecent = p => loadRecent().find(x => x.path === p);
+    ipcMain.handle("recent-pin", (_e, p, on) => { const r = findRecent(p); if (r) { r.pinned = !!on; saveRecent(); } });
+    ipcMain.handle("recent-remove", (_e, p) => { recent = loadRecent().filter(x => x.path !== p); saveRecent(); });
+    ipcMain.handle("recent-clear", () => { recent = loadRecent().filter(x => x.pinned); saveRecent(); try { app.clearRecentDocuments(); } catch (e) {} });
+    ipcMain.handle("recent-open", (_e, p) => {
+      const r = findRecent(p); if (!r) throw new Error("This document is no longer in the recent list.");
+      if (!fs.existsSync(r.path)) throw new Error("This file has been moved, renamed or deleted.");
+      return [readPdf(r.path)];
+    });
 
     ipcMain.handle("app-version", () => app.getVersion());
     ipcMain.handle("check-update", () => checkForUpdate(true));

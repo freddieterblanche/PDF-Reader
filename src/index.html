@@ -42,8 +42,34 @@ body.has-wintitle .app{flex:1;height:auto;min-height:0}
 .ocr-badge{color:var(--accent);font-family:var(--sans);font-weight:500}
 @keyframes paneflash{from{box-shadow:inset 0 0 0 3px var(--accent)}to{box-shadow:inset 0 0 0 3px transparent}}
 .pane.flash{animation:paneflash 1.2s ease-out}
+.openwrap{position:relative;display:flex;flex-direction:column;gap:8px}
+.openmain{width:100%}
 .openrow{display:flex;gap:8px}
-.openrow #openBtn{flex:1}
+.openrow .btn{flex:1;white-space:nowrap}
+.recent-pop{position:absolute;left:0;top:calc(100% + 6px);width:420px;max-width:calc(100vw - 32px);z-index:15;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 40px rgba(0,0,0,.22);display:flex;flex-direction:column;max-height:min(560px,70vh)}
+.recent-list{overflow-y:auto;overflow-x:hidden;padding:6px}
+.recent-head{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:8px 8px 4px}
+.ritem{display:grid;grid-template-columns:28px minmax(0,1fr) 28px;align-items:center;gap:4px;border-radius:6px}
+.ritem:hover{background:var(--accent-soft)}
+.ritem .ropen{background:none;border:0;text-align:left;font:inherit;color:inherit;padding:7px 4px;cursor:pointer;min-width:0;display:flex;flex-direction:column;gap:2px}
+.rname{font-weight:500;overflow-wrap:anywhere;line-height:1.3}
+.rmeta{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ritem.missing .rname{color:var(--muted);text-decoration:line-through}
+.rpin{font-size:16px;color:var(--muted)}
+.rpin[aria-pressed="true"]{color:#c48a00}
+.ritem .rdel{opacity:0}
+.ritem:hover .rdel,.ritem:focus-within .rdel{opacity:1}
+.recent-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.linkbtn{background:none;border:0;color:var(--accent);font:inherit;cursor:pointer;padding:2px 4px;border-radius:4px}
+.linkbtn:hover{text-decoration:underline}
+.recent-empty{padding:16px 10px;color:var(--muted);font-size:13px;text-align:center}
+.recent-inline{width:min(460px,100%);text-align:left;display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.recent-inline:empty{display:none}
+.recent-inline .rhead{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 8px}
+.recent-inline .rmeta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recent-inline .ropen{min-width:0;display:flex;flex-direction:column;gap:1px;background:none;border:0;border-radius:6px;padding:7px 8px;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.recent-inline .ropen:hover{background:var(--surface)}
+.empty-state:has(.recent-inline:not(:empty)){max-width:480px}
 .pane .body{flex:1;display:flex;min-height:0;min-width:0}
 .pane .body .stage{min-width:0}
 .tools{margin-left:auto}
@@ -276,11 +302,18 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Documents">
     <div class="rail-head">
-      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v2.3.3</button>
+      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v2.4</button>
         <button class="icon collapse" id="collapseBtn" type="button" aria-label="Hide sidebar" title="Hide sidebar (Ctrl+\)">«</button></div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="rail-title"><h1>Documents</h1><span class="count" id="count">0</span></div>
-      <div class="openrow"><button class="btn primary" id="openBtn" type="button">Open PDFs</button><button class="btn" id="combineBtn" type="button" title="Combine open PDFs into one document" hidden>Combine</button></div>
+      <div class="openwrap">
+        <button class="btn primary openmain" id="openBtn" type="button">Open PDFs</button>
+        <div class="openrow"><button class="btn desktop-only" id="recentBtn" type="button" aria-expanded="false" title="Recently opened and pinned documents">Recent</button><button class="btn" id="combineBtn" type="button" title="Combine open PDFs into one document" hidden>Combine</button></div>
+        <div class="recent-pop" id="recentPop" hidden role="dialog" aria-label="Recent documents">
+          <div class="recent-list" id="recentList"></div>
+          <div class="recent-foot"><span class="recent-tip">Pin a document to keep it at the top.</span><button class="linkbtn" type="button" id="recentClear">Clear list</button></div>
+        </div>
+      </div>
       <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple hidden>
       <div class="viewrow">
         <span class="viewlabel" id="viewLabel">Side by side</span>
@@ -406,8 +439,69 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
   function emptyHTML(){
     return docs.length
       ? '<div class="empty-state"><span class="sheet" aria-hidden="true"></span><p>Choose a document from the left panel, drag one here, or drop a PDF file here.</p><button class="btn" type="button" data-open>Open PDFs</button></div>'
-      : '<div class="empty-state"><span class="sheet" aria-hidden="true"></span><p><strong>No documents open</strong></p><p>Open one or more PDFs, or drag them here or onto the sidebar.</p><button class="btn primary" type="button" data-open>Open PDFs</button></div>';
+      : (setTimeout(fillInlineRecent, 0), '<div class="empty-state"><span class="sheet" aria-hidden="true"></span><p><strong>No documents open</strong></p><p>Open one or more PDFs, or drag them here or onto the sidebar.</p><button class="btn primary" type="button" data-open>Open PDFs</button><div class="recent-inline" data-recent-inline></div></div>');
   }
+  /* ---- Recent documents ---- */
+  let recentCache = [];
+  function whenText(t){
+    if (!t) return "";
+    const d = new Date(t), now = new Date(), hm = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+    const diff = Math.round((day(now) - day(d)) / 86400000);
+    if (diff === 0) return "Today " + hm;
+    if (diff === 1) return "Yesterday " + hm;
+    return d.toLocaleDateString([], d.getFullYear() === now.getFullYear() ? { day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" });
+  }
+  async function refreshRecent(){
+    if (!window.pdfReader) return;
+    try { recentCache = await window.pdfReader.recentList(); } catch(e){ recentCache = []; }
+    if (!$("recentPop").hidden) renderRecent();
+    fillInlineRecent();
+  }
+  async function openRecent(p){
+    const r = recentCache.find(x => x.path === p);
+    if (r && !r.exists){ toast(r.name + " has been moved, renamed or deleted. Remove it from the list with ×."); return; }
+    try { const list = await window.pdfReader.recentOpen(p); closeRecent(); openNative(list); }
+    catch(e){ toast("Could not open: " + errText(e)); refreshRecent(); }
+  }
+  function renderRecent(){
+    const box = $("recentList"); box.innerHTML = "";
+    if (!recentCache.length){ box.innerHTML = '<p class="recent-empty">Documents you open will be listed here.</p>'; return; }
+    let section = null;
+    recentCache.forEach(r => {
+      const sec = r.pinned ? "Pinned" : "Recent";
+      if (sec !== section){ section = sec; const h = document.createElement("div"); h.className = "recent-head"; h.textContent = sec; box.appendChild(h); }
+      const row = document.createElement("div"); row.className = "ritem" + (r.exists ? "" : " missing");
+      const pin = document.createElement("button"); pin.type = "button"; pin.className = "icon rpin"; pin.setAttribute("aria-pressed", String(r.pinned));
+      pin.textContent = r.pinned ? "\u2605" : "\u2606"; pin.title = r.pinned ? "Unpin" : "Pin to the top"; pin.setAttribute("aria-label", (r.pinned ? "Unpin " : "Pin ") + r.name);
+      pin.addEventListener("click", async () => { await window.pdfReader.recentPin(r.path, !r.pinned); });
+      const open = document.createElement("button"); open.type = "button"; open.className = "ropen"; open.title = r.path;
+      const nm = document.createElement("span"); nm.className = "rname"; nm.textContent = r.name;
+      const meta = document.createElement("span"); meta.className = "rmeta";
+      meta.textContent = (r.exists ? whenText(r.last) : "Not found") + " \u00b7 " + r.folder;
+      open.append(nm, meta); open.addEventListener("click", () => openRecent(r.path));
+      const del = document.createElement("button"); del.type = "button"; del.className = "icon rdel"; del.textContent = "\u00d7";
+      del.title = "Remove from list"; del.setAttribute("aria-label", "Remove " + r.name + " from the list");
+      del.addEventListener("click", async () => { await window.pdfReader.recentRemove(r.path); });
+      row.append(pin, open, del); box.appendChild(row);
+    });
+  }
+  function fillInlineRecent(){
+    document.querySelectorAll("[data-recent-inline]").forEach(box => {
+      box.innerHTML = "";
+      const list = recentCache.filter(r => r.exists).slice(0, 8);
+      if (!list.length || docs.length) return;
+      const h = document.createElement("div"); h.className = "rhead"; h.textContent = "Recent documents"; box.appendChild(h);
+      list.forEach(r => {
+        const b = document.createElement("button"); b.type = "button"; b.className = "ropen"; b.title = r.path;
+        const nm = document.createElement("span"); nm.className = "rname"; nm.textContent = (r.pinned ? "\u2605 " : "") + r.name;
+        const meta = document.createElement("span"); meta.className = "rmeta"; meta.textContent = whenText(r.last) + " \u00b7 " + r.folder;
+        b.append(nm, meta); b.addEventListener("click", () => openRecent(r.path)); box.appendChild(b);
+      });
+    });
+  }
+  function openRecentPop(){ $("recentPop").hidden = false; $("recentBtn").setAttribute("aria-expanded", "true"); renderRecent(); refreshRecent(); const f = $("recentList").querySelector(".ropen"); if (f) f.focus(); }
+  function closeRecent(){ $("recentPop").hidden = true; $("recentBtn").setAttribute("aria-expanded", "false"); }
   document.addEventListener("click", e => { if (e.target.closest("[data-open]")) openFiles(); });
   const keyOf = d => d.orig + "|" + d.size;
   /* Custom names, keyed by the original file name and size, so a renamed file keeps its name when reopened */
@@ -1560,6 +1654,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
     docs.splice(i, 1);
     panes.forEach(p => { if (p.doc === d){ p.doc = null; const n = docs.find(x => !panes.some(q => q !== p && q.doc === x)); n ? p.show(n) : p.clear(); } });
     d.ocrCancel = true;
+    setTimeout(fillInlineRecent, 0);
     if (d.pdf) d.pdf.destroy();
     renderList();
   }
@@ -1652,6 +1747,14 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
   let saved = 1; try { saved = parseInt(localStorage.getItem("paneCount") || (localStorage.getItem("compareMode") === "1" ? "2" : "1"), 10) || 1; } catch(e){}
   setPaneCount(saved);
   $("combineBtn").hidden = !window.pdfReader;
+  $("recentBtn").addEventListener("click", e => { e.stopPropagation(); $("recentPop").hidden ? openRecentPop() : closeRecent(); });
+  $("recentClear").addEventListener("click", async () => {
+    if (!(await askConfirm("Clear the recent list?", "Pinned documents stay. Your files are not affected.", "Clear list"))) return;
+    await window.pdfReader.recentClear();
+  });
+  document.addEventListener("click", e => { if (!$("recentPop").hidden && !e.target.closest("#recentPop") && !e.target.closest("#recentBtn") && $("confirmModal").hidden) closeRecent(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("recentPop").hidden){ e.preventDefault(); closeRecent(); $("recentBtn").focus(); } }, true);
+  if (window.pdfReader){ window.pdfReader.onRecentChanged(refreshRecent); refreshRecent(); }
   $("ocrAuto").checked = ocrEnabled();
   $("ocrAuto").addEventListener("change", e => {
     try { localStorage.setItem("ocrAuto", e.target.checked ? "1" : "0"); } catch(err){}
