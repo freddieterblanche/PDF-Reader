@@ -111,6 +111,9 @@ function createWindow() {
     icon: path.join(__dirname, "src", "icon.png"),
     backgroundColor: "#eef0f2",
     autoHideMenuBar: true,
+    // Our own red title bar; Windows still draws the minimise, maximise and close buttons over it
+    titleBarStyle: "hidden",
+    titleBarOverlay: { color: "#b02e2e", symbolColor: "#ffffff", height: 34 },
     show: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
