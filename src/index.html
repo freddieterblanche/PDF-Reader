@@ -276,7 +276,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Documents">
     <div class="rail-head">
-      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v2.3.1</button>
+      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v2.3.2</button>
         <button class="icon collapse" id="collapseBtn" type="button" aria-label="Hide sidebar" title="Hide sidebar (Ctrl+\)">«</button></div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="rail-title"><h1>Documents</h1><span class="count" id="count">0</span></div>
@@ -416,6 +416,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
   try { customNames = JSON.parse(localStorage.getItem(NAME_KEY) || "{}") || {}; } catch(e){ customNames = {}; }
   function saveNames(){ try { localStorage.setItem(NAME_KEY, JSON.stringify(customNames)); } catch(e){} }
 
+  const UNITS = 96 / 72;  /* PDF points to screen pixels: 100% shows a page at its printed size */
   class Pane {
     constructor(label){
       this.el = $("paneTpl").content.firstElementChild.cloneNode(true);
@@ -423,7 +424,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
       this.stage = this.el.querySelector(".stage"); this.sel = this.el.querySelector(".docsel");
       this.stage.innerHTML = emptyHTML();
       this.pageInput = this.el.querySelector(".pageinput");
-      this.doc = null; this.scale = 1; this.fit = true; this.page = 1; this.vis = new Set(); this.cur = null; this.busy = false; this.pending = false; this.obs = null; this.restoring = false;
+      this.doc = null; this.scale = UNITS; this.fit = false; this.page = 1; this.vis = new Set(); this.cur = null; this.busy = false; this.pending = false; this.obs = null; this.restoring = false;
       this.el.addEventListener("pointerdown", () => setActive(this));
       this.el.addEventListener("focusin", () => setActive(this));
       this.thumbs = this.el.querySelector(".thumbs"); this.findbar = this.el.querySelector(".findbar"); this.findinput = this.el.querySelector(".findinput");
@@ -509,7 +510,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
       if (d.error){ this.stage.innerHTML = '<p class="placeholder err"></p>'; this.stage.firstChild.textContent = "This file could not be opened as a PDF. " + d.error; return; }
       if (!d.pdf){ this.stage.innerHTML = '<p class="placeholder">Opening…</p>'; return; }
       const p = positions[keyOf(d)];
-      this.fit = p ? !!p.fit : true; if (p && p.scale) this.scale = p.scale;
+      /* Documents open at 100% (actual printed size, as in Adobe) unless you zoomed this document yourself */
+      if (p && !p.fit && p.scale){ this.fit = false; this.scale = p.scale; } else { this.fit = false; this.scale = UNITS; }
       await this.layout(false, p);
     }
     clear(){
@@ -526,8 +528,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
       this.cancelRender(); if (this.obs) this.obs.disconnect();
       const first = await d.pdf.getPage(1); if (d !== this.doc) return;
       const base = first.getViewport({ scale: 1 });
-      if (this.fit){ this.scale = Math.max(0.25, Math.min(4, (this.stage.clientWidth - 32) / base.width)); }
-      this.el.querySelector(".zoom").textContent = Math.round(this.scale*100) + "%";
+      if (this.fit){ this.scale = Math.max(0.1 * UNITS, Math.min(4 * UNITS, (this.stage.clientWidth - 32) / base.width)); }
+      this.el.querySelector(".zoom").textContent = Math.round(this.scale / UNITS * 100) + "%";
       this.el.querySelector(".total").textContent = "/ " + d.pdf.numPages;
       this.stage.innerHTML = "";
       this.vis = new Set();
@@ -648,7 +650,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
        the existing images stretch to fit, and sharp pages are redrawn a moment after zooming stops. */
     zoomAt(f, cx, cy){
       if (!this.doc || !this.doc.pdf) return;
-      const ns = Math.max(0.25, Math.min(4, this.scale * f));
+      const ns = Math.max(0.1 * UNITS, Math.min(4 * UNITS, this.scale * f));
       if (Math.abs(ns - this.scale) < 0.001) return;
       const st = this.stage, r = st.getBoundingClientRect();
       const y = cy - r.top + st.scrollTop, x = cx - r.left + st.scrollLeft;
@@ -661,7 +663,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
         st.scrollTop = anchor.p.offsetTop + anchor.fy * anchor.p.offsetHeight - (cy - r.top);
         st.scrollLeft = anchor.p.offsetLeft + anchor.fx * anchor.p.offsetWidth - (cx - r.left);
       }
-      this.el.querySelector(".zoom").textContent = Math.round(ns * 100) + "%";
+      this.el.querySelector(".zoom").textContent = Math.round(ns / UNITS * 100) + "%";
       clearTimeout(this.zoomT);
       this.zoomT = setTimeout(() => { this.redrawVisible(); this.savePos(); }, 180);
     }
@@ -1595,6 +1597,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
     if ((e.ctrlKey || e.metaKey) && (e.key === "=" || e.key === "+")){ e.preventDefault(); active.zoom(1.2); return; }
     if ((e.ctrlKey || e.metaKey) && (e.key === "-" || e.key === "_")){ e.preventDefault(); active.zoom(1/1.2); return; }
     if ((e.ctrlKey || e.metaKey) && e.key === "0" && active.doc){ e.preventDefault(); active.fit = true; active.layout(true); return; }
+    if ((e.ctrlKey || e.metaKey) && e.key === "1" && active.doc){ e.preventDefault(); active.zoom(UNITS / active.scale); return; }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "w" && active.doc && !e.target.closest("input")){ e.preventDefault(); removeDoc(active.doc); return; }
     if (!$("printModal").hidden || e.target.closest("input,select")) return;
     if (e.key === "ArrowRight" || e.key === "PageDown"){ active.goTo(active.page+1); e.preventDefault(); }
