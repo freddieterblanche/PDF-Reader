@@ -302,7 +302,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Documents">
     <div class="rail-head">
-      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v2.4</button>
+      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v2.4.1</button>
         <button class="icon collapse" id="collapseBtn" type="button" aria-label="Hide sidebar" title="Hide sidebar (Ctrl+\)">«</button></div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="rail-title"><h1>Documents</h1><span class="count" id="count">0</span></div>
@@ -400,6 +400,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
         <button class="btn" type="button" data-act="in" aria-label="Zoom in">+</button>
         <button class="btn" type="button" data-act="fit">Fit width</button>
       </div>
+      <button class="btn desktop-only" type="button" data-act="saveas" title="Save a copy of this document to a folder (Ctrl+S)">Save as</button>
       <button class="btn" type="button" data-act="print" aria-label="Print document">Print</button>
       <div class="group tools">
         <button class="btn" type="button" data-act="find" title="Find in document (Ctrl+F)">Find</button>
@@ -440,6 +441,26 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
     return docs.length
       ? '<div class="empty-state"><span class="sheet" aria-hidden="true"></span><p>Choose a document from the left panel, drag one here, or drop a PDF file here.</p><button class="btn" type="button" data-open>Open PDFs</button></div>'
       : (setTimeout(fillInlineRecent, 0), '<div class="empty-state"><span class="sheet" aria-hidden="true"></span><p><strong>No documents open</strong></p><p>Open one or more PDFs, or drag them here or onto the sidebar.</p><button class="btn primary" type="button" data-open>Open PDFs</button><div class="recent-inline" data-recent-inline></div></div>');
+  }
+  /* ---- Save as: keep a copy of any document (for example one opened from an email) in a folder of your choice.
+     Files opened from Outlook live in a hidden temporary folder, so the dialog then starts in the last folder used. ---- */
+  const isTempPath = p => /[\\/](INetCache|Content\.Outlook|Temp|Temporary Internet Files)[\\/]/i.test(p || "");
+  async function saveDocAs(pane){
+    const D = window.pdfReader, d = pane && pane.doc;
+    if (!D || !d || !d.pdf) return;
+    let last = ""; try { last = localStorage.getItem("lastSaveDir") || ""; } catch(e){}
+    const dir = d.path && !isTempPath(d.path) ? dirOf(d.path) : last;
+    const path = await D.saveDialog({ title: "Save a copy", defaultPath: joinPath(dir, cleanName(d.name) + ".pdf") });
+    if (!path) return;
+    try {
+      const bytes = await d.pdf.getData();
+      const saved = await D.writePdf({ path, data: bytes, mode: "new" });
+      try { localStorage.setItem("lastSaveDir", dirOf(saved)); } catch(e){}
+      const wasTemp = !d.path || isTempPath(d.path);
+      d.path = saved;
+      renderList();
+      toast("Saved " + saved.split(/[\\/]/).pop() + " in " + dirOf(saved).split(/[\\/]/).pop() + "." + (wasTemp ? " PDF Reader now works from this copy." : ""));
+    } catch(e){ toast("Could not save: " + errText(e)); }
   }
   /* ---- Recent documents ---- */
   let recentCache = [];
@@ -528,7 +549,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
         const f = ({ prev:()=>this.goTo(this.page-1), next:()=>this.goTo(this.page+1), in:()=>this.zoom(1.2), out:()=>this.zoom(1/1.2),
            fit:()=>{ this.fit = true; this.layout(true); }, print:()=>openPrint(this), toggle:()=>toggleRail(),
            find:()=>this.openFind(), findnext:()=>this.stepMatch(1), findprev:()=>this.stepMatch(-1), findclose:()=>this.closeFind(),
-           thumbs:()=>this.toggleThumbs(), organise:()=>this.openOrganise() })[a.dataset.act];
+           thumbs:()=>this.toggleThumbs(), organise:()=>this.openOrganise(), saveas:()=>saveDocAs(this) })[a.dataset.act];
         if (f) f();
       };
       this.el.querySelector(".toolbar").addEventListener("click", onAct);
@@ -1701,6 +1722,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
     if (e.key === "F3" && active.find){ e.preventDefault(); active.stepMatch(e.shiftKey ? -1 : 1); return; }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p" && active.doc && active.doc.pdf){ e.preventDefault(); openPrint(active); return; }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "o"){ e.preventDefault(); openFiles(); return; }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s" && active.doc && active.doc.pdf){ e.preventDefault(); saveDocAs(active); return; }
     if ((e.ctrlKey || e.metaKey) && (e.key === "=" || e.key === "+")){ e.preventDefault(); active.zoom(1.2); return; }
     if ((e.ctrlKey || e.metaKey) && (e.key === "-" || e.key === "_")){ e.preventDefault(); active.zoom(1/1.2); return; }
     if ((e.ctrlKey || e.metaKey) && e.key === "0" && active.doc){ e.preventDefault(); active.fit = true; active.layout(true); return; }

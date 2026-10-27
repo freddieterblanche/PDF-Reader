@@ -299,7 +299,7 @@ if (!app.requestSingleInstanceLock()) {
       for (let i = 2; i < 1000; i++) { const q = base + " (" + i + ")" + ext; if (!fs.existsSync(q)) return q; }
       throw new Error("Could not find a free file name.");
     }
-    const defaultDir = p => (p && fs.existsSync(path.dirname(p))) ? p : path.join(app.getPath("documents"), path.basename(p || "document.pdf"));
+    const defaultDir = p => (p && path.isAbsolute(p) && fs.existsSync(path.dirname(p))) ? p : path.join(app.getPath("documents"), path.basename(p || "document.pdf"));
 
     ipcMain.handle("save-dialog", async (_e, o) => {
       o = o || {};
