@@ -1,6 +1,6 @@
 // PDF Reader: desktop shell. Opens PDFs from Explorer, keeps one window, and prints
 // the original PDF file straight to the printer through the bundled SumatraPDF engine.
-const { app, BrowserWindow, ipcMain, dialog, Menu, shell } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, Menu, shell, nativeTheme } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
@@ -126,6 +126,11 @@ function saveState() {
   try { fs.writeFileSync(stateFile(), JSON.stringify({ ...win.getNormalBounds(), maximized: win.isMaximized() })); } catch (e) {}
 }
 
+/* Title bar colours match the sidebar in light and dark mode */
+const titleOverlay = () => nativeTheme.shouldUseDarkColors
+  ? { color: "#15171b", symbolColor: "#e8eaee", height: 36 }
+  : { color: "#f3f4f6", symbolColor: "#16181d", height: 36 };
+
 function createWindow() {
   const s = loadState();
   win = new BrowserWindow({
@@ -133,11 +138,11 @@ function createWindow() {
     minWidth: 720, minHeight: 480,
     title: "PDF Reader",
     icon: path.join(__dirname, "src", "icon.png"),
-    backgroundColor: "#eef0f2",
+    backgroundColor: nativeTheme.shouldUseDarkColors ? "#15171b" : "#f3f4f6",
     autoHideMenuBar: true,
-    // Our own red title bar; Windows still draws the minimise, maximise and close buttons over it
+    // Our own title bar; Windows still draws the minimise, maximise and close buttons over it
     titleBarStyle: "hidden",
-    titleBarOverlay: { color: "#b02e2e", symbolColor: "#ffffff", height: 34 },
+    titleBarOverlay: titleOverlay(),
     show: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -189,6 +194,7 @@ if (!app.requestSingleInstanceLock()) {
 
   app.whenReady().then(() => {
     Menu.setApplicationMenu(null);
+    nativeTheme.on("updated", () => { if (win) { try { win.setTitleBarOverlay(titleOverlay()); win.setBackgroundColor(titleOverlay().color); } catch (e) {} } });
 
     ipcMain.handle("initial-files", () => {
       const out = [];
