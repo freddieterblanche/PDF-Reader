@@ -576,6 +576,69 @@ body.has-wintitle .bundle{top:36px}
 .factpill i.a{background:var(--adm)} .factpill i.d{background:var(--dis)}
 .joinlink{color:var(--accent);cursor:pointer;font-size:11px;font-weight:500}
 .joinlink:hover{text-decoration:underline}
+
+/* v3.1: workspace board */
+.app.ws-on{grid-template-columns:var(--rail-w,280px) 6px minmax(0,1fr) 6px var(--ws-w,520px)}
+.app.ws-on.notes-on{grid-template-columns:var(--rail-w,280px) 6px minmax(0,1fr) 6px var(--ws-w,520px) 340px}
+.app.collapsed.ws-on{grid-template-columns:0 0 minmax(0,1fr) 6px var(--ws-w,520px)}
+.app.collapsed.ws-on.notes-on{grid-template-columns:0 0 minmax(0,1fr) 6px var(--ws-w,520px) 340px}
+.ws{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--rail);border-left:1px solid var(--line)}
+.ws-head{display:flex;flex-direction:column;gap:8px;padding:10px 12px 8px;border-bottom:1px solid var(--line);background:var(--surface)}
+.ws-top{display:flex;align-items:center;gap:8px}
+.ws-tools{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.ws-tools .seg{margin-left:auto}
+.ws-head h2{font-size:14px;font-weight:650;letter-spacing:-.01em;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.ws-head .btn{height:30px;padding:0 9px;font-size:12.5px}
+.ws-head .ic{width:15px;height:15px}
+.ws-head .seg .iconbtn{width:26px;min-width:26px;height:26px}
+.ws-zoom{font-family:var(--mono);font-size:11.5px;color:var(--muted);min-width:38px;text-align:center}
+.ws-canvas{position:relative;flex:1;overflow:hidden;background-color:var(--desk);background-image:radial-gradient(circle,color-mix(in srgb,var(--muted) 38%,transparent) 1px,transparent 1.3px);background-size:24px 24px;cursor:grab;touch-action:none;min-height:0;outline:none}
+.ws-canvas.panning{cursor:grabbing}
+.ws-canvas.dropping{box-shadow:inset 0 0 0 3px var(--accent)}
+.ws-world{position:absolute;left:0;top:0;transform-origin:0 0}
+.ws-links{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible;pointer-events:none}
+.ws-links .hit{stroke:transparent;stroke-width:14;pointer-events:stroke;cursor:pointer;fill:none}
+.ws-links .ln{stroke:color-mix(in srgb,var(--muted) 80%,transparent);stroke-width:1.8;fill:none;pointer-events:none}
+.ws-links .end{fill:color-mix(in srgb,var(--muted) 80%,transparent);pointer-events:none}
+.ws-links g.sel .ln{stroke:var(--accent);stroke-width:2.6}
+.ws-links g.sel .end{fill:var(--accent)}
+.ws-links .tmp{stroke:var(--accent);stroke-dasharray:6 4;stroke-width:1.8;fill:none}
+.wsi{position:absolute;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 1px 2px rgba(16,24,40,.08),0 4px 12px rgba(16,24,40,.08);cursor:grab;user-select:none}
+.wsi.sel{box-shadow:0 0 0 2px var(--accent),0 6px 18px rgba(16,24,40,.16);z-index:2}
+.wsi.target{box-shadow:0 0 0 3px var(--accent)}
+.wsi.flash{animation:paneflash 1.4s ease-out}
+.wsi-bar{display:flex;align-items:center;gap:2px;height:22px;padding:0 4px 0 10px;opacity:0;transition:opacity .12s}
+.wsi:hover .wsi-bar,.wsi.sel .wsi-bar{opacity:1}
+.wsi-grip{flex:1;height:6px;background-image:radial-gradient(circle,var(--muted) 1px,transparent 1.3px);background-size:5px 5px;opacity:.45}
+.wsi-b{width:20px;height:20px;border:0;background:none;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;padding:0}
+.wsi-b:hover{background:var(--hover);color:var(--ink)}
+.wsi-b .ic{width:13px;height:13px}
+.wsi-b .dot{width:11px;height:11px;border-radius:50%;background:var(--cc)}
+.wsi-body{padding:0 12px 10px;font-size:13px;line-height:1.45;overflow-wrap:anywhere;white-space:pre-wrap;outline:none;min-height:1.45em}
+.wsi-note .wsi-body,.wsi-heading .wsi-body{cursor:text}
+.wsi-body:empty::before{content:attr(data-ph);color:var(--muted)}
+.c-yellow{--cc:#ffd43b} .c-blue{--cc:#74c0fc} .c-green{--cc:#69db7c} .c-pink{--cc:#f783ac} .c-grey{--cc:#adb5bd}
+.wsi-note{background:color-mix(in srgb,var(--cc) 24%,var(--surface));border-color:color-mix(in srgb,var(--cc) 60%,var(--surface))}
+.wsi-heading{background:transparent;border:0;border-radius:6px;box-shadow:none}
+.wsi-heading .wsi-body{font-size:17px;font-weight:650;letter-spacing:-.01em;padding:0 6px 6px;border-bottom:3px solid var(--cc)}
+.wsi-heading.sel{box-shadow:0 0 0 2px var(--accent);background:color-mix(in srgb,var(--surface) 70%,transparent)}
+.wsi-excerpt{border-left:4px solid var(--hl,#ffd43b)}
+.wsi-excerpt.t-adm{border-left-color:var(--adm)} .wsi-excerpt.t-dis{border-left-color:var(--dis)}
+.wsi-excerpt .wsi-body{white-space:normal;font-family:Georgia,"Times New Roman",serif;font-size:13.5px;display:-webkit-box;-webkit-line-clamp:9;-webkit-box-orient:vertical;overflow:hidden;padding-bottom:6px}
+.wsi-excerpt.sel .wsi-body{display:block}
+.wsi-cite{display:flex;gap:6px;align-items:center;margin:0 12px 10px;padding:0;border:0;background:none;font:inherit;font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;text-align:left;max-width:calc(100% - 24px)}
+.wsi-cite span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wsi-cite:hover span{text-decoration:underline}
+.wsi-cite .tag{flex:none;padding:0 5px;border-radius:4px;font-size:10px;color:#fff;background:var(--adm)}
+.wsi-cite .tag.d{background:var(--dis)}
+.wsi.orphan .wsi-cite{color:var(--muted)}
+.wsi-com{margin:-4px 12px 10px;font-size:12px;color:var(--muted);border-top:1px dashed var(--line);padding-top:5px;white-space:pre-wrap;overflow-wrap:anywhere}
+.wsi-link{position:absolute;right:-8px;top:50%;width:15px;height:15px;margin-top:-7.5px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);cursor:crosshair;opacity:0;transition:opacity .12s}
+.wsi:hover .wsi-link,.wsi.sel .wsi-link{opacity:1}
+.ws-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--muted);font-size:13px;line-height:1.6;pointer-events:none}
+.ws-empty div{max-width:320px}
+.ws-empty strong{display:block;color:var(--ink);font-size:14px;margin-bottom:6px}
+.nitem[draggable="true"]{cursor:grab}
 </style>
 </head>
 <body>
@@ -585,7 +648,7 @@ body.has-wintitle .bundle{top:36px}
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Documents">
     <div class="rail-head">
-      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.0</button>
+      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.1</button>
         <button class="btn ghost iconbtn collapse" id="collapseBtn" type="button" aria-label="Hide sidebar" title="Hide sidebar (Ctrl+\)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg></button></div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -626,6 +689,27 @@ body.has-wintitle .bundle{top:36px}
   </aside>
   <div class="resizer" id="resizer" role="separator" aria-orientation="vertical" aria-label="Resize document panel"></div>
   <div class="panes" id="panes"></div>
+  <div class="resizer wsrz" id="wsrz" hidden role="separator" aria-orientation="vertical" aria-label="Resize workspace"></div>
+  <aside class="ws" id="ws" hidden aria-label="Workspace">
+    <div class="ws-head">
+      <div class="ws-top"><h2 id="wsTitle">Workspace</h2><button class="btn ghost iconbtn" type="button" id="wsClose" aria-label="Close workspace" title="Close (Ctrl+Shift+W)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+      <div class="ws-tools">
+      <button class="btn ghost" type="button" id="wsAddNote" title="Add a note (or double-click the board)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Note</button>
+      <button class="btn ghost" type="button" id="wsAddHead" title="Add a heading to group cards under"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4v16"/><path d="M18 4v16"/><path d="M6 12h12"/></svg>Heading</button>
+      <div class="seg">
+        <button class="btn ghost iconbtn" type="button" id="wsOut" aria-label="Zoom out" title="Zoom out (Ctrl + scroll)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+        <span class="ws-zoom" id="wsZoom">100%</span>
+        <button class="btn ghost iconbtn" type="button" id="wsIn" aria-label="Zoom in" title="Zoom in (Ctrl + scroll)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
+        <button class="btn ghost iconbtn" type="button" id="wsFit" aria-label="Show everything" title="Show everything"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg></button>
+      </div>
+      <button class="btn ghost" type="button" id="wsCopy" title="Copy the workspace as an outline, ready to paste into Word"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy outline</button>
+    </div>
+    </div>
+    <div class="ws-canvas" id="wsCanvas" tabindex="-1">
+      <div class="ws-world" id="wsWorld"><svg class="ws-links" id="wsLinks" aria-hidden="true"></svg></div>
+      <div class="ws-empty" id="wsEmpty"><div><strong>Your workspace</strong>Drag selected text from a document onto this board, or select text and press W. Facts can be dragged here from the Facts panel. Double-click the board to add a note, and drag the dot on the edge of a card to another card to link them.</div></div>
+    </div>
+  </aside>
   <aside class="notes" id="notes" hidden aria-label="Facts and notes">
     <div class="notes-head">
       <div class="notes-top"><h2>Facts and notes</h2><button class="btn ghost iconbtn" id="notesClose" type="button" aria-label="Close panel" title="Close (Ctrl+Shift+N)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
@@ -741,6 +825,7 @@ body.has-wintitle .bundle{top:36px}
     <button class="mb mb-hl" type="button" data-mk="hl" data-color="blue" title="Highlight blue" aria-label="Highlight blue"><span class="dot" style="--c:#74c0fc"></span></button>
     <button class="mb mb-hl" type="button" data-mk="hl" data-color="pink" title="Highlight pink" aria-label="Highlight pink"><span class="dot" style="--c:#f783ac"></span></button>
     <button class="mb" type="button" data-mk="comment" title="Add a comment (C)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Comment</button>
+    <button class="mb" type="button" data-mk="ws" title="Send to the workspace (W)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Workspace</button>
     <button class="mb" type="button" data-mk="copy" title="Copy the text" aria-label="Copy the text"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
     <button class="mb mb-del" type="button" data-mk="delete" title="Delete this mark (Delete)" aria-label="Delete this mark"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
   </div>
@@ -778,6 +863,7 @@ body.has-wintitle .bundle{top:36px}
           <button class="btn ghost" type="button" data-act="thumbs" aria-pressed="false" title="Show page thumbnails"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg><span class="tlabel">Pages</span></button>
           <button class="btn ghost desktop-only" type="button" data-act="organise" title="Delete, reorder, rotate, extract, insert and split pages"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg><span class="tlabel">Organise</span></button>
           <button class="btn ghost" type="button" data-act="notes" aria-pressed="false" title="Facts and notes: admitted and disputed facts, highlights and comments (Ctrl+Shift+N)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span class="tlabel">Facts</span></button>
+          <button class="btn ghost" type="button" data-act="ws" aria-pressed="false" title="Workspace: arrange excerpts, notes and links (Ctrl+Shift+W)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span class="tlabel">Workspace</span></button>
           <span class="tsep" aria-hidden="true"></span>
           <button class="btn ghost desktop-only" type="button" data-act="saveas" title="Save a copy of this document to a folder (Ctrl+S)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span class="tlabel">Save as</span></button>
           <button class="btn ghost" type="button" data-act="print" aria-label="Print document" title="Print (Ctrl+P)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg><span class="tlabel">Print</span></button>
@@ -1111,6 +1197,7 @@ body.has-wintitle .bundle{top:36px}
     clearTimeout(notesState.saveT); notesState.saveT = 0;
     if (!window.pdfReader || !notesState.loaded) return;
     const out = {}; Object.keys(notesState.loose).forEach(k => { if (notesState.loose[k].length) out[k] = notesState.loose[k]; });
+    if (notesState.looseBoard && notesState.looseBoard.items.length) out["*board"] = notesState.looseBoard;
     window.pdfReader.notesSave(out).catch(e => toast("Could not save your marks: " + errText(e)));
   }
   function saveLooseSoon(){ if (!window.pdfReader) return; clearTimeout(notesState.saveT); notesState.saveT = setTimeout(saveLooseNow, notesState.loaded ? 500 : 1500); }
@@ -1121,6 +1208,7 @@ body.has-wintitle .bundle{top:36px}
   function pushUndo(d){ markUndo.push({ d, before: JSON.stringify(marksOf(d)) }); if (markUndo.length > 60) markUndo.shift(); }
   function undoMark(){
     const u = markUndo.pop(); if (!u) return false;
+    if (u.board){ const B = curBoard(), b = JSON.parse(u.before); B.items = b.items; B.links = b.links; wsSel = null; boardChanged(); renderBoard(); toast("Undone."); return true; }
     barCtx = null; $("markBar").hidden = true; selMark = null;
     const arr = marksOf(u.d); arr.splice(0, arr.length, ...JSON.parse(u.before));
     marksChanged(u.d); toast("Undone."); return true;
@@ -1241,6 +1329,8 @@ body.has-wintitle .bundle{top:36px}
   function setBarMode(){
     const b = $("markBar"), edit = !!barCtx && barCtx.mode === "edit", m = edit ? barCtx.mark : null;
     b.querySelector('[data-mk="delete"]').hidden = !edit;
+    const onBoard = edit && cardFor(barCtx.d, m);
+    const wb = b.querySelector('[data-mk="ws"]'); wb.setAttribute("aria-pressed", String(!!onBoard)); wb.title = onBoard ? "Show it in the workspace (W)" : "Send to the workspace (W)";
     b.querySelectorAll("[data-mk]").forEach(x => {
       const k = x.dataset.mk;
       if (k === "adm" || k === "dis" || k === "hl") x.setAttribute("aria-pressed", String(!!m && m.type === k && (k !== "hl" || (m.color || "yellow") === x.dataset.color)));
@@ -1292,6 +1382,7 @@ body.has-wintitle .bundle{top:36px}
     const pane = barCtx.pane;
     if (barCtx.mode === "new"){
       if (k === "copy"){ copyText(String(window.getSelection()).trim()); hideMarkBar(); return; }
+      if (k === "ws"){ const d0 = pane.doc, m0 = addMarks(pane, "hl", "yellow"); $("markBar").hidden = true; barCtx = null; if (m0) addExcerptCard(d0, m0); return; }
       if (k === "delete" || k === "done") return;
       const m = addMarks(pane, k === "comment" ? "hl" : k, color);
       if (!m){ hideMarkBar(); return; }
@@ -1305,6 +1396,7 @@ body.has-wintitle .bundle{top:36px}
       barCtx = null; $("markBar").hidden = true; selMark = null; marksChanged(d); toast("Mark deleted. Press Ctrl+Z to undo."); return;
     }
     if (k === "copy"){ copyText(mark.text); return; }
+    if (k === "ws"){ hideMarkBar(); addExcerptCard(d, mark); return; }
     if (k === "comment"){ $("mbComment").focus(); return; }
     if (k === "done"){ hideMarkBar(); return; }
     if (k === "adm" || k === "dis" || k === "hl"){
@@ -1327,7 +1419,7 @@ body.has-wintitle .bundle{top:36px}
 
   /* ---- Facts and notes panel ---- */
   let notesT = 0;
-  function notesSoon(){ if (!notesState.open) return; clearTimeout(notesT); notesT = setTimeout(renderNotes, 40); }
+  function notesSoon(){ wsSoon(); if (!notesState.open) return; clearTimeout(notesT); notesT = setTimeout(renderNotes, 40); }
   function saveNotesPrefs(){ try { localStorage.setItem("notesPrefs", JSON.stringify({ scope: notesState.scope, tab: notesState.tab, filter: notesState.filter })); } catch(e){} }
   function scopeDocs(){ return notesState.scope === "doc" ? (active.doc && active.doc.pdf ? [active.doc] : []) : docs.filter(d => d.pdf); }
   const byPos = (a, b) => a.page - b.page || ((a.rects[0] || [0, 0])[1] - (b.rects[0] || [0, 0])[1]) || ((a.rects[0] || [0])[0] - (b.rects[0] || [0])[0]);
@@ -1373,7 +1465,9 @@ body.has-wintitle .bundle{top:36px}
         const q = document.createElement("span"); q.className = "nq"; q.textContent = m.text;
         b.append(meta, q);
         if (m.comment){ const c = document.createElement("span"); c.className = "ncom"; c.textContent = m.comment; b.appendChild(c); }
-        b.title = "Show on the page";
+        b.title = "Show on the page. Drag onto the workspace to make a card.";
+        b.draggable = true;
+        b.addEventListener("dragstart", ev => { ev.dataTransfer.effectAllowed = "copy"; ev.dataTransfer.setData("application/x-pdfr-mark", JSON.stringify({ doc: docRef(g.d), id: m.id })); ev.dataTransfer.setData("text/plain", m.text); });
         b.addEventListener("click", () => revealMark(g.d, m));
         box.appendChild(b);
       });
@@ -1448,6 +1542,302 @@ body.has-wintitle .bundle{top:36px}
     } catch(e){ toast("Could not save the marked-up copy: " + errText(e)); }
   }
 
+  /* ---- Workspace: a board beside the documents for excerpts, notes and headings, joined by links.
+     Excerpt cards point back to the marked passage; the board is saved in the project file. ---- */
+  const WS_COLORS = ["yellow", "blue", "green", "pink", "grey"];
+  const wsState = { open: false };
+  let wsSel = null, wsT = 0;
+  const newBoard = () => ({ items: [], links: [], view: { x: 40, y: 40, z: 1 } });
+  function curBoard(){
+    const P = notesState.proj;
+    if (P) return P.board || (P.board = newBoard());
+    return notesState.looseBoard || (notesState.looseBoard = newBoard());
+  }
+  function boardChanged(){ if (notesState.proj) saveProjectSoon(); else saveLooseSoon(); }
+  function pushBoardUndo(){ markUndo.push({ board: true, before: JSON.stringify(curBoard()) }); if (markUndo.length > 60) markUndo.shift(); }
+  function docRef(d){ if (!d) return null; const e = projEntry(d); return e ? "e:" + e.id : d.path ? "p:" + lc(d.path) : "s:" + d.id; }
+  function docByRef(ref){
+    if (!ref) return null;
+    return docs.find(d => { const e = projEntry(d); return (e && "e:" + e.id === ref) || (d.path && "p:" + lc(d.path) === ref) || "s:" + d.id === ref; }) || null;
+  }
+  function cardFor(d, m){ const ref = docRef(d), B = curBoard(); return B.items.find(it => it.kind === "excerpt" && it.mark === m.id && (it.doc === ref || docByRef(it.doc) === d)); }
+  function wsSoon(){ if (!wsState.open) return; clearTimeout(wsT); wsT = setTimeout(() => { if (!document.activeElement || !document.activeElement.closest(".wsi")) renderBoard(); }, 60); }
+  function toggleWs(on){
+    wsState.open = on === undefined ? !wsState.open : !!on;
+    $("ws").hidden = $("wsrz").hidden = !wsState.open; $("app").classList.toggle("ws-on", wsState.open);
+    document.querySelectorAll('[data-act="ws"]').forEach(b => b.setAttribute("aria-pressed", String(wsState.open)));
+    try { localStorage.setItem("wsOpen", wsState.open ? "1" : "0"); } catch(e){}
+    if (wsState.open) renderBoard();
+    setTimeout(() => visiblePanes().forEach(p => { if (p.fit && p.doc) p.layout(true); }), 230);
+  }
+  const svgEl = (tag, attrs) => { const e = document.createElementNS("http://www.w3.org/2000/svg", tag); Object.keys(attrs || {}).forEach(k => e.setAttribute(k, attrs[k])); return e; };
+  function itemEl(it){
+    const el = document.createElement("div"); el.dataset.id = it.id;
+    el.className = "wsi wsi-" + it.kind + (wsSel && wsSel.id === it.id ? " sel" : "");
+    el.style.left = it.x + "px"; el.style.top = it.y + "px"; el.style.width = (it.w || 240) + "px";
+    const bar = document.createElement("div"); bar.className = "wsi-bar";
+    bar.innerHTML = '<span class="wsi-grip" aria-hidden="true"></span>' +
+      (it.kind !== "excerpt" ? '<button type="button" class="wsi-b" data-a="color" title="Change colour" aria-label="Change colour"><span class="dot"></span></button>' : "") +
+      '<button type="button" class="wsi-b" data-a="del" title="Remove from the workspace (Delete)" aria-label="Remove from the workspace"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>';
+    el.appendChild(bar);
+    const body = document.createElement("div"); body.className = "wsi-body";
+    if (it.kind === "excerpt"){
+      const d = docByRef(it.doc), m = d && marksOf(d).find(x => x.id === it.mark);
+      if (m){ it.text = m.text; it.page = m.page; it.mtype = m.type; it.color = m.color; it.comment = m.comment || ""; it.name = d.name; if (d.path) it.path = d.path; }
+      else if (d) el.classList.add("orphan");
+      el.classList.add("t-" + (it.mtype || "hl"));
+      if (!it.mtype || it.mtype === "hl") el.style.setProperty("--hl", HL[it.color] || HL.yellow);
+      body.textContent = it.text || "";
+      el.appendChild(body);
+      const cite = document.createElement("button"); cite.type = "button"; cite.className = "wsi-cite"; cite.dataset.a = "go";
+      cite.title = "Go to this passage in the document";
+      if (it.mtype === "adm" || it.mtype === "dis"){ const t = document.createElement("span"); t.className = "tag" + (it.mtype === "dis" ? " d" : ""); t.textContent = TYPE_NAME[it.mtype]; cite.appendChild(t); }
+      const cs = document.createElement("span"); cs.textContent = (it.name || "Document") + ", p " + it.page + " ↗"; cite.appendChild(cs);
+      el.appendChild(cite);
+      if (it.comment){ const c = document.createElement("div"); c.className = "wsi-com"; c.textContent = it.comment; el.appendChild(c); }
+    } else {
+      el.classList.add("c-" + (it.color || (it.kind === "heading" ? "grey" : "yellow")));
+      body.contentEditable = "plaintext-only"; body.spellcheck = true;
+      body.dataset.ph = it.kind === "heading" ? "Heading" : "Type a note";
+      body.textContent = it.text || "";
+      body.addEventListener("input", () => { it.text = body.textContent; boardChanged(); drawLinks(); });
+      body.addEventListener("keydown", e => { if (e.key === "Escape" || (e.key === "Enter" && (e.ctrlKey || it.kind === "heading"))){ e.preventDefault(); e.stopPropagation(); body.blur(); } });
+      el.appendChild(body);
+    }
+    const link = document.createElement("span"); link.className = "wsi-link"; link.dataset.a = "link"; link.title = "Drag to another card to link them";
+    el.appendChild(link);
+    return el;
+  }
+  function renderBoard(){
+    if (!wsState.open) return;
+    const B = curBoard(), world = $("wsWorld");
+    world.querySelectorAll(".wsi").forEach(e => e.remove());
+    B.items.forEach(it => world.appendChild(itemEl(it)));
+    $("wsEmpty").hidden = B.items.length > 0;
+    $("wsTitle").textContent = notesState.proj ? "Workspace · " + notesState.proj.name : "Workspace";
+    applyView(); drawLinks();
+  }
+  function applyView(){
+    const v = curBoard().view, C = $("wsCanvas");
+    $("wsWorld").style.transform = "translate(" + v.x + "px," + v.y + "px) scale(" + v.z + ")";
+    C.style.backgroundSize = (24 * v.z) + "px " + (24 * v.z) + "px"; C.style.backgroundPosition = v.x + "px " + v.y + "px";
+    $("wsZoom").textContent = Math.round(v.z * 100) + "%";
+  }
+  const boxOf = el => ({ x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight });
+  const itemNode = id => $("wsWorld").querySelector('.wsi[data-id="' + id + '"]');
+  function edgePt(r, t){
+    const cx = r.x + r.w / 2, cy = r.y + r.h / 2, dx = t.x - cx, dy = t.y - cy;
+    if (!dx && !dy) return { x: cx, y: cy };
+    const s = Math.min(Math.abs(r.w / 2 / (dx || 1e-9)), Math.abs(r.h / 2 / (dy || 1e-9)));
+    return { x: cx + dx * s, y: cy + dy * s };
+  }
+  function drawLinks(){
+    const B = curBoard(), svg = $("wsLinks"); svg.textContent = "";
+    B.links.forEach(l => {
+      const ea = itemNode(l.a), eb = itemNode(l.b); if (!ea || !eb) return;
+      const a = boxOf(ea), b = boxOf(eb);
+      const p = edgePt(a, { x: b.x + b.w / 2, y: b.y + b.h / 2 }), q = edgePt(b, { x: a.x + a.w / 2, y: a.y + a.h / 2 });
+      const g = svgEl("g", { "data-link": l.id }); if (wsSel && wsSel.id === l.id) g.setAttribute("class", "sel");
+      const dpath = "M" + p.x + " " + p.y + " L" + q.x + " " + q.y;
+      g.appendChild(svgEl("path", { d: dpath, class: "hit" })); g.appendChild(svgEl("path", { d: dpath, class: "ln" }));
+      g.appendChild(svgEl("circle", { cx: p.x, cy: p.y, r: 3.5, class: "end" })); g.appendChild(svgEl("circle", { cx: q.x, cy: q.y, r: 3.5, class: "end" }));
+      svg.appendChild(g);
+    });
+  }
+  function selectWs(sel){
+    wsSel = sel;
+    $("wsWorld").querySelectorAll(".wsi").forEach(e => e.classList.toggle("sel", !!sel && e.dataset.id === sel.id));
+    drawLinks();
+  }
+  function worldPt(cx, cy){ const r = $("wsCanvas").getBoundingClientRect(), v = curBoard().view; return { x: (cx - r.left - v.x) / v.z, y: (cy - r.top - v.y) / v.z }; }
+  function nextSlot(){
+    const B = curBoard(), C = $("wsCanvas"), v = B.view;
+    const x = Math.round((C.clientWidth / 2 - v.x) / v.z - 120), top = Math.round((30 - v.y) / v.z);
+    let y = top;
+    $("wsWorld").querySelectorAll(".wsi").forEach(el => { const b = boxOf(el); if (Math.abs(b.x - x) < 150 && b.y + b.h + 14 > y && b.y < top + 6000) y = Math.max(y, b.y + b.h + 14); });
+    return { x, y };
+  }
+  function focusItem(id, flash){
+    const el = itemNode(id); if (!el) return;
+    const B = curBoard(), v = B.view, C = $("wsCanvas"), b = boxOf(el);
+    const sx = b.x * v.z + v.x, sy = b.y * v.z + v.y;
+    if (sx < 10 || sy < 10 || sx + b.w * v.z > C.clientWidth - 10 || sy + Math.min(b.h, 200) * v.z > C.clientHeight - 10){
+      v.x = C.clientWidth / 2 - (b.x + b.w / 2) * v.z; v.y = C.clientHeight / 3 - b.y * v.z; applyView(); boardChanged();
+    }
+    selectWs({ kind: "item", id });
+    if (flash){ el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+  }
+  function addExcerptCard(d, m, at){
+    if (!d || !m) return null;
+    if (!wsState.open) toggleWs(true);
+    const ex = cardFor(d, m); if (ex){ focusItem(ex.id, true); return ex; }
+    const B = curBoard(); pushBoardUndo();
+    const pos = at || nextSlot();
+    const it = { id: newId(), kind: "excerpt", x: Math.round(pos.x), y: Math.round(pos.y), w: 250, doc: docRef(d), path: d.path || "", name: d.name, mark: m.id, page: m.page, text: m.text, mtype: m.type, color: m.color };
+    B.items.push(it); boardChanged(); renderBoard(); focusItem(it.id, true);
+    return it;
+  }
+  function addNoteCard(kind, at){
+    if (!wsState.open) toggleWs(true);
+    const B = curBoard(); pushBoardUndo();
+    const pos = at || nextSlot();
+    const it = { id: newId(), kind, x: Math.round(pos.x), y: Math.round(pos.y), w: kind === "heading" ? 300 : 220, text: "", color: kind === "heading" ? "grey" : "yellow" };
+    B.items.push(it); boardChanged(); renderBoard(); focusItem(it.id);
+    const b = itemNode(it.id).querySelector(".wsi-body"); b.focus();
+    return it;
+  }
+  function deleteWsSel(){
+    if (!wsSel) return;
+    const B = curBoard(); pushBoardUndo();
+    if (wsSel.kind === "link") B.links = B.links.filter(l => l.id !== wsSel.id);
+    else { B.items = B.items.filter(it => it.id !== wsSel.id); B.links = B.links.filter(l => l.a !== wsSel.id && l.b !== wsSel.id); }
+    wsSel = null; boardChanged(); renderBoard();
+  }
+  async function goToCard(it){
+    let d = docByRef(it.doc);
+    if (!d){
+      const P = notesState.proj, e = P && it.doc && it.doc.startsWith("e:") && P.docs.find(x => "e:" + x.id === it.doc);
+      const p = (e && !e.missing && e.abs) || it.path;
+      if (p && window.pdfReader){ const l = await window.pdfReader.readFiles([p]); if (l.length) d = await addDoc(l[0].name, l[0].data, false, l[0].path); }
+      if (!d){ toast((it.name || "The document") + " could not be found. It may have been moved or renamed."); return; }
+    }
+    const m = marksOf(d).find(x => x.id === it.mark);
+    if (m){ revealMark(d, m); return; }
+    let pane = visiblePanes().find(p => p.doc === d); if (!pane){ pane = active; await pane.show(d); }
+    pane.goTo(it.page || 1); toast("The mark for this card was removed; showing page " + (it.page || 1) + ".");
+  }
+  function zoomWs(f, cx, cy){
+    const B = curBoard(), v = B.view, r = $("wsCanvas").getBoundingClientRect();
+    const nz = Math.max(0.25, Math.min(2.5, v.z * f)); if (Math.abs(nz - v.z) < 0.001) return;
+    const px = (cx === undefined ? r.width / 2 : cx - r.left), py = (cy === undefined ? r.height / 2 : cy - r.top);
+    v.x = px - (px - v.x) * nz / v.z; v.y = py - (py - v.y) * nz / v.z; v.z = nz; applyView(); boardChanged();
+  }
+  function fitWs(){
+    const B = curBoard(), C = $("wsCanvas"), els = [...$("wsWorld").querySelectorAll(".wsi")]; if (!els.length) return;
+    let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+    els.forEach(el => { const b = boxOf(el); x1 = Math.min(x1, b.x); y1 = Math.min(y1, b.y); x2 = Math.max(x2, b.x + b.w); y2 = Math.max(y2, b.y + b.h); });
+    const z = Math.max(0.25, Math.min(1.2, (C.clientWidth - 60) / (x2 - x1), (C.clientHeight - 60) / (y2 - y1)));
+    B.view = { z, x: (C.clientWidth - (x2 - x1) * z) / 2 - x1 * z, y: (C.clientHeight - (y2 - y1) * z) / 2 - y1 * z }; applyView(); boardChanged();
+  }
+  /* reading order for the outline: top to bottom, cards side by side read left to right */
+  function boardOrder(){
+    const B = curBoard();
+    const box = it => { const el = itemNode(it.id); return el ? boxOf(el) : { x: it.x, y: it.y, w: it.w || 240, h: 60 }; };
+    return B.items.map(it => ({ it, b: box(it) })).sort((p, q) => (Math.abs(p.b.y - q.b.y) < 24 ? p.b.x - q.b.x : p.b.y - q.b.y));
+  }
+  function copyOutline(){
+    const B = curBoard(); if (!B.items.length){ toast("The workspace is empty."); return; }
+    const order = boardOrder(), short = t => { t = String(t || "").replace(/\s+/g, " ").trim(); return t.length > 70 ? t.slice(0, 67) + "..." : t; };
+    const label = it => it.kind === "excerpt" ? short(it.text) + " (" + (it.name || "") + ", p " + it.page + ")" : short(it.text) || (it.kind === "heading" ? "Heading" : "Note");
+    const F = "font-family:Arial,sans-serif;";
+    let html = '<p style="' + F + 'font-size:13pt"><b>' + escHtml(notesState.proj ? notesState.proj.name + ": workspace" : "Workspace") + "</b></p>";
+    const lines = [notesState.proj ? notesState.proj.name + ": workspace" : "Workspace", ""];
+    order.forEach(({ it }) => {
+      if (it.kind === "heading"){ if (!it.text) return; html += '<p style="' + F + 'font-size:12pt;margin-top:14pt"><b>' + escHtml(it.text) + "</b></p>"; lines.push("", it.text.toUpperCase()); }
+      else if (it.kind === "note"){ if (!it.text) return; html += '<p style="' + F + 'font-size:10.5pt">' + escHtml(it.text).replace(/\n/g, "<br>") + "</p>"; lines.push(it.text); }
+      else {
+        const st = it.mtype === "adm" ? " [Admitted]" : it.mtype === "dis" ? " [Disputed]" : "";
+        html += '<p style="' + F + 'font-size:10.5pt;margin-left:24pt">"' + escHtml(it.text) + '"<br><span style="color:#555;font-size:9pt">' + escHtml((it.name || "") + ", p " + it.page + st) + "</span>" +
+          (it.comment ? '<br><span style="font-size:9.5pt"><i>' + escHtml(it.comment) + "</i></span>" : "") + "</p>";
+        lines.push('    "' + it.text + '"', "    (" + (it.name || "") + ", p " + it.page + st + ")" + (it.comment ? " " + it.comment : ""));
+      }
+    });
+    const byId = id => B.items.find(x => x.id === id);
+    const links = B.links.map(l => [byId(l.a), byId(l.b)]).filter(p => p[0] && p[1]);
+    if (links.length){
+      html += '<p style="' + F + 'font-size:12pt;margin-top:14pt"><b>Connections</b></p>';
+      lines.push("", "CONNECTIONS");
+      links.forEach(([a, b]) => { html += '<p style="' + F + 'font-size:10pt">' + escHtml(label(a)) + " &harr; " + escHtml(label(b)) + "</p>"; lines.push(label(a) + "  <->  " + label(b)); });
+    }
+    copyRich(html, lines.join("\n")).then(() => toast("Copied the outline. Paste it into Word or Outlook.")).catch(e => toast("Could not copy: " + errText(e)));
+  }
+  /* pointer work on the board: move cards, pan the board, draw links */
+  function wsPointerDown(e){
+    if (e.button !== 0) return;
+    const C = $("wsCanvas"), B = curBoard(), v = B.view;
+    const linkG = e.target.closest && e.target.closest("[data-link]");
+    if (linkG){ e.preventDefault(); selectWs({ kind: "link", id: linkG.dataset.link }); C.focus(); return; }
+    const act = e.target.closest("[data-a]"), itEl = e.target.closest(".wsi");
+    const it = itEl && B.items.find(x => x.id === itEl.dataset.id);
+    if (act && act.dataset.a === "link" && it){
+      e.preventDefault(); C.setPointerCapture(e.pointerId);
+      const from = boxOf(itEl), tmp = svgEl("path", { class: "tmp" }); $("wsLinks").appendChild(tmp);
+      let over = null;
+      const move = ev => {
+        const p = worldPt(ev.clientX, ev.clientY), a = edgePt(from, p);
+        tmp.setAttribute("d", "M" + a.x + " " + a.y + " L" + p.x + " " + p.y);
+        const hit = document.elementsFromPoint(ev.clientX, ev.clientY).find(n => n.classList && n.classList.contains("wsi") && n !== itEl);
+        if (over && over !== hit) over.classList.remove("target"); over = hit || null; if (over) over.classList.add("target");
+      };
+      const up = () => {
+        C.removeEventListener("pointermove", move); C.removeEventListener("pointerup", up); tmp.remove();
+        if (over){
+          over.classList.remove("target");
+          const to = over.dataset.id;
+          if (!B.links.some(l => (l.a === it.id && l.b === to) || (l.a === to && l.b === it.id))){ pushBoardUndo(); const l = { id: newId(), a: it.id, b: to }; B.links.push(l); boardChanged(); selectWs({ kind: "link", id: l.id }); }
+        } else drawLinks();
+      };
+      C.addEventListener("pointermove", move); C.addEventListener("pointerup", up);
+      return;
+    }
+    if (act) return;
+    if (it){
+      const body = e.target.closest("[contenteditable]");
+      if (body && document.activeElement === body) return;
+      e.preventDefault();
+      if (document.activeElement && document.activeElement.closest && document.activeElement.closest(".wsi")) document.activeElement.blur();
+      selectWs({ kind: "item", id: it.id });
+      C.setPointerCapture(e.pointerId);
+      const sx = e.clientX, sy = e.clientY, ox = it.x, oy = it.y; let moved = false, undone = false;
+      const move = ev => {
+        const dx = (ev.clientX - sx) / v.z, dy = (ev.clientY - sy) / v.z;
+        if (!moved && Math.abs(dx) + Math.abs(dy) < 3) return;
+        if (!undone){ undone = true; markUndo.push({ board: true, before: JSON.stringify(B) }); }
+        moved = true; it.x = Math.round(ox + dx); it.y = Math.round(oy + dy); itEl.style.left = it.x + "px"; itEl.style.top = it.y + "px"; drawLinks();
+      };
+      const up = () => {
+        C.removeEventListener("pointermove", move); C.removeEventListener("pointerup", up);
+        if (moved){ boardChanged(); return; }
+        if (body){ body.focus(); const r = document.createRange(); r.selectNodeContents(body); r.collapse(false); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+        else C.focus();
+      };
+      C.addEventListener("pointermove", move); C.addEventListener("pointerup", up);
+      return;
+    }
+    /* empty board: pan */
+    e.preventDefault(); C.focus();
+    if (document.activeElement && document.activeElement.closest && document.activeElement.closest(".wsi")) document.activeElement.blur();
+    selectWs(null); C.setPointerCapture(e.pointerId); C.classList.add("panning");
+    const sx = e.clientX, sy = e.clientY, ox = v.x, oy = v.y; let moved = false;
+    const move = ev => { moved = true; v.x = ox + ev.clientX - sx; v.y = oy + ev.clientY - sy; applyView(); };
+    const up = () => { C.removeEventListener("pointermove", move); C.removeEventListener("pointerup", up); C.classList.remove("panning"); if (moved) boardChanged(); };
+    C.addEventListener("pointermove", move); C.addEventListener("pointerup", up);
+  }
+  function wsClick(e){
+    const a = e.target.closest("[data-a]"); if (!a) return;
+    const itEl = e.target.closest(".wsi"), B = curBoard(), it = itEl && B.items.find(x => x.id === itEl.dataset.id); if (!it) return;
+    if (a.dataset.a === "del"){ selectWs({ kind: "item", id: it.id }); deleteWsSel(); }
+    else if (a.dataset.a === "color"){ it.color = WS_COLORS[(WS_COLORS.indexOf(it.color) + 1) % WS_COLORS.length]; boardChanged(); WS_COLORS.forEach(c => itEl.classList.remove("c-" + c)); itEl.classList.add("c-" + it.color); }
+    else if (a.dataset.a === "go") goToCard(it);
+  }
+  function wsDrop(e){
+    const C = $("wsCanvas"); C.classList.remove("dropping");
+    const raw = e.dataTransfer.getData("application/x-pdfr-mark");
+    const at = worldPt(e.clientX, e.clientY); at.x -= 30; at.y -= 14;
+    if (raw){
+      e.preventDefault();
+      try { const r = JSON.parse(raw), d = docByRef(r.doc), m = d && marksOf(d).find(x => x.id === r.id); if (m) addExcerptCard(d, m, at); } catch(err){}
+      return;
+    }
+    const s = window.getSelection(), sp = s && !s.isCollapsed && s.rangeCount ? visiblePanes().find(p => p.stage.contains(s.anchorNode)) : null;
+    if (sp && sp.doc){
+      e.preventDefault();
+      const d = sp.doc, m = addMarks(sp, "hl", "yellow");
+      if (barCtx){ $("markBar").hidden = true; barCtx = null; }
+      if (m) addExcerptCard(d, m, at);
+    }
+  }
+
   /* ---- Projects: a project file (.pdfrproj) next to the documents, for example in the matter folder.
      It lists the documents (found again even if the matter folder moves) and keeps the marks and notes on them. ---- */
   function saveProjectSoon(){ if (!notesState.proj || !window.pdfReader) return; clearTimeout(notesState.projT); notesState.projT = setTimeout(saveProjectNow, 600); }
@@ -1455,7 +1845,7 @@ body.has-wintitle .bundle{top:36px}
     const P = notesState.proj; clearTimeout(notesState.projT); notesState.projT = 0;
     if (!P || !window.pdfReader) return;
     P.view = { panes: paneCount, docs: visiblePanes().map(p => (p.doc && p.doc.path) || "") };
-    const data = { app: "PDF Reader", name: P.name, created: P.created, docs: P.docs.map(e => ({ id: e.id, name: e.name, abs: e.abs, rel: e.rel })), notes: P.notes, view: P.view };
+    const data = { app: "PDF Reader", name: P.name, created: P.created, docs: P.docs.map(e => ({ id: e.id, name: e.name, abs: e.abs, rel: e.rel })), notes: P.notes, view: P.view, board: P.board || undefined };
     try { await window.pdfReader.projectSave(P.path, data); if (P.err) toast("Project saved."); P.err = false; }
     catch(e){ if (!P.err) toast("Could not save the project: " + errText(e)); P.err = true; }
   }
@@ -1489,6 +1879,8 @@ body.has-wintitle .bundle{top:36px}
     if (!p) return;
     const name = p.split(/[\\/]/).pop().replace(/\.pdfrproj$/i, "");
     notesState.proj = { path: p, name, created: new Date().toISOString(), docs: [], notes: {} };
+    /* a workspace started before the project was made moves into it */
+    const lb = notesState.looseBoard; if (lb && lb.items.length){ notesState.proj.board = lb; notesState.looseBoard = null; saveLooseSoon(); }
     const skipped = docs.filter(d => d.pdf && !canJoin(d)).length;
     const n = addToProject(docs);
     await saveProjectNow(); renderProjBar(); renderList(); notesSoon(); repaintAll();
@@ -1501,7 +1893,8 @@ body.has-wintitle .bundle{top:36px}
     if (notesState.proj) await closeProject();
     const raw = res.project;
     const P = notesState.proj = { path: res.path, name: raw.name || res.path.split(/[\\/]/).pop().replace(/\.pdfrproj$/i, ""), created: raw.created || new Date().toISOString(),
-      docs: raw.docs.map(e => ({ id: e.id || newId(), name: e.name || String(e.abs || "").split(/[\\/]/).pop(), abs: e.abs, rel: e.rel, missing: !!e.missing })), notes: raw.notes || {}, view: raw.view };
+      docs: raw.docs.map(e => ({ id: e.id || newId(), name: e.name || String(e.abs || "").split(/[\\/]/).pop(), abs: e.abs, rel: e.rel, missing: !!e.missing })), notes: raw.notes || {}, view: raw.view, board: raw.board && Array.isArray(raw.board.items) ? raw.board : null };
+    wsSel = null;
     /* marks made on these documents outside the project join the project */
     let merged = false;
     P.docs.forEach(e => { const k = lc(e.abs), l = notesState.loose[k]; if (l && l.length){ P.notes[e.id] = (P.notes[e.id] || []).concat(l); delete notesState.loose[k]; merged = true; } });
@@ -1526,7 +1919,8 @@ body.has-wintitle .bundle{top:36px}
     const mine = docs.filter(d => projEntry(d));
     notesState.proj = null;
     mine.forEach(d => removeDoc(d));
-    renderProjBar(); renderList(); notesSoon(); repaintAll();
+    wsSel = null;
+    renderProjBar(); renderList(); notesSoon(); repaintAll(); renderBoard();
   }
   function renderProjBar(){
     const P = notesState.proj;
@@ -1693,7 +2087,7 @@ body.has-wintitle .bundle{top:36px}
         const f = ({ prev:()=>this.goTo(this.page-1), next:()=>this.goTo(this.page+1), in:()=>this.zoom(1.2), out:()=>this.zoom(1/1.2),
            fit:()=>{ this.fit = true; this.layout(true); }, print:()=>openPrint(this), toggle:()=>toggleRail(),
            find:()=>this.openFind(), findnext:()=>this.stepMatch(1), findprev:()=>this.stepMatch(-1), findclose:()=>this.closeFind(),
-           thumbs:()=>this.toggleThumbs(), organise:()=>this.openOrganise(), saveas:()=>saveDocAs(this), notes:()=>toggleNotes() })[a.dataset.act];
+           thumbs:()=>this.toggleThumbs(), organise:()=>this.openOrganise(), saveas:()=>saveDocAs(this), notes:()=>toggleNotes(), ws:()=>toggleWs() })[a.dataset.act];
         if (f) f();
       };
       this.el.querySelector(".toolbar").addEventListener("click", onAct);
@@ -2977,19 +3371,61 @@ body.has-wintitle .bundle{top:36px}
   });
   if (!window.pdfReader) document.body.classList.add("no-desktop");
   else { $("winBar").hidden = false; document.body.classList.add("has-wintitle"); }
+  /* ---- v3.1 wiring: workspace ---- */
+  $("wsCanvas").addEventListener("pointerdown", wsPointerDown);
+  $("wsCanvas").addEventListener("click", wsClick);
+  $("wsCanvas").addEventListener("dblclick", e => { if (e.target.closest(".wsi")) return; const p = worldPt(e.clientX, e.clientY); addNoteCard("note", { x: p.x - 20, y: p.y - 14 }); });
+  $("wsCanvas").addEventListener("wheel", e => {
+    e.preventDefault();
+    if (e.ctrlKey || e.metaKey){ const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY; zoomWs(Math.exp(-dy * 0.0015), e.clientX, e.clientY); return; }
+    const v = curBoard().view; v.x -= e.deltaX; v.y -= e.deltaY; applyView(); clearTimeout(wsT); wsT = setTimeout(boardChanged, 400);
+  }, { passive: false });
+  $("wsCanvas").addEventListener("dragover", e => {
+    const t = [...e.dataTransfer.types];
+    if (t.includes("application/x-pdfr-mark") || (t.includes("text/plain") && !t.includes("Files"))){ e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = "copy"; $("wsCanvas").classList.add("dropping"); }
+  });
+  $("wsCanvas").addEventListener("dragleave", e => { if (!e.relatedTarget || !$("wsCanvas").contains(e.relatedTarget)) $("wsCanvas").classList.remove("dropping"); });
+  $("wsCanvas").addEventListener("drop", e => { e.stopPropagation(); wsDrop(e); });
+  $("wsAddNote").addEventListener("click", () => addNoteCard("note"));
+  $("wsAddHead").addEventListener("click", () => addNoteCard("heading"));
+  $("wsIn").addEventListener("click", () => zoomWs(1.2));
+  $("wsOut").addEventListener("click", () => zoomWs(1 / 1.2));
+  $("wsFit").addEventListener("click", fitWs);
+  $("wsCopy").addEventListener("click", copyOutline);
+  $("wsClose").addEventListener("click", () => toggleWs(false));
+  document.addEventListener("keydown", e => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "w"){ e.preventDefault(); e.stopPropagation(); toggleWs(); return; }
+    if (!wsState.open || !wsSel || !$("ws").contains(document.activeElement)) return;
+    if (e.target.closest && e.target.closest("input,textarea,select,[contenteditable]")) return;
+    if (e.key === "Delete" || e.key === "Backspace"){ e.preventDefault(); deleteWsSel(); }
+    else if (e.key === "Escape"){ e.preventDefault(); selectWs(null); }
+  }, true);
+  $("wsrz").addEventListener("pointerdown", e => {
+    const z = $("wsrz"); z.classList.add("active"); z.setPointerCapture(e.pointerId);
+    const sx = e.clientX, sw = $("ws").offsetWidth;
+    const move = ev => $("app").style.setProperty("--ws-w", Math.max(300, Math.min(window.innerWidth * 0.7, sw - (ev.clientX - sx))) + "px");
+    const up = () => { z.classList.remove("active"); z.removeEventListener("pointermove", move); z.removeEventListener("pointerup", up);
+      try { localStorage.setItem("wsWidth", parseInt(getComputedStyle($("app")).getPropertyValue("--ws-w"))); } catch(err){}
+      visiblePanes().forEach(p => { if (p.fit && p.doc) p.layout(true); }); drawLinks(); };
+    z.addEventListener("pointermove", move); z.addEventListener("pointerup", up);
+  });
+  try { const w = localStorage.getItem("wsWidth"); if (w) $("app").style.setProperty("--ws-w", w + "px"); if (localStorage.getItem("wsOpen") === "1") toggleWs(true); } catch(e){}
   /* ---- v3.0 wiring: marks, the Facts and notes panel and projects ---- */
   $("markBar").addEventListener("mousedown", e => { if (e.target.closest("button")) e.preventDefault(); });
   $("markBar").addEventListener("click", e => { const b = e.target.closest("[data-mk]"); if (b) barAct(b.dataset.mk, b.dataset.color); });
   $("mbComment").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)){ e.preventDefault(); hideMarkBar(); } });
   $("mbComment").addEventListener("blur", () => commitComment());
   document.addEventListener("mouseup", e => {
-    if (e.button !== 0 || !e.target.closest || e.target.closest("#markBar,#notes,.toolbar,.findbar,.organiser,.modal-back,.bundle,.rail")) return;
-    const pane = visiblePanes().find(p => p.stage.contains(e.target));
+    if (e.button !== 0 || !e.target.closest || e.target.closest("#markBar")) return;
+    /* a selection made in a document shows the bar even if the mouse was let go over a panel */
+    const outside = !!e.target.closest("#notes,#ws,.toolbar,.findbar,.organiser,.modal-back,.bundle,.rail");
+    const pane = outside ? null : visiblePanes().find(p => p.stage.contains(e.target));
     const x = e.clientX, y = e.clientY;
     setTimeout(() => {
       const s = window.getSelection();
       const sp = s && !s.isCollapsed && s.rangeCount ? visiblePanes().find(p => p.stage.contains(s.anchorNode)) : null;
       if (sp && sp.doc && selectionParts(sp).length){ commitComment(); showMarkBar(sp); return; }
+      if (outside) return;
       if (pane && pane.doc){ const m = hitMark(pane, x, y); if (m){ editMark(pane, pane.doc, m, x, y); return; } }
       if (!$("markBar").hidden) hideMarkBar();
     }, 0);
@@ -3006,7 +3442,7 @@ body.has-wintitle .bundle{top:36px}
     if ($("markBar").hidden || !barCtx) return;
     if (e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); const s = window.getSelection(); if (barCtx.mode === "new" && s) s.removeAllRanges(); hideMarkBar(); return; }
     if (inField || e.ctrlKey || e.metaKey || e.altKey) return;
-    const k = { a: "adm", d: "dis", h: "hl", c: "comment" }[e.key.toLowerCase()];
+    const k = { a: "adm", d: "dis", h: "hl", c: "comment", w: "ws" }[e.key.toLowerCase()];
     if (k){ e.preventDefault(); e.stopPropagation(); barAct(k, "yellow"); return; }
     if ((e.key === "Delete" || e.key === "Backspace") && barCtx.mode === "edit"){ e.preventDefault(); barAct("delete"); }
   }, true);
@@ -3025,10 +3461,13 @@ body.has-wintitle .bundle{top:36px}
   if (window.pdfReader){
     const D = window.pdfReader;
     D.notesLoad().then(o => {
-      const early = notesState.loose; notesState.loose = (o && typeof o === "object") ? o : {}; notesState.loaded = true;
+      o = (o && typeof o === "object") ? o : {};
+      const lb = o["*board"]; delete o["*board"];
+      if (lb && Array.isArray(lb.items) && !(notesState.looseBoard && notesState.looseBoard.items.length)) notesState.looseBoard = lb;
+      const early = notesState.loose; notesState.loose = o; notesState.loaded = true;
       Object.keys(early).forEach(k => { if (early[k].length) notesState.loose[k] = (notesState.loose[k] || []).concat(early[k]); });
       if (Object.keys(early).some(k => early[k].length)) saveLooseSoon();
-      repaintAll(); renderList(); notesSoon();
+      repaintAll(); renderList(); notesSoon(); renderBoard();
     }).catch(() => { notesState.loaded = true; });
     D.onOpenProject(p => openProjFrom(() => D.projectOpen(p)));
     D.initialProject().then(p => { if (p) openProjFrom(() => D.projectOpen(p)); });
