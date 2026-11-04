@@ -1,6 +1,6 @@
 // PDF Reader: desktop shell. Opens PDFs from Explorer, keeps one window, and prints
 // the original PDF file straight to the printer through the bundled SumatraPDF engine.
-const { app, BrowserWindow, ipcMain, dialog, Menu, shell, nativeTheme } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, Menu, shell, nativeTheme, clipboard } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
@@ -12,6 +12,52 @@ const known = new Set();     // files the user has opened; only these may be pri
 
 const isPdf = p => typeof p === "string" && /\.pdf$/i.test(p) && fs.existsSync(p);
 const pdfArgs = argv => argv.slice(1).filter(isPdf).map(p => path.resolve(p));
+/* Projects: a .pdfrproj file in the matter folder lists the project's documents and holds your marks and notes */
+const isProj = p => typeof p === "string" && /\.pdfrproj$/i.test(p) && fs.existsSync(p);
+const projArgs = argv => argv.slice(1).filter(isProj).map(p => path.resolve(p));
+const pendingProj = [];
+const projAllowed = new Set();
+const allowProj = p => projAllowed.add(path.resolve(p).toLowerCase());
+let recentProj = null;
+const recentProjFile = () => path.join(app.getPath("userData"), "recent-projects.json");
+function loadRecentProj() {
+  if (recentProj) return recentProj;
+  try { recentProj = JSON.parse(fs.readFileSync(recentProjFile(), "utf8")); if (!Array.isArray(recentProj)) recentProj = []; } catch (e) { recentProj = []; }
+  recentProj.forEach(r => allowProj(r.path));
+  return recentProj;
+}
+function noteRecentProj(full, name) {
+  loadRecentProj();
+  recentProj = [{ path: full, name: name || path.basename(full, ".pdfrproj"), last: Date.now() }]
+    .concat(recentProj.filter(r => r.path.toLowerCase() !== full.toLowerCase())).slice(0, 15);
+  try { fs.writeFileSync(recentProjFile(), JSON.stringify(recentProj)); } catch (e) {}
+}
+function writeAtomic(target, data) {
+  const tmp = target + ".pdfreader-tmp";
+  try { fs.writeFileSync(tmp, data); fs.renameSync(tmp, target); }
+  catch (e) {
+    try { fs.unlinkSync(tmp); } catch (_) {}
+    if (["EBUSY", "EPERM", "EACCES"].includes(e.code)) throw new Error("The file is locked or read-only (it may be syncing). Your marks are kept and will be saved on the next change.");
+    throw e;
+  }
+}
+function readProject(p) {
+  const full = path.resolve(p);
+  let raw;
+  try { raw = JSON.parse(fs.readFileSync(full, "utf8")); } catch (e) { throw new Error("This project file could not be read."); }
+  if (!raw || raw.app !== "PDF Reader" || !Array.isArray(raw.docs)) throw new Error("This is not a PDF Reader project file.");
+  const dir = path.dirname(full);
+  raw.notes = raw.notes && typeof raw.notes === "object" ? raw.notes : {};
+  raw.docs.forEach(e => {
+    // Documents are found next to the project first (so a matter folder can be moved or synced), then at their old location
+    const cands = [e.rel && path.resolve(dir, e.rel), e.abs].filter(Boolean);
+    const hit = cands.find(c => { try { return fs.statSync(c).isFile(); } catch (x) { return false; } });
+    e.abs = hit || e.abs || (e.rel ? path.resolve(dir, e.rel) : "");
+    e.missing = !hit;
+  });
+  allowProj(full); noteRecentProj(full, raw.name);
+  return { path: full, project: raw };
+}
 
 function readPdf(p) {
   const full = path.resolve(p);
@@ -182,14 +228,17 @@ if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
   pending.push(...pdfArgs(process.argv));
+  projArgs(process.argv).forEach(p => { allowProj(p); pendingProj.push(p); });
 
   app.on("second-instance", (_e, argv) => {
-    const files = pdfArgs(argv);
+    const files = pdfArgs(argv), projs = projArgs(argv);
+    projs.forEach(allowProj);
     if (win) {
       if (win.isMinimized()) win.restore();
       win.focus();
       sendFiles(files);
-    } else pending.push(...files);
+      if (projs[0]) win.webContents.send("open-project", projs[0]);
+    } else { pending.push(...files); pendingProj.push(...projs); }
   });
 
   app.whenReady().then(() => {
@@ -347,6 +396,51 @@ if (!app.requestSingleInstanceLock()) {
       if (o.mode === "new") noteRecent(target);
       return target;
     });
+
+    /* ---- Projects and marks ---- */
+    const backedUp = new Set();
+    const projFilter = [{ name: "PDF Reader projects", extensions: ["pdfrproj"] }];
+    ipcMain.handle("initial-project", () => pendingProj.splice(0)[0] || "");
+    ipcMain.handle("project-new-dialog", async (_e, o) => {
+      o = o || {};
+      const r = await dialog.showSaveDialog(win, { title: "New project", buttonLabel: "Create project", defaultPath: defaultDir(o.defaultPath), filters: projFilter });
+      if (r.canceled || !r.filePath) return "";
+      let p = path.resolve(r.filePath); if (!/\.pdfrproj$/i.test(p)) p += ".pdfrproj";
+      allowProj(p); return p;
+    });
+    ipcMain.handle("project-open-dialog", async () => {
+      const r = await dialog.showOpenDialog(win, { title: "Open project", properties: ["openFile"], filters: projFilter });
+      if (r.canceled || !r.filePaths[0]) return null;
+      return readProject(r.filePaths[0]);
+    });
+    ipcMain.handle("project-open", (_e, p) => {
+      loadRecentProj();
+      if (!projAllowed.has(path.resolve(String(p)).toLowerCase())) throw new Error("Open this project with Open project.");
+      if (!fs.existsSync(p)) throw new Error("The project file has been moved, renamed or deleted.");
+      return readProject(p);
+    });
+    ipcMain.handle("project-save", (_e, p, proj) => {
+      const full = path.resolve(String(p));
+      if (!projAllowed.has(full.toLowerCase())) throw new Error("This project cannot be saved here.");
+      const dir = path.dirname(full);
+      const out = Object.assign({}, proj, { app: "PDF Reader", format: 1, saved: new Date().toISOString(), savedWith: app.getVersion() });
+      out.docs = (proj.docs || []).map(e => ({ id: e.id, name: e.name, rel: e.abs ? path.relative(dir, e.abs) : e.rel, abs: e.abs }));
+      if (!backedUp.has(full) && fs.existsSync(full)) { try { backup(full); } catch (e) {} backedUp.add(full); }
+      writeAtomic(full, JSON.stringify(out, null, 1));
+      noteRecentProj(full, out.name);
+      return true;
+    });
+    ipcMain.handle("project-recent", () => loadRecentProj().map(r => Object.assign({}, r, { exists: fs.existsSync(r.path) })));
+    ipcMain.handle("project-recent-remove", (_e, p) => {
+      loadRecentProj(); recentProj = recentProj.filter(r => r.path !== p);
+      try { fs.writeFileSync(recentProjFile(), JSON.stringify(recentProj)); } catch (e) {}
+    });
+    ipcMain.handle("project-show", (_e, p) => { if (projAllowed.has(path.resolve(String(p)).toLowerCase())) shell.showItemInFolder(p); });
+    // Marks on documents that are not in a project are kept in the app's data folder
+    const notesFile = () => path.join(app.getPath("userData"), "marks.json");
+    ipcMain.handle("notes-load", () => { try { return JSON.parse(fs.readFileSync(notesFile(), "utf8")) || {}; } catch (e) { return {}; } });
+    ipcMain.handle("notes-save", (_e, obj) => { writeAtomic(notesFile(), JSON.stringify(obj || {})); return true; });
+    ipcMain.handle("copy-rich", (_e, html, text) => { clipboard.write({ html: String(html || ""), text: String(text || "") }); return true; });
 
     /* OCR: recognises text on scanned pages, offline, with Tesseract (English). A small pool of workers
        runs in the background; the reader sends one page image at a time and gets words with positions. */

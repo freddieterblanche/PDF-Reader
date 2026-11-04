@@ -91,6 +91,9 @@ body.has-wintitle .app{flex:1;height:auto;min-height:0}
 .textLayer .highlight.selected{background-color:rgba(255,120,0,.6)}
 .textLayer ::selection{background:rgba(31,95,120,.3)}
 .textLayer br::selection{background:transparent}
+.textLayer[data-main-rotation="90"]{transform:rotate(90deg) translateY(-100%)}
+.textLayer[data-main-rotation="180"]{transform:rotate(180deg) translate(-100%,-100%)}
+.textLayer[data-main-rotation="270"]{transform:rotate(270deg) translateX(-100%)}
 .textLayer .endOfContent{display:block;position:absolute;inset:100% 0 0;z-index:-1;cursor:default;user-select:none}
 .textLayer.selecting .endOfContent{top:0}
 .organiser{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;background:var(--desk);outline:none}
@@ -477,6 +480,102 @@ body.has-wintitle .bundle{top:36px}
 .bsummary strong{color:var(--ink)}
 .bcreate{height:40px;justify-content:center;font-size:14px}
 @media (max-width:900px){.bundle-body{grid-template-columns:1fr}.bundle-side{border-left:0;border-top:1px solid var(--line)}}
+
+/* v3.0: projects, marks (admitted and disputed facts, highlights, comments) and the Facts and notes panel */
+:root{--adm:#1f9d55;--dis:#d64545;--adm-ink:#17824a;--dis-ink:#c53030}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--adm-ink:#4fd18b;--dis-ink:#ff8a80}}
+:root[data-theme="dark"]{--adm-ink:#4fd18b;--dis-ink:#ff8a80}
+.markLayer{position:absolute;inset:0;z-index:1;pointer-events:none}
+.mk{position:absolute;border-radius:2px}
+.mk-hl{background:var(--hl);opacity:.45;mix-blend-mode:multiply}
+.mk-adm{background:rgba(31,157,85,.10);box-shadow:0 2px 0 var(--adm)}
+.mk-dis{background:rgba(214,69,69,.10);box-shadow:0 2px 0 var(--dis)}
+.mk-adm.r90{box-shadow:-2px 0 0 var(--adm)} .mk-dis.r90{box-shadow:-2px 0 0 var(--dis)}
+.mk-adm.r180{box-shadow:0 -2px 0 var(--adm)} .mk-dis.r180{box-shadow:0 -2px 0 var(--dis)}
+.mk-adm.r270{box-shadow:2px 0 0 var(--adm)} .mk-dis.r270{box-shadow:2px 0 0 var(--dis)}
+.mk.sel{outline:2px solid var(--accent);outline-offset:2px}
+.mk-pin{position:absolute;width:13px;height:13px;margin:-7px 0 0 3px;background:#ffd43b;border:1px solid #c99a00;border-radius:3px 3px 3px 0}
+.markbar{position:fixed;z-index:40;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(16,24,40,.22);padding:4px;display:flex;flex-direction:column;gap:4px;max-width:calc(100vw - 16px)}
+.mb-row{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+.mb{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:var(--ink);font:inherit;font-size:13px;font-weight:550;cursor:pointer;white-space:nowrap}
+.mb:hover{background:var(--hover)}
+.mb[aria-pressed="true"]{background:var(--accent-soft)}
+.mb .dot{width:12px;height:12px;border-radius:50%;background:var(--c);flex:none}
+.mb-adm{color:var(--adm-ink)} .mb-adm .dot{--c:var(--adm)}
+.mb-dis{color:var(--dis-ink)} .mb-dis .dot{--c:var(--dis)}
+.mb-hl{padding:0 7px}
+.mb-sep{width:1px;height:18px;background:var(--line);margin:0 3px}
+.mb .ic{width:16px;height:16px}
+.mb-del{color:var(--danger)}
+.mb-note{padding:2px 4px 4px;display:flex;flex-direction:column;gap:6px;width:360px;max-width:100%}
+.mb-note textarea{font:inherit;font-size:13px;resize:vertical;min-height:58px;border:1px solid var(--line-strong);border-radius:8px;padding:6px 8px;background:var(--bg);color:var(--ink)}
+.mb-note textarea:focus{outline:2px solid var(--accent);outline-offset:0}
+.mb-foot{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mb-foot .btn{height:28px;padding:0 12px}
+.mb-src{font-size:11.5px}
+.app.notes-on{grid-template-columns:var(--rail-w,280px) 6px minmax(0,1fr) 340px}
+.app.collapsed.notes-on{grid-template-columns:0 0 minmax(0,1fr) 340px}
+.notes{display:flex;flex-direction:column;min-height:0;min-width:0;background:var(--rail);border-left:1px solid var(--line)}
+.notes-head{padding:12px 14px 10px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--line)}
+.notes-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.notes-top h2{margin:0;font-size:14px;font-weight:650;letter-spacing:-.01em}
+.ntabs,.nfilter{width:100%}
+.ntabs .btn,.nfilter .btn{flex:1;height:28px;border:0;background:transparent;color:var(--muted);font-size:12.5px;font-family:var(--sans);justify-content:center;padding:0 6px}
+.ntabs .btn[aria-pressed="true"],.nfilter .btn[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.nfilter .btn[data-f="adm"][aria-pressed="true"]{color:var(--adm-ink)}
+.nfilter .btn[data-f="dis"][aria-pressed="true"]{color:var(--dis-ink)}
+#notesScope{font:inherit;font-size:12.5px;padding:5px 8px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);color:var(--ink)}
+.facts-sum{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.fs-row{display:flex;gap:18px;font-size:12.5px;color:var(--muted);align-items:baseline}
+.fs-row b{font-size:20px;font-weight:650;margin-right:5px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.fs-row .a b{color:var(--adm-ink)} .fs-row .d b{color:var(--dis-ink)}
+.fs-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--line)}
+.fs-bar .a{background:var(--adm)} .fs-bar .d{background:var(--dis)}
+.fs-tip{margin:0;font-size:12px;color:var(--muted);line-height:1.45}
+.notes-list{flex:1;overflow:auto;padding:8px 10px 12px;display:flex;flex-direction:column;gap:6px;min-height:0}
+.ngroup{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:10px 4px 2px;overflow-wrap:anywhere}
+.nitem{flex:none;display:flex;flex-direction:column;gap:3px;text-align:left;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--hl,#ffd43b);border-radius:8px;padding:8px 10px;cursor:pointer}
+.nitem.t-adm{border-left-color:var(--adm)} .nitem.t-dis{border-left-color:var(--dis)}
+.nitem:hover{box-shadow:var(--shadow);background:color-mix(in srgb,var(--surface) 92%,var(--ink))}
+.nitem.sel{box-shadow:0 0 0 2px var(--accent)}
+.nmeta{font-size:11px;font-family:var(--mono);color:var(--muted)}
+.t-adm .nmeta{color:var(--adm-ink)} .t-dis .nmeta{color:var(--dis-ink)}
+.nq{font-size:13px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.ncom{font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:4px;margin-top:2px;white-space:pre-wrap;overflow-wrap:anywhere}
+.nempty{color:var(--muted);font-size:13px;line-height:1.55;padding:12px 6px;margin:0}
+.notes-foot{display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--line)}
+.notes-foot .btn{flex:1;justify-content:center;height:32px;font-size:12.5px;padding:0 8px}
+.notes-foot .ic{width:15px;height:15px}
+.projwrap{position:relative}
+.projbtn{width:100%;display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;text-align:left}
+.projbtn:hover{border-color:var(--line-strong)}
+.projbtn .ic{width:17px;height:17px;color:var(--muted);flex:none}
+.projbtn.has-proj{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.projbtn.has-proj .pj-ic{color:var(--accent)}
+.pj-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.pj-label{font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pj-name{font-size:13px;font-weight:550;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.projbtn:not(.has-proj) .pj-name{color:var(--muted);font-weight:400}
+.proj-pop{position:absolute;left:0;top:calc(100% + 6px);width:390px;max-width:calc(100vw - 32px);z-index:16;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 48px rgba(16,24,40,.18);display:flex;flex-direction:column;max-height:min(620px,75vh);overflow:auto;padding:6px}
+.pp-head{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:8px 8px 4px;overflow-wrap:anywhere}
+.pp-item{display:flex;align-items:center;gap:9px;width:100%;background:none;border:0;border-radius:8px;padding:7px 8px;font:inherit;font-size:13.5px;color:var(--ink);text-align:left;cursor:pointer;min-width:0}
+.pp-item:hover{background:var(--hover)}
+.pp-item .ic{width:16px;height:16px;color:var(--muted);flex:none}
+.pp-doc{display:grid;grid-template-columns:minmax(0,1fr) 28px;align-items:center;border-radius:8px}
+.pp-doc:hover{background:var(--hover)}
+.pp-doc .pp-item:hover{background:none}
+.pp-doc .icon{opacity:.6} .pp-doc:hover .icon{opacity:1}
+.pp-main{display:flex;flex-direction:column;min-width:0;gap:1px}
+.pp-name{font-weight:500;overflow-wrap:anywhere;line-height:1.3}
+.pp-meta{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pp-doc.missing .pp-name{color:var(--muted);text-decoration:line-through}
+.pp-sep{height:1px;background:var(--line);margin:6px 4px;flex:none}
+.pp-tip{font-size:11.5px;color:var(--muted);padding:6px 8px 4px;line-height:1.45;margin:0}
+.factpill{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.factpill i{width:7px;height:7px;border-radius:50%;display:inline-block;margin-left:2px}
+.factpill i.a{background:var(--adm)} .factpill i.d{background:var(--dis)}
+.joinlink{color:var(--accent);cursor:pointer;font-size:11px;font-weight:500}
+.joinlink:hover{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -486,9 +585,13 @@ body.has-wintitle .bundle{top:36px}
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Documents">
     <div class="rail-head">
-      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v2.6</button>
+      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.0</button>
         <button class="btn ghost iconbtn collapse" id="collapseBtn" type="button" aria-label="Hide sidebar" title="Hide sidebar (Ctrl+\)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg></button></div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
+      <div class="projwrap desktop-only">
+        <button class="projbtn" id="projBtn" type="button" aria-expanded="false" title="Projects: keep a matter's documents, marks and notes together"><svg class="ic pj-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg><span class="pj-text"><span class="pj-label">Project</span><span class="pj-name" id="projName">No project open</span></span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="proj-pop" id="projPop" hidden role="dialog" aria-label="Projects"></div>
+      </div>
       <div class="rail-title"><h1>Documents</h1><span class="count" id="count">0</span></div>
       <div class="openwrap">
         <button class="btn primary openmain" id="openBtn" type="button" title="Open PDFs (Ctrl+O)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>Open PDFs</button>
@@ -523,6 +626,27 @@ body.has-wintitle .bundle{top:36px}
   </aside>
   <div class="resizer" id="resizer" role="separator" aria-orientation="vertical" aria-label="Resize document panel"></div>
   <div class="panes" id="panes"></div>
+  <aside class="notes" id="notes" hidden aria-label="Facts and notes">
+    <div class="notes-head">
+      <div class="notes-top"><h2>Facts and notes</h2><button class="btn ghost iconbtn" id="notesClose" type="button" aria-label="Close panel" title="Close (Ctrl+Shift+N)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+      <div class="seg ntabs" id="notesTabs" role="group" aria-label="Show">
+        <button class="btn" type="button" data-tab="facts" aria-pressed="true">Facts</button>
+        <button class="btn" type="button" data-tab="hl" aria-pressed="false">Highlights</button>
+      </div>
+      <select id="notesScope" aria-label="Which documents"><option value="all">All open documents</option><option value="doc">Current document only</option></select>
+      <div class="seg nfilter" id="factsFilter" role="group" aria-label="Filter facts">
+        <button class="btn" type="button" data-f="all" aria-pressed="true">All</button>
+        <button class="btn" type="button" data-f="adm" aria-pressed="false">Admitted</button>
+        <button class="btn" type="button" data-f="dis" aria-pressed="false">Disputed</button>
+      </div>
+    </div>
+    <div class="facts-sum" id="factsSum"></div>
+    <div class="notes-list" id="notesList"></div>
+    <div class="notes-foot">
+      <button class="btn" id="notesCopy" type="button" title="Copy this list as a table, ready to paste into Word or Outlook"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy as table</button>
+      <button class="btn desktop-only" id="notesPdf" type="button" title="Save a copy of the current document with your marks on the pages, for printing or sending to counsel"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>Marked-up PDF</button>
+    </div>
+  </aside>
 </div>
 
 <div class="modal-back" id="printModal" hidden>
@@ -608,6 +732,23 @@ body.has-wintitle .bundle{top:36px}
   </div>
 </div>
 <div id="printArea" aria-hidden="true"></div>
+<div class="markbar" id="markBar" hidden role="toolbar" aria-label="Mark the selected text">
+  <div class="mb-row">
+    <button class="mb mb-adm" type="button" data-mk="adm" title="Admitted fact: green underline (A)"><span class="dot"></span>Admitted</button>
+    <button class="mb mb-dis" type="button" data-mk="dis" title="Disputed fact: red underline (D)"><span class="dot"></span>Disputed</button>
+    <span class="mb-sep"></span>
+    <button class="mb mb-hl" type="button" data-mk="hl" data-color="yellow" title="Highlight yellow (H)" aria-label="Highlight yellow"><span class="dot" style="--c:#ffd43b"></span></button>
+    <button class="mb mb-hl" type="button" data-mk="hl" data-color="blue" title="Highlight blue" aria-label="Highlight blue"><span class="dot" style="--c:#74c0fc"></span></button>
+    <button class="mb mb-hl" type="button" data-mk="hl" data-color="pink" title="Highlight pink" aria-label="Highlight pink"><span class="dot" style="--c:#f783ac"></span></button>
+    <button class="mb" type="button" data-mk="comment" title="Add a comment (C)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Comment</button>
+    <button class="mb" type="button" data-mk="copy" title="Copy the text" aria-label="Copy the text"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+    <button class="mb mb-del" type="button" data-mk="delete" title="Delete this mark (Delete)" aria-label="Delete this mark"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+  </div>
+  <div class="mb-note" hidden>
+    <textarea id="mbComment" rows="3" placeholder="Comment, for example: denied in para 4 of the plea" aria-label="Comment"></textarea>
+    <div class="mb-foot"><span class="mb-src mono"></span><button class="btn primary" type="button" data-mk="done" title="Done (Ctrl+Enter)">Done</button></div>
+  </div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <template id="paneTpl">
@@ -636,6 +777,7 @@ body.has-wintitle .bundle{top:36px}
           <button class="btn ghost" type="button" data-act="find" title="Find in document (Ctrl+F)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span class="tlabel">Find</span></button>
           <button class="btn ghost" type="button" data-act="thumbs" aria-pressed="false" title="Show page thumbnails"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg><span class="tlabel">Pages</span></button>
           <button class="btn ghost desktop-only" type="button" data-act="organise" title="Delete, reorder, rotate, extract, insert and split pages"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg><span class="tlabel">Organise</span></button>
+          <button class="btn ghost" type="button" data-act="notes" aria-pressed="false" title="Facts and notes: admitted and disputed facts, highlights and comments (Ctrl+Shift+N)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span class="tlabel">Facts</span></button>
           <span class="tsep" aria-hidden="true"></span>
           <button class="btn ghost desktop-only" type="button" data-act="saveas" title="Save a copy of this document to a folder (Ctrl+S)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span class="tlabel">Save as</span></button>
           <button class="btn ghost" type="button" data-act="print" aria-label="Print document" title="Print (Ctrl+P)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg><span class="tlabel">Print</span></button>
@@ -690,8 +832,9 @@ body.has-wintitle .bundle{top:36px}
       const bytes = await d.pdf.getData();
       const saved = await D.writePdf({ path, data: bytes, mode: "new" });
       try { localStorage.setItem("lastSaveDir", dirOf(saved)); } catch(e){}
-      const wasTemp = !d.path || isTempPath(d.path);
+      const wasTemp = !d.path || isTempPath(d.path), oldPath = d.path, carry = d._marks;
       d.path = saved;
+      if (oldPath) rekeyMarks(d, oldPath); else if (carry && carry.length){ d._marks = null; marksOf(d).push(...carry); marksChanged(d); }
       renderList();
       toast("Saved " + saved.split(/[\\/]/).pop() + " in " + dirOf(saved).split(/[\\/]/).pop() + "." + (wasTemp ? " PDF Reader now works from this copy." : ""));
     } catch(e){ toast("Could not save: " + errText(e)); }
@@ -943,6 +1086,525 @@ body.has-wintitle .bundle{top:36px}
     } finally { $("bCreate").textContent = "Create bundle…"; renderBundle(); }
   }
 
+  /* ---- Marks: admitted facts (green), disputed facts (red), highlights and comments.
+     A mark is kept by page number with its position as a fraction of the page, so it stays in place at any zoom.
+     Marks on documents in a project are saved in the project file; others in PDF Reader's data folder.
+     The PDF itself is never changed. ---- */
+  const HL = { yellow: "#ffd43b", blue: "#74c0fc", pink: "#f783ac" };
+  const TYPE_NAME = { adm: "Admitted", dis: "Disputed", hl: "Highlight" };
+  const notesState = { loose: {}, loaded: false, proj: null, saveT: 0, projT: 0, scope: "all", tab: "facts", filter: "all", open: false };
+  try { const np = JSON.parse(localStorage.getItem("notesPrefs") || "{}"); ["scope", "tab", "filter"].forEach(k => { if (np[k]) notesState[k] = np[k]; }); } catch(e){}
+  let markSeq = Date.now(), selMark = null, barCtx = null, barShownAt = 0;
+  const markUndo = [];
+  const newId = () => (markSeq++).toString(36);
+  const lc = p => String(p || "").toLowerCase();
+  const canJoin = d => !!(d && d.pdf && d.path && !isTempPath(d.path));
+  function projEntry(d){ const P = notesState.proj; return P && d && d.path ? P.docs.find(e => lc(e.abs) === lc(d.path)) : null; }
+  function marksOf(d){
+    if (!d) return [];
+    const e = projEntry(d), P = notesState.proj;
+    if (e) return P.notes[e.id] || (P.notes[e.id] = []);
+    if (d.path){ const k = lc(d.path); return notesState.loose[k] || (notesState.loose[k] = []); }
+    return d._marks || (d._marks = []);
+  }
+  function saveLooseNow(){
+    clearTimeout(notesState.saveT); notesState.saveT = 0;
+    if (!window.pdfReader || !notesState.loaded) return;
+    const out = {}; Object.keys(notesState.loose).forEach(k => { if (notesState.loose[k].length) out[k] = notesState.loose[k]; });
+    window.pdfReader.notesSave(out).catch(e => toast("Could not save your marks: " + errText(e)));
+  }
+  function saveLooseSoon(){ if (!window.pdfReader) return; clearTimeout(notesState.saveT); notesState.saveT = setTimeout(saveLooseNow, notesState.loaded ? 500 : 1500); }
+  function marksChanged(d){
+    if (projEntry(d)) saveProjectSoon(); else if (d.path) saveLooseSoon();
+    repaintDoc(d); notesSoon(); renderList();
+  }
+  function pushUndo(d){ markUndo.push({ d, before: JSON.stringify(marksOf(d)) }); if (markUndo.length > 60) markUndo.shift(); }
+  function undoMark(){
+    const u = markUndo.pop(); if (!u) return false;
+    barCtx = null; $("markBar").hidden = true; selMark = null;
+    const arr = marksOf(u.d); arr.splice(0, arr.length, ...JSON.parse(u.before));
+    marksChanged(u.d); toast("Undone."); return true;
+  }
+  function rekeyMarks(d, oldPath){
+    const k = lc(oldPath); if (!k || k === lc(d.path)) return;
+    const moved = notesState.loose[k]; if (!moved || !moved.length) return;
+    delete notesState.loose[k]; marksOf(d).push(...moved); marksChanged(d);
+  }
+  function repaintDoc(d){ visiblePanes().forEach(p => { if (p.doc === d) p.stage.querySelectorAll(".page").forEach(el => paintMarks(p, el)); }); }
+  function repaintAll(){ visiblePanes().forEach(p => { if (p.doc) p.stage.querySelectorAll(".page").forEach(el => paintMarks(p, el)); }); }
+  function paintMarks(pane, el){
+    const d = pane.doc, n = +el.dataset.n;
+    const list = d ? marksOf(d).filter(m => m.page === n) : [];
+    let layer = el.querySelector(".markLayer");
+    if (!list.length){ if (layer) layer.remove(); return; }
+    if (!layer){
+      layer = document.createElement("div"); layer.className = "markLayer"; layer.setAttribute("aria-hidden", "true");
+      const tl = el.querySelector(".textLayer"); if (tl) el.insertBefore(layer, tl); else el.appendChild(layer);
+    }
+    layer.textContent = "";
+    const pct = v => (v * 100).toFixed(3) + "%";
+    list.forEach(m => {
+      const on = !!selMark && selMark.id === m.id;
+      m.rects.forEach(r => {
+        const s = document.createElement("div");
+        s.className = "mk mk-" + m.type + (m.rot ? " r" + m.rot : "") + (on ? " sel" : "");
+        if (m.type === "hl") s.style.setProperty("--hl", HL[m.color] || HL.yellow);
+        s.style.left = pct(r[0]); s.style.top = pct(r[1]); s.style.width = pct(r[2]); s.style.height = pct(r[3]);
+        layer.appendChild(s);
+      });
+      if (m.comment && m.rects.length){
+        const r = m.rects[0], pin = document.createElement("div"); pin.className = "mk-pin";
+        pin.style.left = pct(Math.min(0.985, r[0] + r[2])); pin.style.top = pct(r[1]);
+        layer.appendChild(pin);
+      }
+    });
+  }
+  /* selected text to one mark per page: the selection's boxes, joined line by line */
+  function mergeLines(rs){
+    rs.sort((a, b) => a.t - b.t || a.l - b.l);
+    const out = [];
+    rs.forEach(q => {
+      const h = q.b - q.t, mid = (q.t + q.b) / 2;
+      const L = out.find(L => Math.abs(L.mid - mid) < Math.max(L.h, h) * 0.5 && q.l <= L.r + Math.max(h, L.h) * 2.5 && q.r >= L.l - Math.max(h, L.h) * 2.5);
+      if (L){ L.l = Math.min(L.l, q.l); L.r = Math.max(L.r, q.r); L.t = Math.min(L.t, q.t); L.b = Math.max(L.b, q.b); L.mid = (L.t + L.b) / 2; L.h = L.b - L.t; }
+      else out.push(Object.assign({}, q, { mid, h }));
+    });
+    return out;
+  }
+  function selectionParts(pane){
+    const s = window.getSelection(); if (!s || s.isCollapsed || !s.rangeCount) return [];
+    const range = s.getRangeAt(0), parts = [];
+    pane.stage.querySelectorAll(".page").forEach(el => {
+      const tl = el.querySelector(".textLayer"); if (!tl || !range.intersectsNode(tl)) return;
+      const r = document.createRange();
+      if (tl.contains(range.startContainer)) r.setStart(range.startContainer, range.startOffset); else r.setStart(tl, 0);
+      if (tl.contains(range.endContainer)) r.setEnd(range.endContainer, range.endOffset); else r.setEnd(tl, tl.childNodes.length);
+      const frag = r.cloneContents(); frag.querySelectorAll("br").forEach(x => x.replaceWith(" "));
+      const text = frag.textContent.replace(/\s+/g, " ").trim(); if (!text) return;
+      const pr = el.getBoundingClientRect(); if (!pr.width || !pr.height) return;
+      /* on pages turned a quarter, lines run up and down: work in turned coordinates, then turn back */
+      const turned = /^(90|270)$/.test(tl.getAttribute("data-main-rotation") || "");
+      const W = turned ? pr.height : pr.width, H = turned ? pr.width : pr.height;
+      const raw = [...r.getClientRects()]
+        .map(c => { const q = { l: Math.max(0, c.left - pr.left), t: Math.max(0, c.top - pr.top), r: Math.min(pr.width, c.right - pr.left), b: Math.min(pr.height, c.bottom - pr.top) };
+          return turned ? { l: q.t, r: q.b, t: q.l, b: q.r } : q; })
+        .filter(q => q.r - q.l > 0.5 && q.b - q.t > 2 && q.b - q.t < H * 0.08 && q.r - q.l < W * 0.98);
+      const rects = mergeLines(raw).map(q => (turned ? [q.t / pr.width, q.l / pr.height, (q.b - q.t) / pr.width, (q.r - q.l) / pr.height]
+        : [q.l / pr.width, q.t / pr.height, (q.r - q.l) / pr.width, (q.b - q.t) / pr.height]).map(v => +v.toFixed(5)));
+      const rot = +(tl.getAttribute("data-main-rotation") || 0);
+      if (rects.length) parts.push({ page: +el.dataset.n, rects, text, rot });
+    });
+    return parts;
+  }
+  const fam = t => t === "hl" ? "hl" : "fact";
+  const area = r => r[2] * r[3];
+  const inter = (p, q) => Math.max(0, Math.min(p[0] + p[2], q[0] + q[2]) - Math.max(p[0], q[0])) * Math.max(0, Math.min(p[1] + p[3], q[1] + q[3]) - Math.max(p[1], q[1]));
+  /* marking the same words again replaces the old mark (for example, Disputed to Admitted) */
+  const covered = (old, m) => old.page === m.page && old.rects.every(p => m.rects.reduce((a, q) => a + inter(p, q), 0) > area(p) * 0.6);
+  function addMarks(pane, type, color){
+    const d = pane.doc, parts = selectionParts(pane); if (!d || !parts.length) return null;
+    pushUndo(d);
+    const arr = marksOf(d), made = [], group = parts.length > 1 ? newId() : undefined;
+    parts.forEach(p => {
+      const m = { id: newId(), type, page: p.page, rects: p.rects, text: p.text, created: new Date().toISOString() };
+      if (type === "hl") m.color = color || "yellow";
+      if (p.rot) m.rot = p.rot;
+      if (group) m.group = group;
+      for (let i = arr.length - 1; i >= 0; i--) if (fam(arr[i].type) === fam(type) && covered(arr[i], m)) arr.splice(i, 1);
+      arr.push(m); made.push(m);
+    });
+    window.getSelection().removeAllRanges();
+    marksChanged(d);
+    return made[0];
+  }
+  function hitMark(pane, x, y){
+    if (!pane.doc) return null;
+    const el = document.elementsFromPoint(x, y).find(n => n.classList && n.classList.contains("page") && pane.stage.contains(n));
+    if (!el) return null;
+    const r = el.getBoundingClientRect(), fx = (x - r.left) / r.width, fy = (y - r.top) / r.height, n = +el.dataset.n;
+    const px = 3 / r.width, py = 3 / r.height;
+    const list = marksOf(pane.doc).filter(m => m.page === n);
+    for (let i = list.length - 1; i >= 0; i--){
+      const m = list[i];
+      if (m.rects.some(q => fx >= q[0] - px && fx <= q[0] + q[2] + px && fy >= q[1] - py && fy <= q[1] + q[3] + py * 2)) return m;
+      if (m.comment && m.rects[0]){ const q = m.rects[0], ax = q[0] + q[2]; if (fx >= ax - px && fx <= ax + 20 / r.width && fy >= q[1] - 12 / r.height && fy <= q[1] + 10 / r.height) return m; }
+    }
+    return null;
+  }
+  /* ---- the small bar that appears over selected text or a clicked mark ---- */
+  function placeBar(x, y){
+    const b = $("markBar"); b.hidden = false; barShownAt = Date.now();
+    const w = b.offsetWidth, h = b.offsetHeight;
+    let top = y + 10; if (top + h > window.innerHeight - 8) top = Math.max(8, y - h - 34);
+    b.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, x - w / 2)) + "px"; b.style.top = top + "px";
+  }
+  function setBarMode(){
+    const b = $("markBar"), edit = !!barCtx && barCtx.mode === "edit", m = edit ? barCtx.mark : null;
+    b.querySelector('[data-mk="delete"]').hidden = !edit;
+    b.querySelectorAll("[data-mk]").forEach(x => {
+      const k = x.dataset.mk;
+      if (k === "adm" || k === "dis" || k === "hl") x.setAttribute("aria-pressed", String(!!m && m.type === k && (k !== "hl" || (m.color || "yellow") === x.dataset.color)));
+    });
+    b.querySelector(".mb-note").hidden = !edit;
+    if (edit){ $("mbComment").value = m.comment || ""; b.querySelector(".mb-src").textContent = "p " + m.page + " · " + TYPE_NAME[m.type]; }
+  }
+  function showMarkBar(pane){
+    const s = window.getSelection(); if (!s.rangeCount) return;
+    const rs = [...s.getRangeAt(0).getClientRects()].filter(r => r.width > 0 && r.height > 0);
+    const last = rs[rs.length - 1] || s.getRangeAt(0).getBoundingClientRect();
+    if (selMark){ const d = selMark.d; selMark = null; repaintDoc(d); }
+    barCtx = { pane, mode: "new" }; setBarMode(); placeBar(last.left + last.width / 2, last.bottom);
+  }
+  function commitComment(){
+    if (!barCtx || barCtx.mode !== "edit") return;
+    const v = $("mbComment").value.trim(), m = barCtx.mark;
+    if (v === (m.comment || "")) return;
+    pushUndo(barCtx.d); if (v) m.comment = v; else delete m.comment;
+    marksChanged(barCtx.d);
+  }
+  function hideMarkBar(){
+    commitComment();
+    $("markBar").hidden = true; barCtx = null;
+    if (selMark){ const d = selMark.d; selMark = null; repaintDoc(d); notesSoon(); }
+  }
+  function editMark(pane, d, m, x, y){
+    commitComment();
+    const prev = selMark && selMark.d;
+    barCtx = { pane, mode: "edit", d, mark: m }; selMark = { d, id: m.id };
+    if (prev && prev !== d) repaintDoc(prev);
+    repaintDoc(d); setBarMode();
+    if (x === undefined){
+      const els = pane.stage.querySelectorAll(".mk.sel"), el = els[els.length - 1];
+      if (el){ const r = el.getBoundingClientRect(); x = r.left + r.width / 2; y = r.bottom; }
+      else { const sr = pane.stage.getBoundingClientRect(); x = sr.left + sr.width / 2; y = sr.top + sr.height / 3; }
+    }
+    placeBar(x, y); notesSoon();
+  }
+  function copyRich(html, text){
+    if (window.pdfReader) return window.pdfReader.copyRich(html, text);
+    try { return navigator.clipboard.write([new ClipboardItem({ "text/html": new Blob([html], { type: "text/html" }), "text/plain": new Blob([text], { type: "text/plain" }) })]); }
+    catch(e){ return navigator.clipboard.writeText(text); }
+  }
+  const escHtml = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  function copyText(t){ if (t) copyRich(escHtml(t), t).then(() => toast("Copied.")).catch(() => {}); }
+  function barAct(k, color){
+    if (!barCtx) return;
+    const pane = barCtx.pane;
+    if (barCtx.mode === "new"){
+      if (k === "copy"){ copyText(String(window.getSelection()).trim()); hideMarkBar(); return; }
+      if (k === "delete" || k === "done") return;
+      const m = addMarks(pane, k === "comment" ? "hl" : k, color);
+      if (!m){ hideMarkBar(); return; }
+      if (k === "comment"){ editMark(pane, pane.doc, m); setTimeout(() => $("mbComment").focus(), 0); }
+      else { $("markBar").hidden = true; barCtx = null; }
+      return;
+    }
+    const d = barCtx.d, mark = barCtx.mark;
+    if (k === "delete"){
+      pushUndo(d); const arr = marksOf(d), i = arr.indexOf(mark); if (i >= 0) arr.splice(i, 1);
+      barCtx = null; $("markBar").hidden = true; selMark = null; marksChanged(d); toast("Mark deleted. Press Ctrl+Z to undo."); return;
+    }
+    if (k === "copy"){ copyText(mark.text); return; }
+    if (k === "comment"){ $("mbComment").focus(); return; }
+    if (k === "done"){ hideMarkBar(); return; }
+    if (k === "adm" || k === "dis" || k === "hl"){
+      if (mark.type === k && (k !== "hl" || (mark.color || "yellow") === (color || "yellow"))) return;
+      pushUndo(d); mark.type = k; if (k === "hl") mark.color = color || "yellow"; else delete mark.color;
+      marksChanged(d); setBarMode();
+    }
+  }
+  async function revealMark(d, m){
+    let pane = visiblePanes().find(p => p.doc === d);
+    if (!pane){ pane = active; await pane.show(d); }
+    if (pane.doc !== d) return;
+    const el = pane.stage.querySelector('.page[data-n="' + m.page + '"]'); if (!el) return;
+    const r = m.rects[0] || [0, 0, 0, 0];
+    pane.stage.scrollTop = el.offsetTop + r[1] * el.offsetHeight - pane.stage.clientHeight / 3;
+    setActive(pane);
+    await new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
+    editMark(pane, d, m);
+  }
+
+  /* ---- Facts and notes panel ---- */
+  let notesT = 0;
+  function notesSoon(){ if (!notesState.open) return; clearTimeout(notesT); notesT = setTimeout(renderNotes, 40); }
+  function saveNotesPrefs(){ try { localStorage.setItem("notesPrefs", JSON.stringify({ scope: notesState.scope, tab: notesState.tab, filter: notesState.filter })); } catch(e){} }
+  function scopeDocs(){ return notesState.scope === "doc" ? (active.doc && active.doc.pdf ? [active.doc] : []) : docs.filter(d => d.pdf); }
+  const byPos = (a, b) => a.page - b.page || ((a.rects[0] || [0, 0])[1] - (b.rects[0] || [0, 0])[1]) || ((a.rects[0] || [0])[0] - (b.rects[0] || [0])[0]);
+  function collectMarks(){
+    const facts = notesState.tab === "facts", f = notesState.filter;
+    return scopeDocs().map(d => ({ d, marks: marksOf(d).filter(m => facts ? (m.type === "adm" || m.type === "dis") && (f === "all" || m.type === f) : m.type === "hl").sort(byPos) }));
+  }
+  function toggleNotes(on){
+    notesState.open = on === undefined ? !notesState.open : !!on;
+    $("notes").hidden = !notesState.open; $("app").classList.toggle("notes-on", notesState.open);
+    document.querySelectorAll('[data-act="notes"]').forEach(b => b.setAttribute("aria-pressed", String(notesState.open)));
+    try { localStorage.setItem("notesOpen", notesState.open ? "1" : "0"); } catch(e){}
+    if (notesState.open) renderNotes();
+    setTimeout(() => visiblePanes().forEach(p => { if (p.fit && p.doc) p.layout(true); }), 230);
+  }
+  function renderNotes(){
+    if (!notesState.open) return;
+    const facts = notesState.tab === "facts", P = notesState.proj;
+    $("notesScope").querySelector('[value="all"]').textContent = P ? "All open documents in " + P.name : "All open documents";
+    $("notesScope").value = notesState.scope;
+    $("notesTabs").querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.tab === notesState.tab)));
+    $("factsFilter").hidden = !facts;
+    $("factsFilter").querySelectorAll("[data-f]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.f === notesState.filter)));
+    let adm = 0, dis = 0, hl = 0, com = 0;
+    scopeDocs().forEach(d => marksOf(d).forEach(m => { if (m.type === "adm") adm++; else if (m.type === "dis") dis++; else { hl++; if (m.comment) com++; } }));
+    const sum = $("factsSum");
+    if (facts){
+      sum.innerHTML = '<div class="fs-row"><span class="a"><b>' + adm + '</b>admitted</span><span class="d"><b>' + dis + '</b>disputed</span></div>' +
+        '<div class="fs-bar" aria-hidden="true"><span class="a" style="flex:' + adm + '"></span><span class="d" style="flex:' + dis + '"></span></div>' +
+        '<p class="fs-tip">' + (adm + dis ? "Admitted facts need no proof." + (dis ? " Focus on the " + dis + " disputed " + (dis === 1 ? "fact" : "facts") + "." : "") : "Green: admitted, needs no proof. Red: disputed, must be proved.") + '</p>';
+    } else {
+      sum.innerHTML = '<div class="fs-row"><span><b>' + hl + '</b>' + (hl === 1 ? "highlight" : "highlights") + '</span><span><b>' + com + '</b>' + (com === 1 ? "comment" : "comments") + '</span></div>';
+    }
+    const box = $("notesList"), keep = box.scrollTop; box.textContent = "";
+    const groups = collectMarks().filter(g => g.marks.length), multi = scopeDocs().length > 1;
+    groups.forEach(g => {
+      if (multi){ const h = document.createElement("div"); h.className = "ngroup"; h.textContent = g.d.name; box.appendChild(h); }
+      g.marks.forEach(m => {
+        const b = document.createElement("button"); b.type = "button";
+        b.className = "nitem t-" + m.type + (selMark && selMark.id === m.id ? " sel" : "");
+        if (m.type === "hl") b.style.setProperty("--hl", HL[m.color] || HL.yellow);
+        const meta = document.createElement("span"); meta.className = "nmeta"; meta.textContent = "p " + m.page + (m.type !== "hl" ? " · " + TYPE_NAME[m.type] : "");
+        const q = document.createElement("span"); q.className = "nq"; q.textContent = m.text;
+        b.append(meta, q);
+        if (m.comment){ const c = document.createElement("span"); c.className = "ncom"; c.textContent = m.comment; b.appendChild(c); }
+        b.title = "Show on the page";
+        b.addEventListener("click", () => revealMark(g.d, m));
+        box.appendChild(b);
+      });
+    });
+    if (!groups.length){
+      const p = document.createElement("p"); p.className = "nempty";
+      p.textContent = !scopeDocs().length ? "Open a document to start."
+        : facts ? (notesState.filter === "all" ? "Select text in a pleading, then choose Admitted or Disputed (or press A or D). Each fact appears here in page order, and you can copy the list as a table."
+          : "No " + TYPE_NAME[notesState.filter].toLowerCase() + " facts yet.")
+        : "Select text, then choose a highlight colour or Comment (or press H or C).";
+      box.appendChild(p);
+    }
+    box.scrollTop = keep;
+  }
+  function copyTable(){
+    const facts = notesState.tab === "facts", groups = collectMarks().filter(g => g.marks.length);
+    if (!groups.length){ toast("There is nothing to copy yet."); return; }
+    const multi = groups.length > 1;
+    const head = ["No."].concat(multi ? ["Document"] : [], ["Page", facts ? "Fact" : "Passage"], facts ? ["Status"] : [], ["Comment"]);
+    const rows = []; let i = 0;
+    groups.forEach(g => g.marks.forEach(m => rows.push([String(++i)].concat(multi ? [g.d.name] : [], [String(m.page), m.text], facts ? [TYPE_NAME[m.type]] : [], [m.comment || ""]))));
+    const title = facts ? "Admitted and disputed facts" : "Highlights and comments", sub = multi ? (notesState.proj ? notesState.proj.name : "") : groups[0].d.name;
+    const base = "border:1px solid #9aa0a6;padding:4px 6px;vertical-align:top;font-family:Arial,sans-serif;font-size:10pt;";
+    const td = (c, st) => '<td style="' + base + (st || "") + '">' + escHtml(c).replace(/\n/g, "<br>") + "</td>";
+    let html = '<p style="font-family:Arial,sans-serif;font-size:11pt"><b>' + escHtml(title) + "</b>" + (sub ? "<br>" + escHtml(sub) : "") + "</p>" +
+      '<table style="border-collapse:collapse;width:100%"><tr>' + head.map(h => '<th style="' + base + 'background:#eceff1;text-align:left">' + escHtml(h) + "</th>").join("") + "</tr>";
+    rows.forEach(r => { html += "<tr>" + r.map((c, ci) => td(c, head[ci] === "Status" ? (c === "Admitted" ? "color:#17824a;font-weight:bold;" : "color:#c53030;font-weight:bold;") : "")).join("") + "</tr>"; });
+    html += "</table>";
+    const text = [title].concat(sub ? [sub] : [], [head.join("\t")], rows.map(r => r.map(c => c.replace(/\s+/g, " ")).join("\t"))).join("\n");
+    copyRich(html, text).then(() => toast("Copied " + rows.length + (rows.length === 1 ? " row" : " rows") + ". Paste it into Word or Outlook.")).catch(e => toast("Could not copy: " + errText(e)));
+  }
+  async function saveMarkedUp(){
+    const D = window.pdfReader, d = active.doc;
+    if (!D || !d || !d.pdf){ toast("Open the document first."); return; }
+    const list = marksOf(d); if (!list.length){ toast(d.name + " has no marks yet."); return; }
+    let last = ""; try { last = localStorage.getItem("lastSaveDir") || ""; } catch(e){}
+    const dir = d.path && !isTempPath(d.path) ? dirOf(d.path) : last;
+    const path = await D.saveDialog({ title: "Save a marked-up copy", defaultPath: joinPath(dir, cleanName(d.name) + " (marked up).pdf") });
+    if (!path) return;
+    toast("Saving the marked-up copy…", true);
+    try {
+      const { PDFDocument, rgb, PDFHexString } = PDFLib;
+      const out = await PDFDocument.load(await d.pdf.getData(), { ignoreEncryption: true });
+      const COL = { adm: rgb(0.12, 0.62, 0.33), dis: rgb(0.84, 0.27, 0.27) };
+      const hex = h => rgb(parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255);
+      const multiply = PDFLib.BlendMode ? PDFLib.BlendMode.Multiply : undefined;
+      for (const m of list){
+        if (m.page < 1 || m.page > out.getPageCount()) continue;
+        const pg = out.getPage(m.page - 1), vp = (await d.pdf.getPage(m.page)).getViewport({ scale: 1 });
+        const pt = (fx, fy) => { const q = vp.convertToPdfPoint(fx * vp.width, fy * vp.height); return { x: q[0], y: q[1] }; };
+        for (const r of m.rects){
+          const a = pt(r[0], r[1]), b = pt(r[0] + r[2], r[1] + r[3]);
+          const box = { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), width: Math.abs(a.x - b.x), height: Math.abs(a.y - b.y) };
+          if (m.type === "hl") pg.drawRectangle(Object.assign({}, box, { color: hex(HL[m.color] || HL.yellow), opacity: 0.45, blendMode: multiply }));
+          else {
+            pg.drawRectangle(Object.assign({}, box, { color: COL[m.type], opacity: 0.1 }));
+            const L = r[0], T = r[1], R = r[0] + r[2], B = r[1] + r[3];
+            const ends = m.rot === 90 ? [[L, T], [L, B]] : m.rot === 180 ? [[L, T], [R, T]] : m.rot === 270 ? [[R, T], [R, B]] : [[L, B], [R, B]];
+            pg.drawLine({ start: pt(ends[0][0], ends[0][1]), end: pt(ends[1][0], ends[1][1]), thickness: 1.4, color: COL[m.type] });
+          }
+        }
+        if (m.comment && m.rects[0]){
+          const r = m.rects[0], p = pt(Math.min(0.97, r[0] + r[2]), r[1]), ctx = out.context;
+          const an = ctx.register(ctx.obj({ Type: "Annot", Subtype: "Text", Rect: [p.x, p.y - 18, p.x + 18, p.y], Contents: PDFHexString.fromText(m.comment),
+            T: PDFHexString.fromText("PDF Reader"), Name: "Comment", C: [1, 0.83, 0.23], F: 4 }));
+          pg.node.addAnnot(an);
+        }
+      }
+      const saved = await D.writePdf({ path, data: await out.save(), mode: "new" });
+      try { localStorage.setItem("lastSaveDir", dirOf(saved)); } catch(e){}
+      toast("Saved " + saved.split(/[\\/]/).pop() + ". Print it or send it with the marks on the pages.");
+    } catch(e){ toast("Could not save the marked-up copy: " + errText(e)); }
+  }
+
+  /* ---- Projects: a project file (.pdfrproj) next to the documents, for example in the matter folder.
+     It lists the documents (found again even if the matter folder moves) and keeps the marks and notes on them. ---- */
+  function saveProjectSoon(){ if (!notesState.proj || !window.pdfReader) return; clearTimeout(notesState.projT); notesState.projT = setTimeout(saveProjectNow, 600); }
+  async function saveProjectNow(){
+    const P = notesState.proj; clearTimeout(notesState.projT); notesState.projT = 0;
+    if (!P || !window.pdfReader) return;
+    P.view = { panes: paneCount, docs: visiblePanes().map(p => (p.doc && p.doc.path) || "") };
+    const data = { app: "PDF Reader", name: P.name, created: P.created, docs: P.docs.map(e => ({ id: e.id, name: e.name, abs: e.abs, rel: e.rel })), notes: P.notes, view: P.view };
+    try { await window.pdfReader.projectSave(P.path, data); if (P.err) toast("Project saved."); P.err = false; }
+    catch(e){ if (!P.err) toast("Could not save the project: " + errText(e)); P.err = true; }
+  }
+  function addToProject(list){
+    const P = notesState.proj; if (!P) return 0;
+    let n = 0;
+    list.forEach(d => {
+      if (!canJoin(d) || projEntry(d)) return;
+      const k = lc(d.path), loose = notesState.loose[k] || [];
+      const e = { id: newId(), name: d.name, abs: d.path };
+      P.docs.push(e); P.notes[e.id] = loose.slice(); delete notesState.loose[k]; n++;
+    });
+    if (n){ saveLooseSoon(); saveProjectSoon(); renderList(); notesSoon(); renderProjBar(); }
+    return n;
+  }
+  function removeFromProject(e){
+    const P = notesState.proj; if (!P) return;
+    const marks = P.notes[e.id] || [];
+    if (marks.length && e.abs){ const k = lc(e.abs); notesState.loose[k] = (notesState.loose[k] || []).concat(marks); saveLooseSoon(); }
+    delete P.notes[e.id]; const i = P.docs.indexOf(e); if (i >= 0) P.docs.splice(i, 1);
+    saveProjectSoon(); renderList(); notesSoon(); renderProjBar(); repaintAll();
+  }
+  async function newProject(){
+    const D = window.pdfReader; if (!D) return;
+    if (notesState.proj) await closeProject();
+    let last = ""; try { last = localStorage.getItem("lastSaveDir") || ""; } catch(e){}
+    const from = (active.doc && canJoin(active.doc) && active.doc) || docs.find(canJoin);
+    const base = from ? dirOf(from.path) : last;
+    const suggest = base ? cleanName(base.split(/[\\/]/).pop()) : "New project";
+    const p = await D.projectNewDialog({ defaultPath: joinPath(base, suggest + ".pdfrproj") });
+    if (!p) return;
+    const name = p.split(/[\\/]/).pop().replace(/\.pdfrproj$/i, "");
+    notesState.proj = { path: p, name, created: new Date().toISOString(), docs: [], notes: {} };
+    const skipped = docs.filter(d => d.pdf && !canJoin(d)).length;
+    const n = addToProject(docs);
+    await saveProjectNow(); renderProjBar(); renderList(); notesSoon(); repaintAll();
+    toast("Created " + name + (n ? " with " + n + (n === 1 ? " document" : " documents") : "") + ". Your marks on its documents are saved in the project file." +
+      (skipped ? " Documents opened from email need Save as before they can join." : ""));
+  }
+  async function openProject(res){
+    if (!res || !res.project) return;
+    if (notesState.proj && lc(notesState.proj.path) === lc(res.path)){ toast(notesState.proj.name + " is already open."); return; }
+    if (notesState.proj) await closeProject();
+    const raw = res.project;
+    const P = notesState.proj = { path: res.path, name: raw.name || res.path.split(/[\\/]/).pop().replace(/\.pdfrproj$/i, ""), created: raw.created || new Date().toISOString(),
+      docs: raw.docs.map(e => ({ id: e.id || newId(), name: e.name || String(e.abs || "").split(/[\\/]/).pop(), abs: e.abs, rel: e.rel, missing: !!e.missing })), notes: raw.notes || {}, view: raw.view };
+    /* marks made on these documents outside the project join the project */
+    let merged = false;
+    P.docs.forEach(e => { const k = lc(e.abs), l = notesState.loose[k]; if (l && l.length){ P.notes[e.id] = (P.notes[e.id] || []).concat(l); delete notesState.loose[k]; merged = true; } });
+    if (merged){ saveLooseSoon(); saveProjectSoon(); }
+    renderProjBar(); renderList(); repaintAll();
+    const want = P.docs.filter(e => !e.missing).map(e => e.abs);
+    const got = want.length ? await window.pdfReader.readFiles(want) : [];
+    const added = (await Promise.all(got.map(f => addDoc(f.name, f.data, false, f.path)))).filter(Boolean);
+    const v = P.view, find = p => p && added.find(d => d.path && lc(d.path) === lc(p));
+    if (v && v.panes && v.docs && v.docs.some(find)){
+      setPaneCount(v.panes); visiblePanes().forEach(p => p.clear());
+      for (let i = 0; i < visiblePanes().length; i++){ const d = find(v.docs[i]) || added.find(x => !visiblePanes().some(q => q.doc === x)); if (d) await panes[i].show(d); }
+    } else showAdded(added);
+    const miss = P.docs.filter(e => e.missing);
+    toast("Opened " + P.name + "." + (miss.length ? " Not found: " + miss.map(e => e.name).join(", ") + "." : ""));
+    renderProjBar(); renderList(); notesSoon(); repaintAll();
+  }
+  async function closeProject(){
+    const P = notesState.proj; if (!P) return;
+    hideMarkBar();
+    await saveProjectNow();
+    const mine = docs.filter(d => projEntry(d));
+    notesState.proj = null;
+    mine.forEach(d => removeDoc(d));
+    renderProjBar(); renderList(); notesSoon(); repaintAll();
+  }
+  function renderProjBar(){
+    const P = notesState.proj;
+    $("projBtn").classList.toggle("has-proj", !!P);
+    $("projName").textContent = P ? P.name : "No project open";
+    $("projBtn").title = P ? P.path : "Projects: keep a matter's documents, marks and notes together";
+    if (!$("projPop").hidden) renderProjPop();
+  }
+  function closeProjPop(){ $("projPop").hidden = true; $("projBtn").setAttribute("aria-expanded", "false"); }
+  async function openProjFrom(fn){
+    try { await openProject(await fn()); } catch(e){ toast("Could not open the project: " + errText(e)); }
+  }
+  async function renderProjPop(){
+    const pop = $("projPop"), P = notesState.proj, D = window.pdfReader; if (!D) return;
+    let recents = []; try { recents = await D.projectRecent(); } catch(e){}
+    pop.textContent = "";
+    const ICS = { plus: '<path d="M5 12h14"/><path d="M12 5v14"/>', open: '<path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>',
+      folder: '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>', x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+      doc: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>' };
+    const svg = k => '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + ICS[k] + "</svg>";
+    const el = (cls, txt) => { const x = document.createElement("div"); x.className = cls; if (txt) x.textContent = txt; return x; };
+    const item = (ic, label, fn, title) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "pp-item"; b.innerHTML = svg(ic);
+      const s = document.createElement("span"); s.textContent = label; b.appendChild(s); if (title) b.title = title;
+      b.addEventListener("click", fn); pop.appendChild(b); return b;
+    };
+    if (P){
+      pop.appendChild(el("pp-head", P.name));
+      if (!P.docs.length) pop.appendChild(el("pp-tip", "No documents yet. Open PDFs, then choose Add to project."));
+      P.docs.forEach(e => {
+        const d = docs.find(x => x.path && lc(x.path) === lc(e.abs));
+        const row = el("pp-doc" + (e.missing && !d ? " missing" : ""));
+        const b = document.createElement("button"); b.type = "button"; b.className = "pp-item"; b.title = e.abs || ""; b.innerHTML = svg("doc");
+        const main = el("pp-main"), nm = el("pp-name", d ? d.name : e.name);
+        const ms = P.notes[e.id] || []; let a = 0, x = 0, h = 0; ms.forEach(m => { if (m.type === "adm") a++; else if (m.type === "dis") x++; else h++; });
+        const bits = []; if (a) bits.push(a + " admitted"); if (x) bits.push(x + " disputed"); if (h) bits.push(h + (h === 1 ? " highlight" : " highlights"));
+        const meta = el("pp-meta", (d ? "Open" : e.missing ? "Not found" : "Closed, click to open") + (bits.length ? " · " + bits.join(", ") : ""));
+        main.append(nm, meta); b.appendChild(main);
+        b.addEventListener("click", async () => {
+          if (d){ closeProjPop(); active.show(d); return; }
+          if (e.missing){ toast(e.name + " was not found. It may have been moved or renamed."); return; }
+          closeProjPop(); const l = await D.readFiles([e.abs]); if (l.length) openNative(l); else toast(e.name + " could not be opened.");
+        });
+        const rm = document.createElement("button"); rm.type = "button"; rm.className = "btn ghost iconbtn icon"; rm.innerHTML = svg("x");
+        rm.title = "Remove from project"; rm.setAttribute("aria-label", "Remove " + e.name + " from the project");
+        rm.addEventListener("click", async ev => {
+          ev.stopPropagation();
+          if (ms.length && !(await askConfirm("Remove from the project?", e.name + " is not deleted. Its marks leave the project and stay with the document on this computer.", "Remove"))) return;
+          removeFromProject(e); renderProjPop();
+        });
+        row.append(b, rm); pop.appendChild(row);
+      });
+      const extra = docs.filter(d => canJoin(d) && !projEntry(d));
+      if (extra.length) item("plus", "Add open documents to the project (" + extra.length + ")", () => { const n = addToProject(extra); toast(n + (n === 1 ? " document" : " documents") + " added to " + P.name + "."); renderProjPop(); });
+      item("folder", "Show project file in folder", () => { D.projectShow(P.path); closeProjPop(); });
+      item("x", "Close project", () => { closeProjPop(); closeProject(); }, "Saves everything and closes the project's documents");
+      pop.appendChild(el("pp-sep"));
+    }
+    item("plus", "New project…", () => { closeProjPop(); newProject(); }, "Create a project file, for example in the matter folder, with the documents now open");
+    item("open", "Open project…", () => { closeProjPop(); openProjFrom(() => D.projectOpenDialog()); });
+    const rec = recents.filter(r => !P || lc(r.path) !== lc(P.path));
+    if (rec.length){
+      pop.appendChild(el("pp-sep")); pop.appendChild(el("pp-head", "Recent projects"));
+      rec.forEach(r => {
+        const row = el("pp-doc" + (r.exists ? "" : " missing"));
+        const b = document.createElement("button"); b.type = "button"; b.className = "pp-item"; b.title = r.path; b.innerHTML = svg("folder");
+        const main = el("pp-main"); main.append(el("pp-name", r.name), el("pp-meta", (r.exists ? whenText(r.last) : "Not found") + " · " + dirOf(r.path).split(/[\\/]/).pop()));
+        b.appendChild(main);
+        b.addEventListener("click", () => { if (!r.exists){ toast(r.name + " has been moved, renamed or deleted."); return; } closeProjPop(); openProjFrom(() => D.projectOpen(r.path)); });
+        const rm = document.createElement("button"); rm.type = "button"; rm.className = "btn ghost iconbtn icon"; rm.innerHTML = svg("x");
+        rm.title = "Remove from this list"; rm.setAttribute("aria-label", "Remove " + r.name + " from the recent list");
+        rm.addEventListener("click", async ev => { ev.stopPropagation(); await D.projectRecentRemove(r.path); renderProjPop(); });
+        row.append(b, rm); pop.appendChild(row);
+      });
+    }
+    pop.appendChild(el("pp-tip", "A project file sits with your documents, for example in the matter folder, and keeps your marks and notes. Your PDFs are never changed."));
+  }
+
   /* ---- Recent documents ---- */
   let recentCache = [];
   function whenText(t){
@@ -1031,7 +1693,7 @@ body.has-wintitle .bundle{top:36px}
         const f = ({ prev:()=>this.goTo(this.page-1), next:()=>this.goTo(this.page+1), in:()=>this.zoom(1.2), out:()=>this.zoom(1/1.2),
            fit:()=>{ this.fit = true; this.layout(true); }, print:()=>openPrint(this), toggle:()=>toggleRail(),
            find:()=>this.openFind(), findnext:()=>this.stepMatch(1), findprev:()=>this.stepMatch(-1), findclose:()=>this.closeFind(),
-           thumbs:()=>this.toggleThumbs(), organise:()=>this.openOrganise(), saveas:()=>saveDocAs(this) })[a.dataset.act];
+           thumbs:()=>this.toggleThumbs(), organise:()=>this.openOrganise(), saveas:()=>saveDocAs(this), notes:()=>toggleNotes() })[a.dataset.act];
         if (f) f();
       };
       this.el.querySelector(".toolbar").addEventListener("click", onAct);
@@ -1114,7 +1776,7 @@ body.has-wintitle .bundle{top:36px}
       }
       this.savePos();
       const changed = d !== this.doc;
-      this.doc = d; this.refreshSelect(); renderList();
+      this.doc = d; this.refreshSelect(); renderList(); notesSoon();
       if (changed && this.find){ this.find = null; this.el.querySelector(".findcount").textContent = ""; if (!this.findbar.hidden && this.findinput.value.trim()) setTimeout(() => this.runSearch(this.findinput.value), 50); }
       if (d.error){ this.stage.innerHTML = '<p class="placeholder err"></p>'; this.stage.firstChild.textContent = "This file could not be opened as a PDF. " + d.error; return; }
       if (!d.pdf){ this.stage.innerHTML = '<p class="placeholder">Opening…</p>'; return; }
@@ -1155,6 +1817,7 @@ body.has-wintitle .bundle{top:36px}
         p.style.width = Math.floor(base.width*this.scale) + "px"; p.style.height = Math.floor(base.height*this.scale) + "px";
         p.innerHTML = '<span class="num">' + n + '</span>';
         this.stage.appendChild(p); this.obs.observe(p);
+        paintMarks(this, p);
       }
       this.buildThumbs();
       this.restoring = true;
@@ -1442,7 +2105,7 @@ body.has-wintitle .bundle{top:36px}
 
   function setActive(p){
     if (active === p) return; active = p;
-    panes.forEach(x => x.el.classList.toggle("active", x === p)); renderList();
+    panes.forEach(x => x.el.classList.toggle("active", x === p)); renderList(); notesSoon();
   }
   const linked = () => comparing && $("linkPages").checked;
   function followOther(src, page){
@@ -1827,7 +2490,7 @@ body.has-wintitle .bundle{top:36px}
       if (cmd === "save"){
         const d = this.opts.doc; if (!d || !d.path) return;
         if (!this.dirty){ toast("There are no changes to save."); return; }
-        const ok = await askConfirm("Replace the original file?", "This saves your changes over " + d.path.split(/[\\/]/).pop() + ". A backup copy of the original is kept in PDF Reader's backup folder for 30 days.", "Replace original");
+        const ok = await askConfirm("Replace the original file?", "This saves your changes over " + d.path.split(/[\\/]/).pop() + ". A backup copy of the original is kept in PDF Reader's backup folder for 30 days." + (marksOf(d).length ? " Your marks on this document are tied to page numbers, so check them after deleting or moving pages." : ""), "Replace original");
         if (!ok){ this.el.focus(); return; }
         this.setBusy(true, "Saving…");
         try {
@@ -1934,6 +2597,17 @@ body.has-wintitle .bundle{top:36px}
       txt.textContent = d.error ? "Could not open" : !d.pdf ? "Opening" :
         (pos ? "p. " + pos.page + " of " + d.pdf.numPages : d.pdf.numPages + (d.pdf.numPages === 1 ? " page" : " pages")) + " · " + fmtSize(d.size);
       meta.appendChild(txt);
+      if (d.pdf){
+        let na = 0, nd = 0; marksOf(d).forEach(m => { if (m.type === "adm") na++; else if (m.type === "dis") nd++; });
+        if (na || nd){ const f = document.createElement("span"); f.className = "factpill"; f.title = na + " admitted, " + nd + " disputed";
+          f.innerHTML = (na ? '<i class="a"></i>' + na : "") + (nd ? '<i class="d"></i>' + nd : ""); meta.appendChild(f); }
+        if (notesState.proj && canJoin(d) && !projEntry(d)){
+          const j = document.createElement("span"); j.className = "joinlink"; j.setAttribute("role", "button"); j.tabIndex = 0; j.textContent = "Add to project";
+          const go = e => { e.stopPropagation(); if (addToProject([d])) toast(d.name + " is now in " + notesState.proj.name + "."); };
+          j.addEventListener("click", go); j.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") go(e); });
+          meta.appendChild(j);
+        }
+      }
       if (d.ocr && (d.ocr.status === "running" || d.ocr.status === "saving")){
         const o = document.createElement("span"); o.className = "ocr-badge";
         o.textContent = d.ocr.status === "saving" ? "Saving searchable text…" : "Recognising text " + d.ocr.done + " of " + d.ocr.total;
@@ -2182,6 +2856,7 @@ body.has-wintitle .bundle{top:36px}
     try { d.pdf = await lib.getDocument({ data: bytes }).promise; } catch(e){ d.error = (e && e.message) || "Unreadable file"; }
     renderList();
     if (d.pdf) setTimeout(() => autoOcr(d), 1500);
+    notesSoon();
     return d;
   }
 
@@ -2194,7 +2869,7 @@ body.has-wintitle .bundle{top:36px}
     d.ocrCancel = true;
     setTimeout(fillInlineRecent, 0);
     if (d.pdf) d.pdf.destroy();
-    renderList();
+    renderList(); notesSoon();
   }
 
   function handleFiles(files, target){
@@ -2302,6 +2977,63 @@ body.has-wintitle .bundle{top:36px}
   });
   if (!window.pdfReader) document.body.classList.add("no-desktop");
   else { $("winBar").hidden = false; document.body.classList.add("has-wintitle"); }
+  /* ---- v3.0 wiring: marks, the Facts and notes panel and projects ---- */
+  $("markBar").addEventListener("mousedown", e => { if (e.target.closest("button")) e.preventDefault(); });
+  $("markBar").addEventListener("click", e => { const b = e.target.closest("[data-mk]"); if (b) barAct(b.dataset.mk, b.dataset.color); });
+  $("mbComment").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)){ e.preventDefault(); hideMarkBar(); } });
+  $("mbComment").addEventListener("blur", () => commitComment());
+  document.addEventListener("mouseup", e => {
+    if (e.button !== 0 || !e.target.closest || e.target.closest("#markBar,#notes,.toolbar,.findbar,.organiser,.modal-back,.bundle,.rail")) return;
+    const pane = visiblePanes().find(p => p.stage.contains(e.target));
+    const x = e.clientX, y = e.clientY;
+    setTimeout(() => {
+      const s = window.getSelection();
+      const sp = s && !s.isCollapsed && s.rangeCount ? visiblePanes().find(p => p.stage.contains(s.anchorNode)) : null;
+      if (sp && sp.doc && selectionParts(sp).length){ commitComment(); showMarkBar(sp); return; }
+      if (pane && pane.doc){ const m = hitMark(pane, x, y); if (m){ editMark(pane, pane.doc, m, x, y); return; } }
+      if (!$("markBar").hidden) hideMarkBar();
+    }, 0);
+  });
+  document.addEventListener("scroll", e => {
+    if ($("markBar").hidden || Date.now() - barShownAt < 600 || document.activeElement === $("mbComment")) return;
+    if (e.target.classList && e.target.classList.contains("stage")) hideMarkBar();
+  }, true);
+  document.addEventListener("keydown", e => {
+    const inField = e.target.closest && e.target.closest("input,textarea,select,[contenteditable]");
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "n"){ e.preventDefault(); toggleNotes(); return; }
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "z" && !inField && !(e.target.closest && e.target.closest(".organiser"))){ if (undoMark()) e.preventDefault(); return; }
+    if (e.key === "Escape" && !$("projPop").hidden){ e.preventDefault(); e.stopPropagation(); closeProjPop(); $("projBtn").focus(); return; }
+    if ($("markBar").hidden || !barCtx) return;
+    if (e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); const s = window.getSelection(); if (barCtx.mode === "new" && s) s.removeAllRanges(); hideMarkBar(); return; }
+    if (inField || e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = { a: "adm", d: "dis", h: "hl", c: "comment" }[e.key.toLowerCase()];
+    if (k){ e.preventDefault(); e.stopPropagation(); barAct(k, "yellow"); return; }
+    if ((e.key === "Delete" || e.key === "Backspace") && barCtx.mode === "edit"){ e.preventDefault(); barAct("delete"); }
+  }, true);
+  $("notesClose").addEventListener("click", () => toggleNotes(false));
+  $("notesTabs").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (!b) return; notesState.tab = b.dataset.tab; saveNotesPrefs(); renderNotes(); });
+  $("factsFilter").addEventListener("click", e => { const b = e.target.closest("[data-f]"); if (!b) return; notesState.filter = b.dataset.f; saveNotesPrefs(); renderNotes(); });
+  $("notesScope").addEventListener("change", e => { notesState.scope = e.target.value; saveNotesPrefs(); renderNotes(); });
+  $("notesCopy").addEventListener("click", copyTable);
+  $("notesPdf").addEventListener("click", saveMarkedUp);
+  $("projBtn").addEventListener("click", e => {
+    e.stopPropagation();
+    if ($("projPop").hidden){ $("projPop").hidden = false; $("projBtn").setAttribute("aria-expanded", "true"); renderProjPop(); } else closeProjPop();
+  });
+  document.addEventListener("click", e => { if (!$("projPop").hidden && !e.target.closest("#projPop") && !e.target.closest("#projBtn") && $("confirmModal").hidden) closeProjPop(); });
+  try { if (localStorage.getItem("notesOpen") === "1") toggleNotes(true); } catch(e){}
+  if (window.pdfReader){
+    const D = window.pdfReader;
+    D.notesLoad().then(o => {
+      const early = notesState.loose; notesState.loose = (o && typeof o === "object") ? o : {}; notesState.loaded = true;
+      Object.keys(early).forEach(k => { if (early[k].length) notesState.loose[k] = (notesState.loose[k] || []).concat(early[k]); });
+      if (Object.keys(early).some(k => early[k].length)) saveLooseSoon();
+      repaintAll(); renderList(); notesSoon();
+    }).catch(() => { notesState.loaded = true; });
+    D.onOpenProject(p => openProjFrom(() => D.projectOpen(p)));
+    D.initialProject().then(p => { if (p) openProjFrom(() => D.projectOpen(p)); });
+    window.addEventListener("beforeunload", () => { commitComment(); if (notesState.saveT) saveLooseNow(); if (notesState.projT) saveProjectNow(); });
+  }
   if (window.pdfReader){
     const D = window.pdfReader;
     let updating = false;

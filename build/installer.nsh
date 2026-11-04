@@ -16,6 +16,11 @@
   WriteRegStr HKCU "Software\PDFReader\Capabilities" "ApplicationIcon" "$INSTDIR\PDF Reader.exe,0"
   WriteRegStr HKCU "Software\PDFReader\Capabilities\FileAssociations" ".pdf" "PDFReader.Document"
   WriteRegStr HKCU "Software\RegisteredApplications" "PDF Reader" "Software\PDFReader\Capabilities"
+  ; Project files (.pdfrproj) open in PDF Reader with a double-click
+  WriteRegStr HKCU "Software\Classes\.pdfrproj" "" "PDFReader.Project"
+  WriteRegStr HKCU "Software\Classes\PDFReader.Project" "" "PDF Reader project"
+  WriteRegStr HKCU "Software\Classes\PDFReader.Project\DefaultIcon" "" "$INSTDIR\PDF Reader.exe,0"
+  WriteRegStr HKCU "Software\Classes\PDFReader.Project\shell\open\command" "" '"$INSTDIR\PDF Reader.exe" "%1"'
   System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
 !macroend
 
@@ -24,6 +29,8 @@
   DeleteRegKey HKCU "Software\PDFReader"
   DeleteRegValue HKCU "Software\Classes\.pdf\OpenWithProgids" "PDFReader.Document"
   DeleteRegKey HKCU "Software\Classes\PDFReader.Document"
+  DeleteRegKey HKCU "Software\Classes\PDFReader.Project"
+  DeleteRegKey HKCU "Software\Classes\.pdfrproj"
   DeleteRegKey HKCU "Software\Classes\Applications\PDF Reader.exe"
   System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
 !macroend
