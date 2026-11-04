@@ -639,6 +639,56 @@ body.has-wintitle .bundle{top:36px}
 .ws-empty div{max-width:320px}
 .ws-empty strong{display:block;color:var(--ink);font-size:14px;margin-bottom:6px}
 .nitem[draggable="true"]{cursor:grab}
+
+/* v3.2: cross-referencing */
+.mk-ref{border-bottom:1.5px dashed color-mix(in srgb,var(--accent) 75%,transparent);border-radius:0}
+.mk.flash{animation:mkflash 1.6s ease-out}
+@keyframes mkflash{0%,40%{outline:3px solid var(--accent);outline-offset:2px}100%{outline:3px solid transparent;outline-offset:2px}}
+.xLayer{position:absolute;inset:0;z-index:3;pointer-events:none}
+.mk-tab{position:absolute;left:4px;transform:translateY(-15%);pointer-events:auto;display:inline-flex;align-items:center;gap:3px;height:18px;padding:0 5px;border-radius:9px;border:1px solid color-mix(in srgb,var(--accent) 45%,#fff);background:#fff;color:#2f5bdb;font:600 10.5px/1 var(--sans);cursor:pointer;box-shadow:0 1px 3px rgba(16,24,40,.18)}
+.mk-tab:hover{background:#e9eefc}
+.mk-tab .ic{width:11px;height:11px}
+.mk-tab i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.mb-link.pending{background:var(--accent);color:var(--accent-ink)}
+.mb-link.pending:hover{background:var(--accent)}
+.mb-x{display:flex;flex-direction:column;gap:6px}
+.mb-links:empty{display:none}
+.mb-links{display:flex;flex-direction:column;gap:2px}
+.mb-lrow{display:grid;grid-template-columns:minmax(0,1fr) 22px;align-items:center;gap:2px;border-radius:6px}
+.mb-lrow:hover{background:var(--hover)}
+.mb-lgo{display:flex;gap:6px;align-items:center;background:none;border:0;font:inherit;font-size:12px;color:var(--ink);text-align:left;padding:4px 6px;cursor:pointer;min-width:0}
+.mb-lgo .ic{width:13px;height:13px;color:var(--accent);flex:none}
+.mb-lgo span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mb-iss{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.mb-chips{display:contents}
+.chip{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 4px 0 8px;border-radius:11px;background:color-mix(in srgb,var(--cc) 18%,var(--surface));border:1px solid color-mix(in srgb,var(--cc) 50%,var(--surface));font-size:12px;font-weight:550;color:var(--ink)}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--cc)}
+.chip button{border:0;background:none;color:var(--muted);cursor:pointer;width:16px;height:16px;border-radius:8px;padding:0;font-size:13px;line-height:1}
+.chip button:hover{background:var(--hover);color:var(--ink)}
+#mbIssue{flex:1;min-width:150px;font:inherit;font-size:12.5px;height:26px;padding:0 8px;border:1px solid var(--line-strong);border-radius:7px;background:var(--bg);color:var(--ink)}
+.linkbanner{position:fixed;top:46px;left:50%;transform:translateX(-50%);z-index:41;display:flex;align-items:center;gap:12px;padding:8px 8px 8px 14px;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-size:13px;box-shadow:0 10px 30px rgba(16,24,40,.25);max-width:calc(100vw - 32px)}
+.linkbanner .btn{height:28px;padding:0 12px;background:rgba(255,255,255,.18);border-color:transparent;color:inherit}
+.xpop,.kindpop{position:fixed;z-index:42;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 40px rgba(16,24,40,.22);padding:6px;min-width:220px;max-width:min(420px,calc(100vw - 16px));display:flex;flex-direction:column}
+.xpop .pp-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kindpop .pp-item[aria-current="true"]{color:var(--accent);font-weight:600}
+.kindtag{display:inline-flex;align-items:center;height:16px;padding:0 6px;border-radius:4px;background:var(--bg);border:1px solid var(--line);font-family:var(--sans);font-size:10.5px;font-weight:550;color:var(--muted);cursor:pointer}
+.kindtag:hover{border-color:var(--accent);color:var(--accent)}
+.kindtag.k-pleading{color:#2f5bdb} .kindtag.k-evidence{color:#b45309} .kindtag.k-caselaw{color:#7c3aed} .kindtag.k-legislation{color:#0f766e} .kindtag.k-correspondence{color:#64748b}
+.iss-add{display:flex;gap:6px}
+.iss-add input{flex:1;min-width:0;font:inherit;font-size:12.5px;height:30px;padding:0 9px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);color:var(--ink)}
+.iss-add .btn{height:30px;padding:0 12px}
+.iss{display:flex;flex-direction:column;gap:6px;flex:none}
+.iss + .iss{margin-top:8px}
+.iss-head{display:flex;align-items:center;gap:6px;padding:4px 2px}
+.iss-tog{display:flex;align-items:center;gap:8px;flex:1;min-width:0;background:none;border:0;font:inherit;color:var(--ink);cursor:pointer;padding:2px;text-align:left}
+.iss-tog i{width:10px;height:10px;border-radius:50%;flex:none}
+.iss-name{font-weight:650;font-size:13.5px;overflow-wrap:anywhere;outline:none;border-radius:4px}
+.iss-name[contenteditable="plaintext-only"]{background:var(--surface);box-shadow:0 0 0 2px var(--accent);padding:0 4px}
+.iss-n{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.iss-head .btn{height:26px;padding:0 9px;font-size:12px}
+.iss-head .iconbtn{width:26px;min-width:26px}
+.iss.closed .nitem{display:none}
+.nitem .nkind{font-family:var(--sans);font-weight:600}
 </style>
 </head>
 <body>
@@ -648,7 +698,7 @@ body.has-wintitle .bundle{top:36px}
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Documents">
     <div class="rail-head">
-      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.1.1</button>
+      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.2</button>
         <button class="btn ghost iconbtn collapse" id="collapseBtn" type="button" aria-label="Hide sidebar" title="Hide sidebar (Ctrl+\)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg></button></div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -716,8 +766,9 @@ body.has-wintitle .bundle{top:36px}
       <div class="seg ntabs" id="notesTabs" role="group" aria-label="Show">
         <button class="btn" type="button" data-tab="facts" aria-pressed="true">Facts</button>
         <button class="btn" type="button" data-tab="hl" aria-pressed="false">Highlights</button>
+        <button class="btn" type="button" data-tab="issues" aria-pressed="false">Issues</button>
       </div>
-      <select id="notesScope" aria-label="Which documents"><option value="all">All open documents</option><option value="doc">Current document only</option></select>
+      <select id="notesScope" aria-label="Which documents"><option value="all">All open documents</option><option value="doc">Current document only</option><option value="pleadings">Pleadings only</option></select>
       <div class="seg nfilter" id="factsFilter" role="group" aria-label="Filter facts">
         <button class="btn" type="button" data-f="all" aria-pressed="true">All</button>
         <button class="btn" type="button" data-f="adm" aria-pressed="false">Admitted</button>
@@ -824,16 +875,23 @@ body.has-wintitle .bundle{top:36px}
     <button class="mb mb-hl" type="button" data-mk="hl" data-color="yellow" title="Highlight yellow (H)" aria-label="Highlight yellow"><span class="dot" style="--c:#ffd43b"></span></button>
     <button class="mb mb-hl" type="button" data-mk="hl" data-color="blue" title="Highlight blue" aria-label="Highlight blue"><span class="dot" style="--c:#74c0fc"></span></button>
     <button class="mb mb-hl" type="button" data-mk="hl" data-color="pink" title="Highlight pink" aria-label="Highlight pink"><span class="dot" style="--c:#f783ac"></span></button>
-    <button class="mb" type="button" data-mk="comment" title="Add a comment (C)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Comment</button>
-    <button class="mb" type="button" data-mk="ws" title="Send to the workspace (W)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Workspace</button>
+    <button class="mb" type="button" data-mk="comment" title="Add a comment (C)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="mb mb-link" type="button" data-mk="link" title="Link this passage to a passage in another document (L)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span class="mb-lt">Link</span></button>
+    <button class="mb" type="button" data-mk="issue" title="Add this passage to an issue (I)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4z"/><circle cx="7.5" cy="7.5" r="1"/></svg>Issue</button>
+    <button class="mb" type="button" data-mk="ws" title="Send to the workspace (W)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></button>
     <button class="mb" type="button" data-mk="copy" title="Copy the text" aria-label="Copy the text"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
     <button class="mb mb-del" type="button" data-mk="delete" title="Delete this mark (Delete)" aria-label="Delete this mark"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
   </div>
   <div class="mb-note" hidden>
+    <div class="mb-x"><div class="mb-links" id="mbLinks"></div><div class="mb-iss"><span class="mb-chips" id="mbChips"></span><input id="mbIssue" list="issueNames" placeholder="Add to an issue, then press Enter" aria-label="Add to an issue" autocomplete="off"></div></div>
     <textarea id="mbComment" rows="3" placeholder="Comment, for example: denied in para 4 of the plea" aria-label="Comment"></textarea>
     <div class="mb-foot"><span class="mb-src mono"></span><button class="btn primary" type="button" data-mk="done" title="Done (Ctrl+Enter)">Done</button></div>
   </div>
 </div>
+<datalist id="issueNames"></datalist>
+<div class="linkbanner" id="linkBanner" hidden role="status"><span id="linkBannerText"></span><button class="btn" type="button" id="linkCancel">Cancel</button></div>
+<div class="xpop" id="xPop" hidden role="menu"></div>
+<div class="kindpop" id="kindPop" hidden role="menu" aria-label="Document type"></div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <template id="paneTpl">
@@ -1177,7 +1235,7 @@ body.has-wintitle .bundle{top:36px}
      Marks on documents in a project are saved in the project file; others in PDF Reader's data folder.
      The PDF itself is never changed. ---- */
   const HL = { yellow: "#ffd43b", blue: "#74c0fc", pink: "#f783ac" };
-  const TYPE_NAME = { adm: "Admitted", dis: "Disputed", hl: "Highlight" };
+  const TYPE_NAME = { adm: "Admitted", dis: "Disputed", hl: "Highlight", ref: "Passage" };
   const notesState = { loose: {}, loaded: false, proj: null, saveT: 0, projT: 0, scope: "all", tab: "facts", filter: "all", open: false };
   try { const np = JSON.parse(localStorage.getItem("notesPrefs") || "{}"); ["scope", "tab", "filter"].forEach(k => { if (np[k]) notesState[k] = np[k]; }); } catch(e){}
   let markSeq = Date.now(), selMark = null, barCtx = null, barShownAt = 0;
@@ -1198,6 +1256,7 @@ body.has-wintitle .bundle{top:36px}
     if (!window.pdfReader || !notesState.loaded) return;
     const out = {}; Object.keys(notesState.loose).forEach(k => { if (notesState.loose[k].length) out[k] = notesState.loose[k]; });
     if (notesState.looseBoard && notesState.looseBoard.items.length) out["*board"] = notesState.looseBoard;
+    const lx = notesState.looseXref; if (lx && (lx.links.length || lx.issues.length || Object.keys(lx.kinds).length)) out["*xref"] = lx;
     window.pdfReader.notesSave(out).catch(e => toast("Could not save your marks: " + errText(e)));
   }
   function saveLooseSoon(){ if (!window.pdfReader) return; clearTimeout(notesState.saveT); notesState.saveT = setTimeout(saveLooseNow, notesState.loaded ? 500 : 1500); }
@@ -1208,6 +1267,7 @@ body.has-wintitle .bundle{top:36px}
   function pushUndo(d){ markUndo.push({ d, before: JSON.stringify(marksOf(d)) }); if (markUndo.length > 60) markUndo.shift(); }
   function undoMark(){
     const u = markUndo.pop(); if (!u) return false;
+    if (u.xref){ const X = xref(), b = JSON.parse(u.before); X.links = b.links; X.issues = b.issues; X.kinds = b.kinds; xrefChanged(); toast("Undone."); return true; }
     if (u.board){ const B = curBoard(), b = JSON.parse(u.before); B.items = b.items; B.links = b.links; wsSel = null; boardChanged(); renderBoard(); toast("Undone."); return true; }
     barCtx = null; $("markBar").hidden = true; selMark = null;
     const arr = marksOf(u.d); arr.splice(0, arr.length, ...JSON.parse(u.before));
@@ -1224,6 +1284,7 @@ body.has-wintitle .bundle{top:36px}
     const d = pane.doc, n = +el.dataset.n;
     const list = d ? marksOf(d).filter(m => m.page === n) : [];
     let layer = el.querySelector(".markLayer");
+    paintTabs(pane, el, list);
     if (!list.length){ if (layer) layer.remove(); return; }
     if (!layer){
       layer = document.createElement("div"); layer.className = "markLayer"; layer.setAttribute("aria-hidden", "true");
@@ -1235,7 +1296,7 @@ body.has-wintitle .bundle{top:36px}
       const on = !!selMark && selMark.id === m.id;
       m.rects.forEach(r => {
         const s = document.createElement("div");
-        s.className = "mk mk-" + m.type + (m.rot ? " r" + m.rot : "") + (on ? " sel" : "");
+        s.dataset.id = m.id; s.className = "mk mk-" + m.type + (m.rot ? " r" + m.rot : "") + (on ? " sel" : "");
         if (m.type === "hl") s.style.setProperty("--hl", HL[m.color] || HL.yellow);
         s.style.left = pct(r[0]); s.style.top = pct(r[1]); s.style.width = pct(r[2]); s.style.height = pct(r[3]);
         layer.appendChild(s);
@@ -1284,7 +1345,7 @@ body.has-wintitle .bundle{top:36px}
     });
     return parts;
   }
-  const fam = t => t === "hl" ? "hl" : "fact";
+  const fam = t => t === "hl" ? "hl" : t === "ref" ? "ref" : "fact";
   const area = r => r[2] * r[3];
   const inter = (p, q) => Math.max(0, Math.min(p[0] + p[2], q[0] + q[2]) - Math.max(p[0], q[0])) * Math.max(0, Math.min(p[1] + p[3], q[1] + q[3]) - Math.max(p[1], q[1]));
   /* marking the same words again replaces the old mark (for example, Disputed to Admitted) */
@@ -1309,6 +1370,9 @@ body.has-wintitle .bundle{top:36px}
       if (type === "hl") m.color = color || "yellow";
       if (p.rot) m.rot = p.rot;
       if (group) m.group = group;
+      /* marking a linked passage keeps its links and issues: the passage simply becomes Admitted, Disputed or a highlight */
+      const up = type !== "ref" && arr.find(o => o.type === "ref" && covered(o, m) && covered(m, o));
+      if (up){ up.type = type; if (type === "hl") up.color = m.color; made.push(up); return; }
       for (let i = arr.length - 1; i >= 0; i--) if (fam(arr[i].type) === fam(type) && covered(arr[i], m)) arr.splice(i, 1);
       arr.push(m); made.push(m);
     });
@@ -1348,6 +1412,10 @@ body.has-wintitle .bundle{top:36px}
       if (k === "adm" || k === "dis" || k === "hl") x.setAttribute("aria-pressed", String(!!m && m.type === k && (k !== "hl" || (m.color || "yellow") === x.dataset.color)));
     });
     b.querySelector(".mb-note").hidden = !edit;
+    const lb = b.querySelector('[data-mk="link"]');
+    lb.classList.toggle("pending", !!pendingLink); lb.querySelector(".mb-lt").textContent = pendingLink ? "Link here" : "Link";
+    lb.title = pendingLink ? "Link to the passage you started from (L)" : "Link this passage to a passage in another document (L)";
+    if (edit) fillBarXref();
     if (edit){ $("mbComment").value = m.comment || ""; b.querySelector(".mb-src").textContent = "p " + m.page + " · " + TYPE_NAME[m.type]; }
   }
   function showMarkBar(pane){
@@ -1396,6 +1464,8 @@ body.has-wintitle .bundle{top:36px}
       if (k === "copy"){ copyText(String(window.getSelection()).trim()); hideMarkBar(); return; }
       if (k === "ws"){ const d0 = pane.doc, m0 = markForCard(pane); $("markBar").hidden = true; barCtx = null; if (m0) addExcerptCard(d0, m0); return; }
       if (k === "delete" || k === "done") return;
+      if (k === "link"){ const d0 = pane.doc, m0 = markForRef(pane); $("markBar").hidden = true; barCtx = null; if (m0) linkStep(pane, d0, m0); return; }
+      if (k === "issue"){ const d0 = pane.doc, m0 = markForRef(pane); if (!m0){ hideMarkBar(); return; } editMark(pane, d0, m0); setTimeout(() => $("mbIssue").focus(), 0); return; }
       const m = addMarks(pane, k === "comment" ? "hl" : k, color);
       if (!m){ hideMarkBar(); return; }
       if (k === "comment"){ editMark(pane, pane.doc, m); setTimeout(() => $("mbComment").focus(), 0); }
@@ -1405,11 +1475,14 @@ body.has-wintitle .bundle{top:36px}
     const d = barCtx.d, mark = barCtx.mark;
     if (k === "delete"){
       pushUndo(d); const arr = marksOf(d), i = arr.indexOf(mark); if (i >= 0) arr.splice(i, 1);
+      unlinkMark(d, mark);
       barCtx = null; $("markBar").hidden = true; selMark = null; marksChanged(d); toast("Mark deleted. Press Ctrl+Z to undo."); return;
     }
     if (k === "copy"){ copyText(mark.text); return; }
     if (k === "ws"){ hideMarkBar(); addExcerptCard(d, mark); return; }
     if (k === "comment"){ $("mbComment").focus(); return; }
+    if (k === "link"){ hideMarkBar(); linkStep(pane, d, mark); return; }
+    if (k === "issue"){ $("mbIssue").focus(); return; }
     if (k === "done"){ hideMarkBar(); return; }
     if (k === "adm" || k === "dis" || k === "hl"){
       if (mark.type === k && (k !== "hl" || (mark.color || "yellow") === (color || "yellow"))) return;
@@ -1433,7 +1506,11 @@ body.has-wintitle .bundle{top:36px}
   let notesT = 0;
   function notesSoon(){ wsSoon(); if (!notesState.open) return; clearTimeout(notesT); notesT = setTimeout(renderNotes, 40); }
   function saveNotesPrefs(){ try { localStorage.setItem("notesPrefs", JSON.stringify({ scope: notesState.scope, tab: notesState.tab, filter: notesState.filter })); } catch(e){} }
-  function scopeDocs(){ return notesState.scope === "doc" ? (active.doc && active.doc.pdf ? [active.doc] : []) : docs.filter(d => d.pdf); }
+  function scopeDocs(){
+    if (notesState.scope === "doc") return active.doc && active.doc.pdf ? [active.doc] : [];
+    if (notesState.scope === "pleadings") return docs.filter(d => d.pdf && kindOf(d) === "pleading");
+    return docs.filter(d => d.pdf);
+  }
   const byPos = (a, b) => a.page - b.page || ((a.rects[0] || [0, 0])[1] - (b.rects[0] || [0, 0])[1]) || ((a.rects[0] || [0])[0] - (b.rects[0] || [0])[0]);
   function collectMarks(){
     const facts = notesState.tab === "facts", f = notesState.filter;
@@ -1455,6 +1532,7 @@ body.has-wintitle .bundle{top:36px}
     $("notesTabs").querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.tab === notesState.tab)));
     $("factsFilter").hidden = !facts;
     $("factsFilter").querySelectorAll("[data-f]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.f === notesState.filter)));
+    if (notesState.tab === "issues"){ $("factsFilter").hidden = true; renderIssuesTab(); return; }
     let adm = 0, dis = 0, hl = 0, com = 0;
     scopeDocs().forEach(d => marksOf(d).forEach(m => { if (m.type === "adm") adm++; else if (m.type === "dis") dis++; else { hl++; if (m.comment) com++; } }));
     const sum = $("factsSum");
@@ -1473,7 +1551,7 @@ body.has-wintitle .bundle{top:36px}
         const b = document.createElement("button"); b.type = "button";
         b.className = "nitem t-" + m.type + (selMark && selMark.id === m.id ? " sel" : "");
         if (m.type === "hl") b.style.setProperty("--hl", HL[m.color] || HL.yellow);
-        const meta = document.createElement("span"); meta.className = "nmeta"; meta.textContent = "p " + m.page + (m.type !== "hl" ? " · " + TYPE_NAME[m.type] : "");
+        const meta = document.createElement("span"); meta.className = "nmeta"; meta.textContent = "p " + m.page + (m.type !== "hl" ? " · " + TYPE_NAME[m.type] : "") + xrefSuffix(g.d, m);
         const q = document.createElement("span"); q.className = "nq"; q.textContent = m.text;
         b.append(meta, q);
         if (m.comment){ const c = document.createElement("span"); c.className = "ncom"; c.textContent = m.comment; b.appendChild(c); }
@@ -1495,6 +1573,7 @@ body.has-wintitle .bundle{top:36px}
     box.scrollTop = keep;
   }
   function copyTable(){
+    if (notesState.tab === "issues"){ copyIssues(); return; }
     const facts = notesState.tab === "facts", groups = collectMarks().filter(g => g.marks.length);
     if (!groups.length){ toast("There is nothing to copy yet."); return; }
     const multi = groups.length > 1;
@@ -1527,6 +1606,7 @@ body.has-wintitle .bundle{top:36px}
       const hex = h => rgb(parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255);
       const multiply = PDFLib.BlendMode ? PDFLib.BlendMode.Multiply : undefined;
       for (const m of list){
+        if (m.type === "ref") continue;
         if (m.page < 1 || m.page > out.getPageCount()) continue;
         const pg = out.getPage(m.page - 1), vp = (await d.pdf.getPage(m.page)).getViewport({ scale: 1 });
         const pt = (fx, fy) => { const q = vp.convertToPdfPoint(fx * vp.width, fy * vp.height); return { x: q[0], y: q[1] }; };
@@ -1552,6 +1632,311 @@ body.has-wintitle .bundle{top:36px}
       try { localStorage.setItem("lastSaveDir", dirOf(saved)); } catch(e){}
       toast("Saved " + saved.split(/[\\/]/).pop() + ". Print it or send it with the marks on the pages.");
     } catch(e){ toast("Could not save the marked-up copy: " + errText(e)); }
+  }
+
+  /* ---- Cross-referencing: links between passages in different documents, issues that gather passages
+     from the whole matter, and document types (pleading, evidence, case law ...) that set the reading order. ---- */
+  const KINDS = [["pleading", "Pleading"], ["evidence", "Evidence"], ["correspondence", "Correspondence"], ["caselaw", "Case law"], ["legislation", "Legislation"], ["other", "Other"]];
+  const ISS_COLORS = ["#2f5bdb", "#e8590c", "#2b8a3e", "#ae3ec9", "#e03131", "#0c8599", "#f08c00", "#5f3dc4"];
+  const kindRank = k => { const i = KINDS.findIndex(x => x[0] === k); return i < 0 ? 9 : i; };
+  const kindLabel = k => (KINDS.find(x => x[0] === k) || [0, "Other"])[1];
+  const newXref = () => ({ links: [], issues: [], kinds: {} });
+  let pendingLink = null;
+  function xref(){
+    const P = notesState.proj;
+    if (P) return P.xref || (P.xref = newXref());
+    return notesState.looseXref || (notesState.looseXref = newXref());
+  }
+  function xrefChanged(){ boardChanged(); repaintAll(); notesSoon(); renderList(); }
+  function pushXUndo(){ markUndo.push({ xref: true, before: JSON.stringify(xref()) }); if (markUndo.length > 60) markUndo.shift(); }
+  function guessKind(name){
+    const n = " " + String(name || "").toLowerCase().replace(/\.pdf$/, "") + " ";
+    if (/plea\b|particulars|declaration|replication|summons|notice of motion|exception|counterclaim|rejoinder|founding|answering|replying|statement of (claim|defence)|application/.test(n)) return "pleading";
+    if (/\bv\.? |judg[e]?ment|\bza(sca|cc|wchc|gpjhc|gppht|kzdhc|ecg|lac|lc)\b|\(\d{4}\)|\d+ sa \d+|all sa/.test(n)) return "caselaw";
+    if (/affidavit|statement|annexure|exhibit|invoice|report|record|transcript|photo|minutes|valuation|contract|agreement/.test(n)) return "evidence";
+    if (/\bact\b|regulation|\brules\b|constitution|gazette|by-law|bylaw/.test(n)) return "legislation";
+    if (/letter|e-?mail|correspondence|whatsapp|\bsms\b/.test(n)) return "correspondence";
+    return "other";
+  }
+  function kindOf(d){ if (!d) return "other"; const X = xref(); return X.kinds[docRef(d)] || (d.path && X.kinds["p:" + lc(d.path)]) || guessKind(d.name); }
+  const refsOf = d => d ? [docRef(d), d.path ? "p:" + lc(d.path) : null, "s:" + d.id].filter(Boolean) : [];
+  const endpoint = (d, m) => ({ doc: docRef(d), mark: m.id, name: d.name, page: m.page, text: String(m.text || "").slice(0, 400), path: d.path || "" });
+  const isEnd = (ep, refs, m) => refs.includes(ep.doc) && ep.mark === m.id;
+  function linksOfMark(d, m){
+    const refs = refsOf(d);
+    return xref().links.filter(l => isEnd(l.a, refs, m) || isEnd(l.b, refs, m)).map(l => ({ l, other: isEnd(l.a, refs, m) ? l.b : l.a }));
+  }
+  function epInfo(ep){
+    const d = docByRef(ep.doc), m = d && marksOf(d).find(x => x.id === ep.mark);
+    if (m){ ep.name = d.name; ep.page = m.page; ep.text = String(m.text || "").slice(0, 400); }
+    return { name: ep.name || "Document", page: ep.page || 1, text: ep.text || "", type: m ? m.type : null, kind: d ? kindOf(d) : null };
+  }
+  const shortText = (t, n) => { t = String(t || "").replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n - 3) + "..." : t; };
+  function unlinkMark(d, m){
+    const refs = refsOf(d), X = xref(), before = X.links.length;
+    X.links = X.links.filter(l => !isEnd(l.a, refs, m) && !isEnd(l.b, refs, m));
+    if (X.links.length !== before) xrefChanged();
+  }
+  function issueById(id){ return xref().issues.find(i => i.id === id); }
+  function issueByName(name, create){
+    const X = xref(), n = String(name || "").trim(); if (!n) return null;
+    let is = X.issues.find(i => i.name.toLowerCase() === n.toLowerCase());
+    if (!is && create){ is = { id: newId(), name: n, color: ISS_COLORS[X.issues.length % ISS_COLORS.length] }; X.issues.push(is); }
+    return is;
+  }
+  function xrefSuffix(d, m){
+    const names = (m.issues || []).map(issueById).filter(Boolean).map(i => i.name), n = linksOfMark(d, m).length;
+    return (names.length ? " · " + names.join(", ") : "") + (n ? " · " + n + (n === 1 ? " link" : " links") : "");
+  }
+  /* a passage for linking or an issue: the mark already on these words, or a new passage mark */
+  function markForRef(pane){
+    const m = existingMark(pane);
+    if (m){ window.getSelection().removeAllRanges(); return m; }
+    return addMarks(pane, "ref");
+  }
+  function linkStep(pane, d, m){
+    if (!pendingLink){
+      pendingLink = { d, m };
+      $("linkBannerText").textContent = "Linking from " + d.name + ", p " + m.page + ". Now select the matching passage in any document and press L (or click Link here). Esc cancels.";
+      $("linkBanner").hidden = false; repaintDoc(d); flashOn(d, m);
+      return;
+    }
+    const from = pendingLink; cancelLink();
+    if (from.m.id === m.id){ toast("Choose a different passage to link to."); return; }
+    const X = xref(), refsA = refsOf(from.d), refsB = refsOf(d);
+    if (X.links.some(l => (isEnd(l.a, refsA, from.m) && isEnd(l.b, refsB, m)) || (isEnd(l.b, refsA, from.m) && isEnd(l.a, refsB, m)))){ toast("These passages are already linked."); return; }
+    pushXUndo();
+    X.links.push({ id: newId(), a: endpoint(from.d, from.m), b: endpoint(d, m), created: new Date().toISOString() });
+    xrefChanged();
+    toast("Linked " + from.d.name + " p " + from.m.page + " with " + d.name + " p " + m.page + ". Click the link tag in the margin to jump between them.");
+  }
+  function cancelLink(){ pendingLink = null; $("linkBanner").hidden = true; if (barCtx) setBarMode(); }
+  function flashOn(d, m){ visiblePanes().forEach(p => { if (p.doc === d) p.stage.querySelectorAll('.mk[data-id="' + m.id + '"]').forEach(x => { x.classList.remove("flash"); void x.offsetWidth; x.classList.add("flash"); }); }); }
+  async function ensureDoc(ref, path){
+    let d = docByRef(ref); if (d) return d;
+    const P = notesState.proj, e = P && ref && ref.startsWith("e:") && P.docs.find(x => "e:" + x.id === ref);
+    const p = (e && !e.missing && e.abs) || path;
+    if (p && window.pdfReader){ try { const l = await window.pdfReader.readFiles([p]); if (l.length) d = await addDoc(l[0].name, l[0].data, false, l[0].path); } catch(err){} }
+    return d || null;
+  }
+  async function revealOn(pane, d, m, quiet){
+    if (pane.doc !== d) await pane.show(d);
+    if (pane.doc !== d) return;
+    const el = pane.stage.querySelector('.page[data-n="' + m.page + '"]'); if (!el) return;
+    const r = m.rects[0] || [0, 0, 0, 0];
+    pane.stage.scrollTop = el.offsetTop + r[1] * el.offsetHeight - pane.stage.clientHeight / 3;
+    await new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
+    if (quiet) flashOn(d, m); else { setActive(pane); editMark(pane, d, m); flashOn(d, m); }
+  }
+  /* follow a link: the other passage opens beside the one you are reading */
+  async function followLink(fromPane, ep){
+    $("xPop").hidden = true;
+    const d = await ensureDoc(ep.doc, ep.path);
+    if (!d){ toast((ep.name || "The linked document") + " could not be found. It may have been moved or renamed."); return; }
+    const m = marksOf(d).find(x => x.id === ep.mark);
+    let pane = visiblePanes().find(p => p.doc === d);
+    if (!pane){
+      if (paneCount === 1) setPaneCount(2);
+      pane = visiblePanes().find(p => p !== fromPane) || active;
+    }
+    if (m) await revealOn(pane, d, m, false);
+    else { if (pane.doc !== d) await pane.show(d); pane.goTo(ep.page || 1); toast("The linked passage was removed; showing page " + (ep.page || 1) + "."); }
+  }
+  function paintTabs(pane, el, list){
+    let lay = el.querySelector(".xLayer");
+    const items = list.map(m => ({ m, ln: linksOfMark(pane.doc, m), is: (m.issues || []).map(issueById).filter(Boolean) })).filter(x => x.ln.length || x.is.length);
+    if (!items.length){ if (lay) lay.remove(); return; }
+    if (!lay){ lay = document.createElement("div"); lay.className = "xLayer"; el.appendChild(lay); }
+    lay.textContent = "";
+    let lastY = -1;
+    items.sort((a, b) => (a.m.rects[0] || [0, 0])[1] - (b.m.rects[0] || [0, 0])[1]).forEach(x => {
+      const r = x.m.rects[0] || [0, 0, 0, 0], y = Math.max(r[1], lastY + 0.024); lastY = y;
+      const t = document.createElement("button"); t.type = "button"; t.className = "mk-tab"; t.dataset.id = x.m.id; t.style.top = (y * 100).toFixed(3) + "%";
+      t.innerHTML = (x.ln.length ? '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span>' + x.ln.length + "</span>" : "") +
+        x.is.map(i => '<i style="background:' + i.color + '"></i>').join("");
+      t.title = x.is.map(i => "Issue: " + i.name).concat(x.ln.map(o => { const f = epInfo(o.other); return "Linked: " + f.name + ", p " + f.page + ": " + shortText(f.text, 90); })).join("\n");
+      t.setAttribute("aria-label", t.title.replace(/\n/g, ". "));
+      lay.appendChild(t);
+    });
+  }
+  function placePop(p, anchor){
+    p.hidden = false; const r = anchor.getBoundingClientRect(), w = p.offsetWidth, h = p.offsetHeight;
+    let top = r.bottom + 6; if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 6);
+    p.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left)) + "px"; p.style.top = top + "px";
+  }
+  function popItem(p, icon, label, fn, title){
+    const b = document.createElement("button"); b.type = "button"; b.className = "pp-item"; if (icon) b.innerHTML = icon;
+    const s = document.createElement("span"); s.textContent = label; b.appendChild(s); if (title) b.title = title;
+    b.addEventListener("click", e => { e.stopPropagation(); fn(); }); p.appendChild(b); return b;
+  }
+  function showXPop(anchor, pane, m){
+    const p = $("xPop"), d = pane.doc; p.textContent = "";
+    const LI = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>';
+    const TI = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4z"/></svg>';
+    linksOfMark(d, m).forEach(o => { const f = epInfo(o.other); popItem(p, LI, f.name + ", p " + f.page + ": " + shortText(f.text, 60), () => followLink(pane, o.other), f.text); });
+    (m.issues || []).map(issueById).filter(Boolean).forEach(is => popItem(p, TI, "Issue: " + is.name, () => { p.hidden = true; showIssue(is.id); }));
+    popItem(p, null, "Edit this passage…", () => { p.hidden = true; editMark(pane, d, m); });
+    placePop(p, anchor);
+  }
+  function showKindPop(anchor, d){
+    const p = $("kindPop"); p.textContent = "";
+    KINDS.forEach(([k, l]) => { const b = popItem(p, null, l, () => { xref().kinds[docRef(d)] = k; p.hidden = true; xrefChanged(); }); if (k === kindOf(d)) b.setAttribute("aria-current", "true"); });
+    placePop(p, anchor);
+  }
+  function showIssue(id){
+    notesState.tab = "issues"; notesState.focusIssue = id; saveNotesPrefs();
+    if (!notesState.open) toggleNotes(true); else renderNotes();
+  }
+  /* the link and issue section of the bar for a selected passage */
+  function fillBarXref(){
+    const d = barCtx.d, m = barCtx.mark, box = $("mbLinks"), chips = $("mbChips"), X = xref();
+    box.textContent = ""; chips.textContent = "";
+    linksOfMark(d, m).forEach(o => {
+      const f = epInfo(o.other), row = document.createElement("div"); row.className = "mb-lrow";
+      const go = document.createElement("button"); go.type = "button"; go.className = "mb-lgo"; go.title = "Open beside: " + f.text;
+      go.innerHTML = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+      const sp = document.createElement("span"); sp.textContent = f.name + ", p " + f.page + ": " + shortText(f.text, 70); go.appendChild(sp);
+      go.addEventListener("click", () => { const pn = barCtx.pane; hideMarkBar(); followLink(pn, o.other); });
+      const un = document.createElement("button"); un.type = "button"; un.className = "wsi-b"; un.title = "Remove this link"; un.setAttribute("aria-label", "Remove this link");
+      un.innerHTML = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+      un.addEventListener("click", () => { pushXUndo(); X.links = X.links.filter(l => l !== o.l); xrefChanged(); setBarMode(); });
+      row.append(go, un); box.appendChild(row);
+    });
+    (m.issues || []).map(issueById).filter(Boolean).forEach(is => {
+      const c = document.createElement("span"); c.className = "chip"; c.style.setProperty("--cc", is.color);
+      c.innerHTML = "<i></i>"; const t = document.createElement("span"); t.textContent = is.name; c.appendChild(t);
+      const x = document.createElement("button"); x.type = "button"; x.textContent = "×"; x.title = "Remove from this issue"; x.setAttribute("aria-label", "Remove from " + is.name);
+      x.addEventListener("click", () => { pushUndo(d); m.issues = m.issues.filter(i => i !== is.id); marksChanged(d); setBarMode(); });
+      c.appendChild(x); chips.appendChild(c);
+    });
+    const dl = $("issueNames"); dl.textContent = "";
+    X.issues.forEach(i => { const o = document.createElement("option"); o.value = i.name; dl.appendChild(o); });
+  }
+  function addIssueFromBar(){
+    if (!barCtx || barCtx.mode !== "edit") return;
+    const inp = $("mbIssue"), name = inp.value.trim(); if (!name) return;
+    const d = barCtx.d, m = barCtx.mark, is = issueByName(name, true);
+    pushUndo(d); m.issues = m.issues || []; if (!m.issues.includes(is.id)) m.issues.push(is.id);
+    inp.value = ""; xrefChanged(); marksChanged(d); setBarMode(); inp.focus();
+  }
+  /* ---- Issues tab: every issue with its passages from all documents, pleadings first ---- */
+  const byKindDocPos = (a, b) => kindRank(kindOf(a.d)) - kindRank(kindOf(b.d)) || docs.indexOf(a.d) - docs.indexOf(b.d) || byPos(a.m, b.m);
+  function issuePassages(is, ds){
+    const out = []; (ds || docs.filter(d => d.pdf)).forEach(d => marksOf(d).forEach(m => { if ((m.issues || []).includes(is.id)) out.push({ d, m }); }));
+    return out.sort(byKindDocPos);
+  }
+  const closedIssues = new Set();
+  function renderIssuesTab(){
+    const X = xref(), sum = $("factsSum"), box = $("notesList"), keep = box.scrollTop, ds = scopeDocs();
+    let np = 0; ds.forEach(d => marksOf(d).forEach(m => { if ((m.issues || []).length) np++; }));
+    sum.innerHTML = '<div class="fs-row"><span><b>' + X.issues.length + "</b>" + (X.issues.length === 1 ? "issue" : "issues") + "</span><span><b>" + np + "</b>" + (np === 1 ? "passage" : "passages") +
+      "</span><span><b>" + X.links.length + "</b>" + (X.links.length === 1 ? "link" : "links") + '</span></div><div class="iss-add"><input id="issNew" placeholder="New issue, for example Duty to insure" aria-label="New issue"><button class="btn" type="button" id="issAddBtn">Add</button></div>';
+    const add = () => { const v = $("issNew").value.trim(); if (!v) return; if (issueByName(v)){ toast("There is already an issue called " + v + "."); return; } issueByName(v, true); xrefChanged(); };
+    $("issAddBtn").addEventListener("click", add); $("issNew").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); add(); } });
+    box.textContent = "";
+    if (!X.issues.length){
+      const p = document.createElement("p"); p.className = "nempty";
+      p.textContent = "Issues gather passages from every document in the matter: the allegation, the denial, the evidence, the case law and the legislation. Select a passage and press I (or click Issue), then type the issue. To link two passages directly, select one, press L, then select the other and press L again.";
+      box.appendChild(p); return;
+    }
+    X.issues.forEach(is => {
+      const items = issuePassages(is, ds), sec = document.createElement("div"); sec.className = "iss" + (closedIssues.has(is.id) ? " closed" : ""); sec.dataset.issue = is.id;
+      const head = document.createElement("div"); head.className = "iss-head";
+      const tog = document.createElement("button"); tog.type = "button"; tog.className = "iss-tog"; tog.title = "Show or hide the passages. Double-click the name to rename.";
+      tog.innerHTML = '<i style="background:' + is.color + '"></i>';
+      const nm = document.createElement("span"); nm.className = "iss-name"; nm.textContent = is.name;
+      const cnt = document.createElement("span"); cnt.className = "iss-n"; cnt.textContent = items.length;
+      tog.append(nm, cnt);
+      tog.addEventListener("click", () => { if (nm.isContentEditable) return; sec.classList.toggle("closed"); if (sec.classList.contains("closed")) closedIssues.add(is.id); else closedIssues.delete(is.id); });
+      nm.addEventListener("dblclick", e => {
+        e.stopPropagation(); nm.contentEditable = "plaintext-only"; nm.focus();
+        const r = document.createRange(); r.selectNodeContents(nm); const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+        const done = save => { nm.contentEditable = "false"; nm.removeAttribute("contenteditable"); const v = nm.textContent.trim(); if (save && v && v !== is.name){ is.name = v; xrefChanged(); } else nm.textContent = is.name; };
+        nm.addEventListener("keydown", ev => { if (ev.key === "Enter"){ ev.preventDefault(); done(true); } if (ev.key === "Escape"){ ev.preventDefault(); ev.stopPropagation(); done(false); } });
+        nm.addEventListener("blur", () => { if (nm.isContentEditable) done(true); }, { once: true });
+      });
+      const cmp = document.createElement("button"); cmp.type = "button"; cmp.className = "btn"; cmp.textContent = "Compare";
+      const nd = new Set(items.map(x => x.d)).size; cmp.disabled = nd < 2; cmp.title = nd < 2 ? "Add passages from at least two documents to compare them" : "Open this issue's passages side by side, one document per pane";
+      cmp.addEventListener("click", () => compareIssue(is));
+      const del = document.createElement("button"); del.type = "button"; del.className = "btn ghost iconbtn"; del.title = "Delete this issue"; del.setAttribute("aria-label", "Delete issue " + is.name);
+      del.innerHTML = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+      del.addEventListener("click", async () => {
+        if (!(await askConfirm("Delete the issue " + is.name + "?", "The passages and their marks stay; they are just no longer grouped under this issue.", "Delete issue"))) return;
+        pushXUndo(); const X2 = xref(); X2.issues = X2.issues.filter(i => i !== is);
+        docs.forEach(d => { let ch = false; marksOf(d).forEach(m => { if ((m.issues || []).includes(is.id)){ m.issues = m.issues.filter(i => i !== is.id); ch = true; } }); if (ch) marksChanged(d); });
+        xrefChanged();
+      });
+      head.append(tog, cmp, del); sec.appendChild(head);
+      if (!items.length){ const p = document.createElement("p"); p.className = "nempty"; p.style.padding = "0 6px 4px"; p.textContent = "No passages yet. Select text in any document and press I."; sec.appendChild(p); }
+      items.forEach(({ d, m }) => {
+        const b = document.createElement("button"); b.type = "button"; b.className = "nitem t-" + m.type + (selMark && selMark.id === m.id ? " sel" : "");
+        if (m.type === "hl") b.style.setProperty("--hl", HL[m.color] || HL.yellow);
+        if (m.type === "ref") b.style.setProperty("--hl", is.color);
+        const meta = document.createElement("span"); meta.className = "nmeta";
+        const k = document.createElement("span"); k.className = "nkind"; k.textContent = kindLabel(kindOf(d)); meta.appendChild(k);
+        meta.appendChild(document.createTextNode(" · " + d.name + " · p " + m.page + (m.type === "adm" || m.type === "dis" ? " · " + TYPE_NAME[m.type] : "") + (linksOfMark(d, m).length ? " · " + linksOfMark(d, m).length + " linked" : "")));
+        const q = document.createElement("span"); q.className = "nq"; q.textContent = m.text;
+        b.append(meta, q);
+        if (m.comment){ const c = document.createElement("span"); c.className = "ncom"; c.textContent = m.comment; b.appendChild(c); }
+        b.title = "Show on the page. Drag onto the workspace to make a card.";
+        b.addEventListener("click", () => revealMark(d, m));
+        b.draggable = true;
+        b.addEventListener("dragstart", ev => { ev.dataTransfer.effectAllowed = "copy"; ev.dataTransfer.setData("application/x-pdfr-mark", JSON.stringify({ doc: docRef(d), id: m.id })); ev.dataTransfer.setData("text/plain", m.text); });
+        sec.appendChild(b);
+      });
+      box.appendChild(sec);
+    });
+    box.scrollTop = keep;
+    if (notesState.focusIssue){
+      const sec = box.querySelector('[data-issue="' + notesState.focusIssue + '"]'); notesState.focusIssue = null;
+      if (sec){ sec.classList.remove("closed"); closedIssues.delete(sec.dataset.issue); sec.scrollIntoView({ block: "start" }); }
+    }
+  }
+  async function compareIssue(is){
+    const items = issuePassages(is), firsts = [];
+    items.forEach(x => { if (!firsts.some(f => f.d === x.d)) firsts.push(x); });
+    const pick = firsts.slice(0, 3); if (!pick.length) return;
+    hideMarkBar();
+    /* three documents side by side need the room: the sidebar folds away (Ctrl+\\ brings it back) */
+    let folded = false;
+    if (pick.length === 3 && !$("app").classList.contains("collapsed") && !window.matchMedia("(max-width: 700px)").matches){ setCollapsed(true); folded = true; await new Promise(r => setTimeout(r, 260)); }
+    setPaneCount(Math.max(1, pick.length)); visiblePanes().forEach(p => p.clear());
+    for (let i = 0; i < pick.length; i++){
+      const pn = panes[i], x = pick[i];
+      await pn.show(x.d); if (pn.doc !== x.d) continue;
+      /* zoom each pane so the passage fills its width, then bring it into view */
+      const xe = x.m.rects.map(r => r[0] + r[2]);
+      const rx = 0, rw = Math.min(1, Math.max(...xe) + 0.03);  /* from the page edge, so the link tags in the margin stay in view */
+      const bw = (await x.d.pdf.getPage(x.m.page)).getViewport({ scale: 1 }).width;
+      pn.fit = false; pn.scale = Math.max(0.35 * UNITS, Math.min(1.6 * UNITS, (pn.stage.clientWidth - 56) / (rw * bw)));
+      await pn.layout(false, { page: x.m.page, offset: 0 });
+      await revealOn(pn, x.d, x.m, true);
+      const el = pn.stage.querySelector('.page[data-n="' + x.m.page + '"]'); if (el) pn.stage.scrollLeft = Math.max(0, el.offsetLeft - 8);
+    }
+    toast(is.name + ": " + pick.map(x => x.d.name).join(", ") + "." + (firsts.length > 3 ? " Showing 3 of " + firsts.length + " documents." : "") + (folded ? " The sidebar is hidden to make room; Ctrl+\\ shows it." : ""));
+  }
+  function copyIssues(){
+    const X = xref(), ds = scopeDocs(), rowsAll = [];
+    X.issues.forEach(is => { const items = issuePassages(is, ds); if (items.length) rowsAll.push({ is, items }); });
+    if (!rowsAll.length){ toast("There are no passages under any issue yet."); return; }
+    const head = ["Document", "Type", "Page", "Passage", "Status", "Linked to"];
+    const base = "border:1px solid #9aa0a6;padding:4px 6px;vertical-align:top;font-family:Arial,sans-serif;font-size:10pt;";
+    let html = '<p style="font-family:Arial,sans-serif;font-size:11pt"><b>Issues and cross-references</b>' + (notesState.proj ? "<br>" + escHtml(notesState.proj.name) : "") + "</p><table style=\"border-collapse:collapse;width:100%\"><tr>" +
+      head.map(h => '<th style="' + base + 'background:#eceff1;text-align:left">' + escHtml(h) + "</th>").join("") + "</tr>";
+    const lines = ["Issues and cross-references", head.join("\t")];
+    rowsAll.forEach(({ is, items }) => {
+      html += '<tr><td colspan="6" style="' + base + 'background:#f5f7fb;font-weight:bold;font-size:10.5pt">' + escHtml(is.name) + "</td></tr>";
+      lines.push("", is.name.toUpperCase());
+      items.forEach(({ d, m }) => {
+        const st = m.type === "adm" || m.type === "dis" ? TYPE_NAME[m.type] : "";
+        const ln = linksOfMark(d, m).map(o => { const f = epInfo(o.other); return f.name.replace(/\.pdf$/i, "") + " p " + f.page; }).join("; ");
+        const cells = [d.name.replace(/\.pdf$/i, ""), kindLabel(kindOf(d)), String(m.page), m.text + (m.comment ? "\n[" + m.comment + "]" : ""), st, ln];
+        html += "<tr>" + cells.map((c, i) => '<td style="' + base + (i === 4 && c ? (c === "Admitted" ? "color:#17824a;font-weight:bold;" : "color:#c53030;font-weight:bold;") : "") + '">' + escHtml(c).replace(/\n/g, "<br>") + "</td>").join("") + "</tr>";
+        lines.push(cells.map(c => c.replace(/\s+/g, " ")).join("\t"));
+      });
+    });
+    html += "</table>";
+    copyRich(html, lines.join("\n")).then(() => toast("Copied the issues table. Paste it into Word or Outlook.")).catch(e => toast("Could not copy: " + errText(e)));
   }
 
   /* ---- Workspace: a board beside the documents for excerpts, notes and headings, joined by links.
@@ -1857,7 +2242,7 @@ body.has-wintitle .bundle{top:36px}
     const P = notesState.proj; clearTimeout(notesState.projT); notesState.projT = 0;
     if (!P || !window.pdfReader) return;
     P.view = { panes: paneCount, docs: visiblePanes().map(p => (p.doc && p.doc.path) || "") };
-    const data = { app: "PDF Reader", name: P.name, created: P.created, docs: P.docs.map(e => ({ id: e.id, name: e.name, abs: e.abs, rel: e.rel })), notes: P.notes, view: P.view, board: P.board || undefined };
+    const data = { app: "PDF Reader", name: P.name, created: P.created, docs: P.docs.map(e => ({ id: e.id, name: e.name, abs: e.abs, rel: e.rel })), notes: P.notes, view: P.view, board: P.board || undefined, xref: P.xref || undefined };
     try { await window.pdfReader.projectSave(P.path, data); if (P.err) toast("Project saved."); P.err = false; }
     catch(e){ if (!P.err) toast("Could not save the project: " + errText(e)); P.err = true; }
   }
@@ -1893,6 +2278,7 @@ body.has-wintitle .bundle{top:36px}
     notesState.proj = { path: p, name, created: new Date().toISOString(), docs: [], notes: {} };
     /* a workspace started before the project was made moves into it */
     const lb = notesState.looseBoard; if (lb && lb.items.length){ notesState.proj.board = lb; notesState.looseBoard = null; saveLooseSoon(); }
+    const lx = notesState.looseXref; if (lx && (lx.links.length || lx.issues.length || Object.keys(lx.kinds).length)){ notesState.proj.xref = lx; notesState.looseXref = null; saveLooseSoon(); }
     const skipped = docs.filter(d => d.pdf && !canJoin(d)).length;
     const n = addToProject(docs);
     await saveProjectNow(); renderProjBar(); renderList(); notesSoon(); repaintAll();
@@ -1905,7 +2291,7 @@ body.has-wintitle .bundle{top:36px}
     if (notesState.proj) await closeProject();
     const raw = res.project;
     const P = notesState.proj = { path: res.path, name: raw.name || res.path.split(/[\\/]/).pop().replace(/\.pdfrproj$/i, ""), created: raw.created || new Date().toISOString(),
-      docs: raw.docs.map(e => ({ id: e.id || newId(), name: e.name || String(e.abs || "").split(/[\\/]/).pop(), abs: e.abs, rel: e.rel, missing: !!e.missing })), notes: raw.notes || {}, view: raw.view, board: raw.board && Array.isArray(raw.board.items) ? raw.board : null };
+      docs: raw.docs.map(e => ({ id: e.id || newId(), name: e.name || String(e.abs || "").split(/[\\/]/).pop(), abs: e.abs, rel: e.rel, missing: !!e.missing })), notes: raw.notes || {}, view: raw.view, board: raw.board && Array.isArray(raw.board.items) ? raw.board : null, xref: raw.xref && Array.isArray(raw.xref.links) ? Object.assign(newXref(), raw.xref) : null };
     wsSel = null;
     /* marks made on these documents outside the project join the project */
     let merged = false;
@@ -3004,6 +3390,11 @@ body.has-wintitle .bundle{top:36px}
         (pos ? "p. " + pos.page + " of " + d.pdf.numPages : d.pdf.numPages + (d.pdf.numPages === 1 ? " page" : " pages")) + " · " + fmtSize(d.size);
       meta.appendChild(txt);
       if (d.pdf){
+        const kt = document.createElement("span"); const kk = kindOf(d); kt.className = "kindtag k-" + kk; kt.setAttribute("role", "button"); kt.tabIndex = 0;
+        kt.textContent = kindLabel(kk); kt.title = "Document type, used to order cross-references. Click to change.";
+        const openK = e => { e.stopPropagation(); e.preventDefault(); showKindPop(kt, d); };
+        kt.addEventListener("click", openK); kt.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") openK(e); });
+        meta.appendChild(kt);
         let na = 0, nd = 0; marksOf(d).forEach(m => { if (m.type === "adm") na++; else if (m.type === "dis") nd++; });
         if (na || nd){ const f = document.createElement("span"); f.className = "factpill"; f.title = na + " admitted, " + nd + " disputed";
           f.innerHTML = (na ? '<i class="a"></i>' + na : "") + (nd ? '<i class="d"></i>' + nd : ""); meta.appendChild(f); }
@@ -3383,6 +3774,24 @@ body.has-wintitle .bundle{top:36px}
   });
   if (!window.pdfReader) document.body.classList.add("no-desktop");
   else { $("winBar").hidden = false; document.body.classList.add("has-wintitle"); }
+  /* ---- v3.2 wiring: links, issues and document types ---- */
+  $("linkCancel").addEventListener("click", cancelLink);
+  $("mbIssue").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); e.stopPropagation(); addIssueFromBar(); } });
+  $("mbIssue").addEventListener("change", () => { if (issueByName($("mbIssue").value)) addIssueFromBar(); });
+  document.addEventListener("click", e => {
+    const t = e.target.closest && e.target.closest(".mk-tab");
+    if (t){
+      e.preventDefault(); e.stopPropagation();
+      const pane = visiblePanes().find(p => p.stage.contains(t)); if (!pane || !pane.doc) return;
+      const m = marksOf(pane.doc).find(x => x.id === t.dataset.id); if (!m) return;
+      const ln = linksOfMark(pane.doc, m);
+      if (ln.length === 1 && !(m.issues || []).length){ followLink(pane, ln[0].other); return; }
+      showXPop(t, pane, m); return;
+    }
+    if (!$("xPop").hidden && !e.target.closest("#xPop")) $("xPop").hidden = true;
+    if (!$("kindPop").hidden && !e.target.closest("#kindPop") && !e.target.closest(".kindtag")) $("kindPop").hidden = true;
+  }, true);
+  document.addEventListener("scroll", () => { $("xPop").hidden = true; }, true);
   /* ---- v3.1 wiring: workspace ---- */
   $("wsCanvas").addEventListener("pointerdown", wsPointerDown);
   $("wsCanvas").addEventListener("click", wsClick);
@@ -3428,7 +3837,7 @@ body.has-wintitle .bundle{top:36px}
   $("mbComment").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)){ e.preventDefault(); hideMarkBar(); } });
   $("mbComment").addEventListener("blur", () => commitComment());
   document.addEventListener("mouseup", e => {
-    if (e.button !== 0 || !e.target.closest || e.target.closest("#markBar")) return;
+    if (e.button !== 0 || !e.target.closest || e.target.closest("#markBar,.mk-tab,#xPop,#kindPop,#linkBanner")) return;
     /* a selection made in a document shows the bar even if the mouse was let go over a panel */
     const outside = !!e.target.closest("#notes,#ws,.toolbar,.findbar,.organiser,.modal-back,.bundle,.rail");
     const pane = outside ? null : visiblePanes().find(p => p.stage.contains(e.target));
@@ -3451,10 +3860,14 @@ body.has-wintitle .bundle{top:36px}
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "n"){ e.preventDefault(); toggleNotes(); return; }
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "z" && !inField && !(e.target.closest && e.target.closest(".organiser"))){ if (undoMark()) e.preventDefault(); return; }
     if (e.key === "Escape" && !$("projPop").hidden){ e.preventDefault(); e.stopPropagation(); closeProjPop(); $("projBtn").focus(); return; }
+    if (e.key === "Escape" && !$("xPop").hidden){ e.preventDefault(); e.stopPropagation(); $("xPop").hidden = true; return; }
+    if (e.key === "Escape" && !$("kindPop").hidden){ e.preventDefault(); e.stopPropagation(); $("kindPop").hidden = true; return; }
+    if (e.key === "Escape" && pendingLink && $("markBar").hidden){ e.preventDefault(); e.stopPropagation(); cancelLink(); return; }
+    if (!inField && !e.ctrlKey && !e.metaKey && !e.altKey && pendingLink && $("markBar").hidden && e.key.toLowerCase() === "l"){ e.preventDefault(); }
     if ($("markBar").hidden || !barCtx) return;
     if (e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); const s = window.getSelection(); if (barCtx.mode === "new" && s) s.removeAllRanges(); hideMarkBar(); return; }
     if (inField || e.ctrlKey || e.metaKey || e.altKey) return;
-    const k = { a: "adm", d: "dis", h: "hl", c: "comment", w: "ws" }[e.key.toLowerCase()];
+    const k = { a: "adm", d: "dis", h: "hl", c: "comment", w: "ws", l: "link", i: "issue" }[e.key.toLowerCase()];
     if (k){ e.preventDefault(); e.stopPropagation(); barAct(k, "yellow"); return; }
     if ((e.key === "Delete" || e.key === "Backspace") && barCtx.mode === "edit"){ e.preventDefault(); barAct("delete"); }
   }, true);
@@ -3475,6 +3888,7 @@ body.has-wintitle .bundle{top:36px}
     D.notesLoad().then(o => {
       o = (o && typeof o === "object") ? o : {};
       const lb = o["*board"]; delete o["*board"];
+      const lx = o["*xref"]; delete o["*xref"]; if (lx && Array.isArray(lx.links) && !notesState.looseXref) notesState.looseXref = Object.assign(newXref(), lx);
       if (lb && Array.isArray(lb.items) && !(notesState.looseBoard && notesState.looseBoard.items.length)) notesState.looseBoard = lb;
       const early = notesState.loose; notesState.loose = o; notesState.loaded = true;
       Object.keys(early).forEach(k => { if (early[k].length) notesState.loose[k] = (notesState.loose[k] || []).concat(early[k]); });
