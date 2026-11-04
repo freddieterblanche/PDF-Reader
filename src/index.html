@@ -427,6 +427,56 @@ body{font-family:var(--sans);font-size:13.5px;letter-spacing:-.003em;-webkit-fon
 ::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--muted) 38%,transparent);border-radius:10px;border:3px solid transparent;background-clip:content-box}
 ::-webkit-scrollbar-thumb:hover{background-color:color-mix(in srgb,var(--muted) 60%,transparent)}
 ::-webkit-scrollbar-corner{background:transparent}
+
+/* ===== v2.6 bundle maker and appearance switch ===== */
+#themeSeg.seg .btn{background:transparent;border:0;height:26px;width:32px;padding:0;justify-content:center;color:var(--muted)}
+#themeSeg.seg .btn[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+#themeSeg .ic{width:15px;height:15px}
+.bundle{position:fixed;inset:0;z-index:24;background:var(--bg);display:flex;flex-direction:column}
+body.has-wintitle .bundle{top:36px}
+.bundle-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 24px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
+.bundle-head h2{margin:0;font-size:18px;font-weight:650;letter-spacing:-.015em}
+.bundle-head .sub{margin:4px 0 0;color:var(--muted);font-size:13px}
+.bundle-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 320px}
+.bundle-docs{display:flex;flex-direction:column;min-height:0;min-width:0}
+.bundle-actions{display:flex;flex-wrap:wrap;gap:8px;padding:14px 24px 10px;align-items:center}
+.bspacer{flex:1}
+.bundle-list{flex:1;overflow:auto;padding:4px 24px 24px;display:flex;flex-direction:column;gap:6px}
+.bundle-list.dropping{outline:2px dashed var(--accent);outline-offset:-10px;border-radius:12px}
+.bempty{margin:auto;text-align:center;color:var(--muted);max-width:420px;line-height:1.55;padding:40px 0}
+.bempty strong{display:block;color:var(--ink);font-size:15px;margin-bottom:4px}
+.brow{display:grid;grid-template-columns:14px 34px 30px minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:8px 10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;position:relative}
+.brow:hover{border-color:var(--line-strong)}
+.brow.dragging{opacity:.4}
+.brow.drop-before::before,.brow.drop-after::after{content:"";position:absolute;left:8px;right:8px;height:3px;border-radius:2px;background:var(--accent)}
+.brow.drop-before::before{top:-5px}
+.brow.drop-after::after{bottom:-5px}
+.brow .grip{cursor:grab}
+.bnum{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right}
+.bkind{width:26px;height:32px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;letter-spacing:.04em;background:color-mix(in srgb,var(--danger) 12%,var(--surface));color:var(--danger)}
+.bkind.img{background:color-mix(in srgb,var(--accent) 14%,var(--surface));color:var(--accent)}
+.bmain{min-width:0;display:flex;flex-direction:column;gap:2px}
+.bdesc{font:inherit;font-weight:550;color:var(--ink);background:transparent;border:1px solid transparent;border-radius:6px;padding:3px 6px;margin-left:-7px;width:100%}
+.bdesc:hover{border-color:var(--line)}
+.bdesc:focus{border-color:var(--accent);background:var(--surface);outline:none}
+.bmeta{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bmeta.err{color:var(--danger)}
+.brange{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap;text-align:right}
+.bbtns{display:flex;gap:2px}
+.bbtns .iconbtn{width:28px;min-width:28px;height:28px}
+.bundle-side{border-left:1px solid var(--line);background:var(--surface);padding:16px 20px 20px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+.bundle-side h3{margin:8px 0 0;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.bundle-side h3:first-child{margin-top:0}
+.bgrid{display:grid;grid-template-columns:80px minmax(0,1fr);gap:8px 10px;align-items:center}
+.bgrid label{font-size:12.5px;color:var(--muted)}
+.bgrid input,.bgrid select{font:inherit;padding:6px 8px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);color:var(--ink);min-width:0;width:100%}
+.bgrid.off{opacity:.45;pointer-events:none}
+.bpreview{font-size:12.5px;color:var(--muted)}
+.bpreview span{font-family:var(--mono);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:2px 8px;margin-left:4px}
+.bsummary{margin-top:auto;padding-top:12px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);line-height:1.5}
+.bsummary strong{color:var(--ink)}
+.bcreate{height:40px;justify-content:center;font-size:14px}
+@media (max-width:900px){.bundle-body{grid-template-columns:1fr}.bundle-side{border-left:0;border-top:1px solid var(--line)}}
 </style>
 </head>
 <body>
@@ -436,13 +486,13 @@ body{font-family:var(--sans);font-size:13.5px;letter-spacing:-.003em;-webkit-fon
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Documents">
     <div class="rail-head">
-      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v2.5</button>
+      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v2.6</button>
         <button class="btn ghost iconbtn collapse" id="collapseBtn" type="button" aria-label="Hide sidebar" title="Hide sidebar (Ctrl+\)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg></button></div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="rail-title"><h1>Documents</h1><span class="count" id="count">0</span></div>
       <div class="openwrap">
         <button class="btn primary openmain" id="openBtn" type="button" title="Open PDFs (Ctrl+O)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>Open PDFs</button>
-        <div class="openrow"><button class="btn desktop-only" id="recentBtn" type="button" aria-expanded="false" title="Recently opened and pinned documents"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Recent</button><button class="btn" id="combineBtn" type="button" title="Combine open PDFs into one document" hidden><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 4.5-9 4.5-9-4.5z"/><path d="m3 12 9 4.5 9-4.5"/><path d="m3 16.5 9 4.5 9-4.5"/></svg>Combine</button></div>
+        <div class="openrow"><button class="btn desktop-only" id="recentBtn" type="button" aria-expanded="false" title="Recently opened and pinned documents"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Recent</button><button class="btn" id="combineBtn" type="button" title="Bundle maker: combine documents into one numbered bundle" hidden><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>Bundle</button></div>
         <div class="recent-pop" id="recentPop" hidden role="dialog" aria-label="Recent documents">
           <div class="recent-list" id="recentList"></div>
           <div class="recent-foot"><span class="recent-tip">Pin a document to keep it at the top.</span><button class="linkbtn" type="button" id="recentClear">Clear list</button></div>
@@ -455,6 +505,14 @@ body{font-family:var(--sans);font-size:13.5px;letter-spacing:-.003em;-webkit-fon
           <button class="btn" type="button" data-n="1" aria-pressed="true" aria-label="One document">1</button>
           <button class="btn" type="button" data-n="2" aria-pressed="false" aria-label="Two documents side by side">2</button>
           <button class="btn" type="button" data-n="3" aria-pressed="false" aria-label="Three documents side by side">3</button>
+        </div>
+      </div>
+      <div class="viewrow desktop-only">
+        <span class="viewlabel" id="themeLabel">Appearance</span>
+        <div class="seg" id="themeSeg" role="group" aria-labelledby="themeLabel">
+          <button class="btn" type="button" data-theme-src="system" aria-pressed="true" title="Follow Windows" aria-label="System"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></button>
+          <button class="btn" type="button" data-theme-src="light" aria-pressed="false" title="Light" aria-label="Light"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></button>
+          <button class="btn" type="button" data-theme-src="dark" aria-pressed="false" title="Dark" aria-label="Dark"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
         </div>
       </div>
       <label class="check" id="linkWrap" hidden><input type="checkbox" id="linkPages"> Keep page numbers in step</label>
@@ -508,6 +566,45 @@ body{font-family:var(--sans);font-size:13.5px;letter-spacing:-.003em;-webkit-fon
     <p class="sub">Tick the documents to combine. They are joined in the order shown in the sidebar; you can reorder pages before saving.</p>
     <div class="combine-list" id="combineList"></div>
     <div class="foot"><button class="btn" type="button" id="combineNo">Cancel</button><button class="btn primary" type="button" id="combineYes">Combine</button></div>
+  </div>
+</div>
+<div class="bundle" id="bundle" hidden role="dialog" aria-modal="true" aria-labelledby="bundleTitle">
+  <div class="bundle-head">
+    <div><h2 id="bundleTitle">Bundle maker</h2><p class="sub">Add documents, drag them into order, then create one numbered PDF bundle.</p></div>
+    <button class="btn ghost iconbtn" type="button" id="bundleClose" aria-label="Close bundle maker" title="Close (Esc)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+  </div>
+  <div class="bundle-body">
+    <section class="bundle-docs">
+      <div class="bundle-actions">
+        <button class="btn" type="button" id="bAddFiles"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Add files…</button>
+        <button class="btn" type="button" id="bAddFolder"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>Add folder…</button>
+        <button class="btn" type="button" id="bAddOpen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 4.5-9 4.5-9-4.5z"/><path d="m3 12 9 4.5 9-4.5"/><path d="m3 16.5 9 4.5 9-4.5"/></svg>Add open documents</button>
+        <span class="bspacer"></span>
+        <button class="btn ghost" type="button" id="bSort" title="Sort documents by file name"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M11 4h10"/><path d="M11 8h7"/><path d="M11 12h4"/></svg>Sort by name</button>
+        <button class="btn ghost" type="button" id="bClear">Clear</button>
+      </div>
+      <div class="bundle-list" id="bList" aria-label="Documents in the bundle"></div>
+    </section>
+    <aside class="bundle-side">
+      <h3>Bates numbering</h3>
+      <label class="check"><input type="checkbox" id="bBates" checked> Number every page</label>
+      <div class="bgrid" id="bBatesOpts">
+        <label for="bPrefix">Prefix</label><input id="bPrefix" type="text" placeholder="for example ABC">
+        <label for="bStart">Start at</label><input id="bStart" type="number" min="0" value="1">
+        <label for="bDigits">Digits</label><select id="bDigits"><option>1</option><option>3</option><option>4</option><option>5</option><option selected>6</option><option>7</option><option>8</option></select>
+        <label for="bSuffix">Suffix</label><input id="bSuffix" type="text">
+        <label for="bPos">Position</label><select id="bPos"><option value="br">Bottom right</option><option value="bc">Bottom centre</option><option value="bl">Bottom left</option><option value="tr">Top right</option><option value="tc">Top centre</option><option value="tl">Top left</option></select>
+        <label for="bSize">Size</label><select id="bSize"><option>8</option><option>9</option><option selected>10</option><option>11</option><option>12</option><option>14</option></select>
+      </div>
+      <label class="check"><input type="checkbox" id="bBox" checked> White box behind the number</label>
+      <div class="bpreview">Example: <span id="bPreview"></span></div>
+      <h3>Bundle</h3>
+      <label class="check"><input type="checkbox" id="bIndex" checked> Index page at the front</label>
+      <div class="bgrid"><label for="bTitle">Index title</label><input id="bTitle" type="text" value="INDEX"></div>
+      <label class="check"><input type="checkbox" id="bMarks" checked> Bookmark for each document</label>
+      <div class="bsummary" id="bSummary"></div>
+      <button class="btn primary bcreate" type="button" id="bCreate">Create bundle…</button>
+    </aside>
   </div>
 </div>
 <div id="printArea" aria-hidden="true"></div>
@@ -599,6 +696,253 @@ body{font-family:var(--sans);font-size:13.5px;letter-spacing:-.003em;-webkit-fon
       toast("Saved " + saved.split(/[\\/]/).pop() + " in " + dirOf(saved).split(/[\\/]/).pop() + "." + (wasTemp ? " PDF Reader now works from this copy." : ""));
     } catch(e){ toast("Could not save: " + errText(e)); }
   }
+  /* ---- Appearance: system, light or dark ---- */
+  function applyTheme(src){
+    if (src === "light" || src === "dark") document.documentElement.dataset.theme = src; else delete document.documentElement.dataset.theme;
+    document.querySelectorAll("#themeSeg [data-theme-src]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.themeSrc === src)));
+    try { localStorage.setItem("theme", src); } catch(e){}
+    if (window.pdfReader && window.pdfReader.setTheme) window.pdfReader.setTheme(src);
+  }
+
+  /* ---- Bundle maker ---- */
+  const bundle = { items: [], drag: null, key: 1, busy: false };
+  const naturalCmp = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" }).compare;
+  const bOpt = () => ({
+    bates: $("bBates").checked, prefix: ocrText($("bPrefix").value), suffix: ocrText($("bSuffix").value),
+    start: Math.max(0, parseInt($("bStart").value, 10) || 0), digits: parseInt($("bDigits").value, 10) || 6,
+    pos: $("bPos").value, size: parseInt($("bSize").value, 10) || 10, box: $("bBox").checked,
+    index: $("bIndex").checked, title: ocrText($("bTitle").value) || "INDEX", marks: $("bMarks").checked });
+  const bLabel = (o, i) => o.bates ? o.prefix + String(o.start + i).padStart(o.digits, "0") + o.suffix : String(i + 1);
+  function saveBundlePrefs(){ try { const o = bOpt(); localStorage.setItem("bundlePrefs", JSON.stringify(o)); } catch(e){} }
+  function loadBundlePrefs(){
+    try {
+      const o = JSON.parse(localStorage.getItem("bundlePrefs") || "null"); if (!o) return;
+      $("bBates").checked = o.bates !== false; $("bPrefix").value = o.prefix || ""; $("bSuffix").value = o.suffix || "";
+      $("bStart").value = o.start != null ? o.start : 1; $("bDigits").value = String(o.digits || 6); $("bPos").value = o.pos || "br";
+      $("bSize").value = String(o.size || 10); $("bBox").checked = o.box !== false; $("bIndex").checked = o.index !== false;
+      $("bTitle").value = o.title || "INDEX"; $("bMarks").checked = o.marks !== false;
+    } catch(e){}
+  }
+  function openBundle(){
+    if (!window.pdfReader) return;
+    loadBundlePrefs(); $("bundle").hidden = false; renderBundle(); $("bAddFiles").focus();
+  }
+  function closeBundle(){ if (bundle.busy) return; saveBundlePrefs(); $("bundle").hidden = true; }
+  async function countPages(it){
+    try {
+      if (it.doc){ it.pages = it.doc.pdf.numPages; return; }
+      if (it.kind !== "pdf"){ it.pages = 1; return; }
+      const bytes = await window.pdfReader.bundleRead(it.path);
+      const doc = await lib.getDocument({ data: bytes }).promise; it.pages = doc.numPages; doc.destroy();
+    } catch(e){ it.pages = 0; it.error = "Could not be read as a PDF"; }
+  }
+  async function addBundleItems(list){
+    const have = new Set(bundle.items.map(x => (x.path || "").toLowerCase()));
+    const added = [];
+    for (const f of list){
+      if (f.path && have.has(f.path.toLowerCase())) continue;
+      const it = { key: bundle.key++, path: f.path || "", name: f.name, folder: f.folder || "", kind: f.kind || "pdf", doc: f.doc || null,
+        desc: (f.desc || f.name).replace(/\.(pdf|jpe?g|png)$/i, ""), pages: null, error: "" };
+      bundle.items.push(it); added.push(it); if (it.path) have.add(it.path.toLowerCase());
+    }
+    renderBundle();
+    for (const it of added){ await countPages(it); renderBundle(); }
+    return added.length;
+  }
+  function moveBundle(keys, targetKey, after){
+    const moving = bundle.items.filter(x => keys.includes(x.key));
+    if (targetKey !== null && moving.some(x => x.key === targetKey)) return renderBundle();
+    const rest = bundle.items.filter(x => !moving.includes(x));
+    const at = targetKey === null ? rest.length : rest.findIndex(x => x.key === targetKey) + (after ? 1 : 0);
+    rest.splice(at, 0, ...moving); bundle.items = rest; renderBundle();
+  }
+  function renderBundle(){
+    const box = $("bList"), o = bOpt();
+    $("bBatesOpts").classList.toggle("off", !o.bates);
+    $("bPreview").textContent = o.bates ? bLabel(o, 0) : "1";
+    const active = document.activeElement && document.activeElement.classList.contains("bdesc") ? document.activeElement.dataset.key : null;
+    box.innerHTML = "";
+    if (!bundle.items.length){
+      box.innerHTML = '<div class="bempty"><strong>No documents yet</strong>Use Add files or Add folder, or drag PDFs here from File Explorer. Then drag the documents into the order you want.</div>';
+    }
+    const idxPages = o.index && bundle.items.length ? planIndexCount(bundle.items.length) : 0;
+    let p = idxPages;
+    bundle.items.forEach((it, i) => {
+      const row = document.createElement("div"); row.className = "brow"; row.draggable = true; row.dataset.key = it.key;
+      const start = p, end = p + (it.pages || 0) - 1; if (it.pages) p += it.pages;
+      row.innerHTML = '<span class="grip" aria-hidden="true"></span><span class="bnum"></span><span class="bkind"></span>' +
+        '<div class="bmain"><input class="bdesc" type="text" aria-label="Description in the index"><span class="bmeta"></span></div>' +
+        '<span class="brange"></span><span class="bbtns"></span>';
+      row.querySelector(".bnum").textContent = (i + 1) + ".";
+      const k = row.querySelector(".bkind"); k.textContent = it.kind === "pdf" ? "PDF" : "IMG"; if (it.kind !== "pdf") k.classList.add("img");
+      const inp = row.querySelector(".bdesc"); inp.value = it.desc; inp.dataset.key = it.key; inp.title = "Description used in the index. Click to edit.";
+      inp.addEventListener("input", () => { it.desc = inp.value; });
+      inp.addEventListener("keydown", e => { if (e.key === "Enter") inp.blur(); });
+      const meta = row.querySelector(".bmeta");
+      if (it.error){ meta.textContent = it.error; meta.classList.add("err"); }
+      else meta.textContent = (it.pages === null ? "Counting pages…" : it.pages + (it.pages === 1 ? " page" : " pages")) + " · " + (it.doc ? "open document" : it.name + (it.folder ? " · " + it.folder : ""));
+      meta.title = it.path || it.name;
+      row.querySelector(".brange").textContent = it.pages ? (it.pages === 1 ? bLabel(o, start) : bLabel(o, start) + " to " + bLabel(o, end)) : "";
+      const btns = row.querySelector(".bbtns");
+      const mk = (svg, label, fn, dis) => { const b = document.createElement("button"); b.type = "button"; b.className = "btn ghost iconbtn"; b.innerHTML = svg; b.title = label; b.setAttribute("aria-label", label + ": " + it.desc); b.disabled = !!dis; b.addEventListener("click", fn); btns.appendChild(b); };
+      mk(UP_IC, "Move up", () => moveBundle([it.key], bundle.items[i - 1].key, false), i === 0);
+      mk(DOWN_IC, "Move down", () => moveBundle([it.key], bundle.items[i + 1].key, true), i === bundle.items.length - 1);
+      mk(X_IC, "Remove", () => { bundle.items = bundle.items.filter(x => x !== it); renderBundle(); });
+      row.addEventListener("dragstart", e => { if (e.target.closest(".bdesc")) { e.preventDefault(); return; } bundle.drag = it.key; row.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", "bundle"); });
+      row.addEventListener("dragend", () => { bundle.drag = null; box.querySelectorAll(".dragging,.drop-before,.drop-after").forEach(x => x.classList.remove("dragging","drop-before","drop-after")); });
+      row.addEventListener("dragover", e => {
+        if (bundle.drag === null) return; e.preventDefault(); e.stopPropagation();
+        const r = row.getBoundingClientRect(), after = e.clientY > r.top + r.height / 2;
+        box.querySelectorAll(".drop-before,.drop-after").forEach(x => x.classList.remove("drop-before","drop-after"));
+        row.classList.add(after ? "drop-after" : "drop-before"); row.dataset.after = after ? "1" : "";
+      });
+      row.addEventListener("drop", e => { if (bundle.drag === null) return; e.preventDefault(); e.stopPropagation(); const k2 = bundle.drag; bundle.drag = null; moveBundle([k2], it.key, !!row.dataset.after); });
+      box.appendChild(row);
+    });
+    if (active){ const el = box.querySelector('.bdesc[data-key="' + active + '"]'); if (el) el.focus(); }
+    const total = p, docsN = bundle.items.length, bad = bundle.items.filter(x => x.error).length, counting = bundle.items.some(x => x.pages === null);
+    $("bSummary").innerHTML = docsN
+      ? "<strong>" + docsN + (docsN === 1 ? " document" : " documents") + "</strong>, " + (counting ? "counting pages…" : "<strong>" + total + " pages</strong>" + (idxPages ? " including the index" : "")) +
+        (o.bates && total && !counting ? "<br>Numbered " + bLabel(o, 0) + " to " + bLabel(o, total - 1) : "") + (bad ? "<br>" + bad + " could not be read and will be left out." : "")
+      : "Add documents to begin.";
+    $("bCreate").disabled = bundle.busy || !docsN || counting || bad === docsN;
+  }
+  /* index layout: rows of wrapped descriptions on A4 pages */
+  const A4 = [595.28, 841.89], IDX = { top: 70, margin: 56, line: 14, size: 10.5, rowGap: 8, numW: 36, rangeW: 150 };
+  function wrapText(text, font, size, width){
+    const words = String(text).split(/\s+/).filter(Boolean), lines = []; let cur = "";
+    words.forEach(w => {
+      const t = cur ? cur + " " + w : w;
+      if (font.widthOfTextAtSize(t, size) <= width || !cur) cur = t; else { lines.push(cur); cur = w; }
+    });
+    if (cur) lines.push(cur);
+    return lines.length ? lines : [""];
+  }
+  function planIndex(items, font){
+    const descW = A4[0] - IDX.margin * 2 - IDX.numW - IDX.rangeW - 12, pages = [[]];
+    let y = A4[1] - IDX.top - 60;
+    items.forEach((it, i) => {
+      const lines = wrapText(ocrText(it.desc) || ocrText(it.name), font, IDX.size, descW);
+      const h = lines.length * IDX.line + IDX.rowGap;
+      if (y - h < IDX.margin + 20){ pages.push([]); y = A4[1] - IDX.top - 40; }
+      pages[pages.length - 1].push({ i, lines }); y -= h;
+    });
+    return pages;
+  }
+  function planIndexCount(){  /* on-screen estimate; the bundle itself uses the exact layout */
+    let pages = 1, y = A4[1] - IDX.top - 60;
+    bundle.items.forEach(it => {
+      const h = Math.max(1, Math.ceil((it.desc || it.name).length / 62)) * IDX.line + IDX.rowGap;
+      if (y - h < IDX.margin + 20){ pages++; y = A4[1] - IDX.top - 40; }
+      y -= h;
+    });
+    return pages;
+  }
+  function stampPlace(page, tw, th, pos, m){
+    const cb = page.getCropBox(), rot = ((page.getRotation().angle % 360) + 360) % 360;
+    const dw = rot % 180 ? cb.height : cb.width, dh = rot % 180 ? cb.width : cb.height;
+    const px = pos[1] === "l" ? m : pos[1] === "c" ? (dw - tw) / 2 : dw - m - tw;
+    const py = pos[0] === "b" ? m : dh - m - th;
+    const map = (dx, dy) => rot === 90 ? [cb.x + cb.width - dy, cb.y + dx] : rot === 180 ? [cb.x + cb.width - dx, cb.y + cb.height - dy] : rot === 270 ? [cb.x + dy, cb.y + cb.height - dx] : [cb.x + dx, cb.y + dy];
+    return { map, px, py, rot };
+  }
+  async function buildBundle(items, o, progress){
+    const { PDFDocument, StandardFonts, rgb, degrees, PDFName, PDFHexString, PDFNull } = PDFLib;
+    const out = await PDFDocument.create();
+    const font = await out.embedFont(StandardFonts.Helvetica), bold = await out.embedFont(StandardFonts.HelveticaBold);
+    const plan = o.index ? planIndex(items, font) : [];
+    const idxPages = plan.map(() => out.addPage(A4));
+    for (let k = 0; k < items.length; k++){
+      const it = items[k]; progress("Adding " + (k + 1) + " of " + items.length + ": " + it.desc);
+      it.start = out.getPageCount();
+      if (it.kind === "pdf"){
+        const bytes = it.doc ? await it.doc.pdf.getData() : await window.pdfReader.bundleRead(it.path);
+        const src = await PDFDocument.load(bytes, { ignoreEncryption: true });
+        (await out.copyPages(src, src.getPageIndices())).forEach(pg => out.addPage(pg));
+      } else {
+        const bytes = await window.pdfReader.bundleRead(it.path);
+        const img = it.kind === "png" ? await out.embedPng(bytes) : await out.embedJpg(bytes);
+        const land = img.width > img.height, size = land ? [A4[1], A4[0]] : A4, m = 36;
+        const sc = Math.min((size[0] - 2 * m) / img.width, (size[1] - 2 * m) / img.height, 1.5);
+        const pg = out.addPage(size), w = img.width * sc, h = img.height * sc;
+        pg.drawImage(img, { x: (size[0] - w) / 2, y: (size[1] - h) / 2, width: w, height: h });
+      }
+      it.end = out.getPageCount() - 1;
+    }
+    const total = out.getPageCount();
+    if (o.bates){
+      progress("Numbering " + total + " pages…");
+      for (let i = 0; i < total; i++){
+        const page = out.getPage(i), text = bLabel(o, i), tw = bold.widthOfTextAtSize(text, o.size), th = o.size * 0.72;
+        const { map, px, py, rot } = stampPlace(page, tw, th, o.pos, 22);
+        if (o.box){ const [bx, by] = map(px - 4, py - 4); page.drawRectangle({ x: bx, y: by, width: tw + 8, height: th + 8, color: rgb(1, 1, 1), rotate: degrees(rot) }); }
+        const [x, y] = map(px, py);
+        page.drawText(text, { x, y, size: o.size, font: bold, color: rgb(0, 0, 0), rotate: degrees(rot) });
+      }
+    }
+    if (plan.length){
+      progress("Writing the index…");
+      const ctx = out.context, descX = IDX.margin + IDX.numW, rangeR = A4[0] - IDX.margin;
+      plan.forEach((rows, pi) => {
+        const pg = idxPages[pi]; let y = A4[1] - IDX.top;
+        if (pi === 0){
+          const tw = bold.widthOfTextAtSize(o.title, 14); pg.drawText(o.title, { x: (A4[0] - tw) / 2, y, size: 14, font: bold }); y -= 36;
+        } else y -= 16;
+        pg.drawText("No.", { x: IDX.margin, y, size: 9.5, font: bold }); pg.drawText("Description", { x: descX, y, size: 9.5, font: bold });
+        const ph = o.bates ? "Pages" : "Page"; pg.drawText(ph, { x: rangeR - bold.widthOfTextAtSize(ph, 9.5), y, size: 9.5, font: bold });
+        y -= 7; pg.drawLine({ start: { x: IDX.margin, y }, end: { x: rangeR, y }, thickness: 0.8, color: rgb(0.2, 0.2, 0.2) }); y -= IDX.line + 2;
+        rows.forEach(r => {
+          const it = items[r.i], top = y + IDX.line;
+          pg.drawText((r.i + 1) + ".", { x: IDX.margin, y, size: IDX.size, font });
+          r.lines.forEach((ln, li) => pg.drawText(ln, { x: descX, y: y - li * IDX.line, size: IDX.size, font }));
+          const range = it.end > it.start ? bLabel(o, it.start) + " to " + bLabel(o, it.end) : bLabel(o, it.start);
+          pg.drawText(range, { x: rangeR - font.widthOfTextAtSize(range, IDX.size), y, size: IDX.size, font });
+          const bottom = y - (r.lines.length - 1) * IDX.line - 4;
+          const link = ctx.register(ctx.obj({ Type: "Annot", Subtype: "Link", Rect: [IDX.margin, bottom, rangeR, top], Border: [0, 0, 0],
+            Dest: [out.getPage(it.start).ref, "XYZ", null, null, null] }));
+          pg.node.addAnnot(link);
+          y = bottom - IDX.rowGap;
+          pg.drawLine({ start: { x: IDX.margin, y: y + IDX.rowGap / 2 + 2 }, end: { x: rangeR, y: y + IDX.rowGap / 2 + 2 }, thickness: 0.3, color: rgb(0.75, 0.75, 0.75) });
+          y -= IDX.line - 6;
+        });
+      });
+    }
+    if (o.marks){
+      const ctx = out.context, outline = ctx.nextRef();
+      const marks = (plan.length ? [{ title: o.title, page: 0 }] : []).concat(items.map(it => ({ title: (it.desc || it.name) + (o.bates ? "  (" + bLabel(o, it.start) + ")" : ""), page: it.start })));
+      const refs = marks.map(() => ctx.nextRef());
+      marks.forEach((mk, i) => {
+        const d = ctx.obj({ Title: PDFHexString.fromText(mk.title), Parent: outline, Dest: [out.getPage(mk.page).ref, "XYZ", null, null, null] });
+        if (i > 0) d.set(PDFName.of("Prev"), refs[i - 1]);
+        if (i < marks.length - 1) d.set(PDFName.of("Next"), refs[i + 1]);
+        ctx.assign(refs[i], d);
+      });
+      ctx.assign(outline, ctx.obj({ Type: "Outlines", First: refs[0], Last: refs[refs.length - 1], Count: marks.length }));
+      out.catalog.set(PDFName.of("Outlines"), outline);
+      out.catalog.set(PDFName.of("PageMode"), PDFName.of("UseOutlines"));
+    }
+    progress("Saving…");
+    return { bytes: await out.save({ useObjectStreams: true }), total };
+  }
+  async function createBundle(){
+    const D = window.pdfReader, o = bOpt(), items = bundle.items.filter(x => !x.error && x.pages);
+    if (!items.length) return;
+    saveBundlePrefs();
+    const first = items.find(x => x.folder) || {};
+    const path = await D.saveDialog({ title: "Save the bundle", defaultPath: joinPath(first.folder || "", (o.prefix ? o.prefix.trim() + " " : "") + "Bundle.pdf") });
+    if (!path) return;
+    bundle.busy = true; $("bCreate").disabled = true; $("bCreate").textContent = "Creating…";
+    try {
+      const { bytes, total } = await buildBundle(items, o, msg => { $("bSummary").textContent = msg; });
+      const saved = await D.writePdf({ path, data: bytes.slice(), mode: "new" });
+      bundle.busy = false; $("bundle").hidden = true;
+      await openSaved(saved, bytes, active);
+      toast("Bundle created: " + total + " pages" + (o.bates ? ", numbered " + bLabel(o, 0) + " to " + bLabel(o, total - 1) : "") + ". Saved as " + saved.split(/[\\/]/).pop() + ".");
+    } catch(e){
+      bundle.busy = false; toast("Could not create the bundle: " + errText(e));
+    } finally { $("bCreate").textContent = "Create bundle…"; renderBundle(); }
+  }
+
   /* ---- Recent documents ---- */
   let recentCache = [];
   function whenText(t){
@@ -668,6 +1012,7 @@ body{font-family:var(--sans);font-size:13.5px;letter-spacing:-.003em;-webkit-fon
   try { customNames = JSON.parse(localStorage.getItem(NAME_KEY) || "{}") || {}; } catch(e){ customNames = {}; }
   function saveNames(){ try { localStorage.setItem(NAME_KEY, JSON.stringify(customNames)); } catch(e){} }
 
+  const UP_IC = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>', DOWN_IC = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>', X_IC = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
   const UNITS = 96 / 72;  /* PDF points to screen pixels: 100% shows a page at its printed size */
   class Pane {
     constructor(label){
@@ -1528,7 +1873,42 @@ body{font-family:var(--sans);font-size:13.5px;letter-spacing:-.003em;-webkit-fon
     const items = []; chosen.forEach(d => { for (let i = 0; i < d.pdf.numPages; i++) items.push({ key: orgKey++, src: d, idx: i, rot: 0 }); });
     new Organiser(active, items, { title: "Combine " + chosen.length + " documents", doc: null, dirty: true });
   });
-  $("combineBtn").addEventListener("click", openCombine);
+  $("combineBtn").addEventListener("click", openBundle);
+  $("bundleClose").addEventListener("click", closeBundle);
+  $("bAddFiles").addEventListener("click", async () => addBundleItems(await window.pdfReader.bundlePickFiles()));
+  $("bAddFolder").addEventListener("click", async () => {
+    const r = await window.pdfReader.bundlePickFolder(); if (!r.folder) return;
+    const n = await addBundleItems(r.files);
+    toast(r.files.length ? "Added " + n + (n === 1 ? " PDF" : " PDFs") + " from " + r.folder.split(/[\/]/).pop() + ", in file-name order." : "That folder has no PDFs in it.");
+  });
+  $("bAddOpen").addEventListener("click", () => {
+    const list = docs.filter(d => d.pdf).map(d => ({ path: d.path, name: d.orig, desc: d.name, folder: dirOf(d.path), kind: "pdf", doc: d }));
+    if (!list.length){ toast("No documents are open."); return; }
+    addBundleItems(list);
+  });
+  $("bSort").addEventListener("click", () => { bundle.items.sort((a, b) => naturalCmp(a.name, b.name)); renderBundle(); });
+  $("bClear").addEventListener("click", async () => { if (bundle.items.length && await askConfirm("Clear the bundle?", "This removes every document from the list. Your files are not affected.", "Clear")) { bundle.items = []; renderBundle(); } });
+  $("bCreate").addEventListener("click", createBundle);
+  ["bBates","bPrefix","bStart","bDigits","bSuffix","bPos","bSize","bBox","bIndex","bTitle","bMarks"].forEach(id => $(id).addEventListener(id === "bPrefix" || id === "bSuffix" || id === "bTitle" ? "input" : "change", () => { renderBundle(); saveBundlePrefs(); }));
+  const bl = $("bList");
+  bl.addEventListener("dragover", e => {
+    if (bundle.drag !== null){ e.preventDefault(); e.stopPropagation(); return; }
+    if (e.dataTransfer && [...e.dataTransfer.types].includes("Files")){ e.preventDefault(); e.stopPropagation(); bl.classList.add("dropping"); }
+  });
+  bl.addEventListener("dragleave", e => { if (!e.relatedTarget || !bl.contains(e.relatedTarget)) bl.classList.remove("dropping"); });
+  bl.addEventListener("drop", async e => {
+    e.preventDefault(); e.stopPropagation(); bl.classList.remove("dropping");
+    if (bundle.drag !== null){ const k = bundle.drag; bundle.drag = null; moveBundle([k], null, true); return; }
+    const paths = [...(e.dataTransfer.files || [])].map(f => window.pdfReader.pathForFile(f)).filter(Boolean);
+    const ok = await window.pdfReader.bundleAllow(paths);
+    if (paths.length && !ok.length) toast("Only PDF, JPG and PNG files can be added to a bundle.");
+    addBundleItems(ok);
+  });
+  $("bundle").addEventListener("dragover", e => { if (e.dataTransfer && [...e.dataTransfer.types].includes("Files")) { e.preventDefault(); e.stopPropagation(); } });
+  $("bundle").addEventListener("drop", e => { e.preventDefault(); e.stopPropagation(); });
+  /* appearance */
+  document.querySelectorAll("#themeSeg [data-theme-src]").forEach(b => b.addEventListener("click", () => applyTheme(b.dataset.themeSrc)));
+  { let t = "system"; try { t = localStorage.getItem("theme") || "system"; } catch(e){} applyTheme(t); }
 
   function renderList(force){
     if (editingDoc && !force) return;  /* don't rebuild the list while a name is being typed */
@@ -1853,6 +2233,7 @@ body{font-family:var(--sans);font-size:13.5px;letter-spacing:-.003em;-webkit-fon
   document.addEventListener("dragend", () => panes.forEach(q => q.el.classList.remove("dropping")));
   rail.addEventListener("dragover", () => panes.forEach(q => q.el.classList.remove("dropping")));
   document.addEventListener("keydown", e => {
+    if (!$("bundle").hidden && $("confirmModal").hidden){ if (e.key === "Escape"){ e.preventDefault(); closeBundle(); } return; }
     if (!$("confirmModal").hidden || !$("combineModal").hidden){ if (e.key === "Escape" && !$("combineModal").hidden) $("combineModal").hidden = true; return; }
     if (e.target.closest && e.target.closest(".organiser")){ if ((e.ctrlKey || e.metaKey) && /^[pwfo]$/i.test(e.key)) e.preventDefault(); return; }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f" && active.doc && active.doc.pdf){ e.preventDefault(); active.openFind(); return; }

@@ -403,6 +403,45 @@ if (!app.requestSingleInstanceLock()) {
       return [readPdf(r.path)];
     });
 
+    /* Bundle maker: pick files or a whole folder; only files picked here (or opened) can be read */
+    const bundleAllowed = new Set();
+    const bundleKind = p => /\.pdf$/i.test(p) ? "pdf" : /\.jpe?g$/i.test(p) ? "jpg" : /\.png$/i.test(p) ? "png" : "";
+    const naturally = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" }).compare;
+    function bundleMeta(p) {
+      try {
+        const full = path.resolve(String(p)), kind = bundleKind(full);
+        if (!kind || !fs.existsSync(full)) return null;
+        const st = fs.statSync(full); if (!st.isFile()) return null;
+        bundleAllowed.add(full);
+        return { path: full, name: path.basename(full), folder: path.dirname(full), size: st.size, kind };
+      } catch (e) { return null; }
+    }
+    ipcMain.handle("bundle-pick-files", async () => {
+      const r = await dialog.showOpenDialog(win, { title: "Add documents to the bundle", properties: ["openFile", "multiSelections"],
+        filters: [{ name: "PDFs and images", extensions: ["pdf", "jpg", "jpeg", "png"] }] });
+      return r.canceled ? [] : r.filePaths.map(bundleMeta).filter(Boolean);
+    });
+    ipcMain.handle("bundle-pick-folder", async () => {
+      const r = await dialog.showOpenDialog(win, { title: "Add every PDF in a folder", properties: ["openDirectory"] });
+      if (r.canceled || !r.filePaths[0]) return { folder: "", files: [] };
+      const dir = r.filePaths[0];
+      const files = fs.readdirSync(dir).filter(n => /\.pdf$/i.test(n)).sort(naturally).map(n => bundleMeta(path.join(dir, n))).filter(Boolean);
+      return { folder: dir, files };
+    });
+    ipcMain.handle("bundle-allow", (_e, paths) => (Array.isArray(paths) ? paths : []).map(bundleMeta).filter(Boolean));
+    ipcMain.handle("bundle-read", (_e, p) => {
+      const full = path.resolve(String(p));
+      if (!bundleAllowed.has(full) && !known.has(full)) throw new Error("This file was not added to the bundle.");
+      return fs.readFileSync(full);
+    });
+
+    // Appearance: "system", "light" or "dark"; the title bar follows through nativeTheme's "updated" event
+    ipcMain.handle("set-theme", (_e, src) => {
+      nativeTheme.themeSource = ["system", "light", "dark"].includes(src) ? src : "system";
+      if (win) { try { win.setTitleBarOverlay(titleOverlay()); win.setBackgroundColor(titleOverlay().color); } catch (e) {} }
+      return nativeTheme.shouldUseDarkColors;
+    });
+
     ipcMain.handle("app-version", () => app.getVersion());
     ipcMain.handle("check-update", () => checkForUpdate(true));
     ipcMain.handle("install-update", () => installUpdate());
