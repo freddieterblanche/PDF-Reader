@@ -1,7 +1,7 @@
 {
   "name": "pdf-reader",
   "productName": "PDF Reader",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "PDF Reader: side-by-side reading and fast printing",
   "author": "Freddie Terblanche",
   "main": "main.js",
@@ -12,7 +12,8 @@
   "devDependencies": {
     "electron": "33.2.1",
     "electron-builder": "25.1.8",
-    "resedit": "2.0.2"
+    "resedit": "2.0.2",
+    "@pdf-lib/fontkit": "^1.1.1"
   },
   "build": {
     "appId": "za.co.terblanchelaw.pdfreader",

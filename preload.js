@@ -39,6 +39,7 @@ contextBridge.exposeInMainWorld("pdfReader", {
   onOpenProject: cb => ipcRenderer.on("open-project", (_e, p) => cb(p)),
   notesLoad: () => ipcRenderer.invoke("notes-load"),
   notesSave: obj => ipcRenderer.invoke("notes-save", obj),
+  fontRead: name => ipcRenderer.invoke("font-read", name),
   copyRich: (html, text) => ipcRenderer.invoke("copy-rich", html, text),
   appVersion: () => ipcRenderer.invoke("app-version"),
   checkUpdate: () => ipcRenderer.invoke("check-update"),

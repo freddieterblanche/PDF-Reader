@@ -689,6 +689,43 @@ body.has-wintitle .bundle{top:36px}
 .iss-head .iconbtn{width:26px;min-width:26px}
 .iss.closed .nitem{display:none}
 .nitem .nkind{font-family:var(--sans);font-weight:600}
+
+/* v3.3: bundle stamps */
+.bunit{display:flex;align-items:center;gap:8px;min-width:0}
+.bunit input{width:64px;flex:none}
+.bunit span{font-size:12px;color:var(--muted);line-height:1.3}
+.bfont{color:var(--muted);font-size:12px}
+.bnote{margin:2px 0 0;font-size:12px;color:var(--muted);line-height:1.45}
+#bAnnOpts.off,#bAnnNote.off{opacity:.45;pointer-events:none}
+.brow .bann{display:none;width:100%;min-width:0;font:inherit;font-weight:700;font-size:12.5px;text-align:center;padding:5px 4px;border:1px solid var(--line-strong);border-radius:7px;background:var(--bg);color:var(--ink)}
+.bundle-list.ann-on .brow{grid-template-columns:14px 34px 30px 72px minmax(0,1fr) auto auto}
+.bundle-list.ann-on .brow .bann{display:block}
+
+/* v3.3: annexure stamper */
+.stampbar{display:flex;flex-direction:column;gap:6px;padding:8px 14px 10px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--accent) 6%,var(--surface))}
+.sb-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sb-title{font-size:13px}
+.sb-row label{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+.sb-row input[type="text"],.sb-row input[type="number"]{font:inherit;font-size:13px;font-weight:700;height:28px;padding:0 8px;border:1px solid var(--line-strong);border-radius:7px;background:var(--surface);color:var(--ink)}
+.sb-prefix{width:70px} .sb-start{width:58px}
+.sb-size .btn{height:26px;padding:0 10px;border:0;background:transparent;color:var(--muted);font-family:var(--sans);font-size:12.5px}
+.sb-size .btn[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.sb-sp{flex:1}
+.stampbar .btn.primary,.stampbar .btn.ghost{height:30px;padding:0 12px}
+.sb-help{font-size:12px;color:var(--muted);line-height:1.45}
+.sb-list{display:flex;flex-wrap:wrap;gap:4px}
+.sb-list:empty{display:none}
+.sb-chip{height:24px;padding:0 9px;border-radius:12px;border:1px solid var(--line-strong);background:var(--surface);font:inherit;font-size:12px;color:var(--ink);cursor:pointer}
+.sb-chip b{margin-right:4px}
+.sb-chip:hover{border-color:var(--accent);color:var(--accent)}
+.stampLayer{position:absolute;inset:0;z-index:4;pointer-events:none;container-type:size}
+.stp{position:absolute;font-family:Arial,"Liberation Sans",Helvetica,sans-serif;font-weight:700;line-height:1;color:#000;background:#fff;padding:.12em .2em;white-space:nowrap;outline:1.5px dashed rgba(47,91,219,.55);outline-offset:1px}
+.stp.num{outline-color:rgba(100,116,139,.5)}
+.pane.stamping .stage{cursor:copy}
+.pane.stamping .textLayer{pointer-events:none}
+.pane.stamping .stp[data-kind="ann"]{pointer-events:auto;cursor:pointer}
+.pane.stamping .stp[data-kind="ann"]:hover{outline:2px solid var(--danger);text-decoration:line-through}
+.pane.stamping .page:hover{box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 60%,transparent),0 12px 28px rgba(16,24,40,.08)}
 </style>
 </head>
 <body>
@@ -698,7 +735,7 @@ body.has-wintitle .bundle{top:36px}
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Documents">
     <div class="rail-head">
-      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.2</button>
+      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.3</button>
         <button class="btn ghost iconbtn collapse" id="collapseBtn" type="button" aria-label="Hide sidebar" title="Hide sidebar (Ctrl+\)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg></button></div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -852,11 +889,22 @@ body.has-wintitle .bundle{top:36px}
         <label for="bStart">Start at</label><input id="bStart" type="number" min="0" value="1">
         <label for="bDigits">Digits</label><select id="bDigits"><option>1</option><option>3</option><option>4</option><option>5</option><option selected>6</option><option>7</option><option>8</option></select>
         <label for="bSuffix">Suffix</label><input id="bSuffix" type="text">
-        <label for="bPos">Position</label><select id="bPos"><option value="br">Bottom right</option><option value="bc">Bottom centre</option><option value="bl">Bottom left</option><option value="tr">Top right</option><option value="tc">Top centre</option><option value="tl">Top left</option></select>
-        <label for="bSize">Size</label><select id="bSize"><option>8</option><option>9</option><option selected>10</option><option>11</option><option>12</option><option>14</option></select>
+        <label for="bPos">Position</label><select id="bPos"><option value="tr" selected>Top right</option><option value="tc">Top centre</option><option value="tl">Top left</option><option value="br">Bottom right</option><option value="bc">Bottom centre</option><option value="bl">Bottom left</option></select>
+        <label for="bSize">Size</label><select id="bSize"><option value="14">Medium</option><option value="18" selected>Large</option></select>
+        <label for="bEdge">From edges</label><div class="bunit"><input id="bEdge" type="number" min="3" max="40" step="1" value="8"><span>mm from the top and side</span></div>
       </div>
       <label class="check"><input type="checkbox" id="bBox" checked> White box behind the number</label>
-      <div class="bpreview">Example: <span id="bPreview"></span></div>
+      <div class="bpreview">Example: <span id="bPreview"></span> <span class="bfont">in Arial Bold</span></div>
+      <h3>Annexure labels</h3>
+      <label class="check"><input type="checkbox" id="bAnn"> Label each document, for example FA1, FA2</label>
+      <div class="bgrid" id="bAnnOpts">
+        <label for="bAnnPrefix">Prefix</label><input id="bAnnPrefix" type="text" placeholder="for example FA">
+        <label for="bAnnStart">Start at</label><input id="bAnnStart" type="number" min="0" value="1">
+        <label for="bAnnSize">Size</label><select id="bAnnSize"><option value="14">Medium</option><option value="18" selected>Large</option></select>
+        <label for="bAnnTop">From top</label><div class="bunit"><input id="bAnnTop" type="number" min="5" max="90" step="1" value="25"><span>mm, in line with the number on the right</span></div>
+        <label for="bAnnWhere">Pages</label><select id="bAnnWhere"><option value="first">First page of each document</option><option value="all">Every page</option></select>
+      </div>
+      <p class="bnote" id="bAnnNote">Type over any label in the list (for example POC1), or clear it to leave that document unlabelled.</p>
       <h3>Bundle</h3>
       <label class="check"><input type="checkbox" id="bIndex" checked> Index page at the front</label>
       <div class="bgrid"><label for="bTitle">Index title</label><input id="bTitle" type="text" value="INDEX"></div>
@@ -920,6 +968,7 @@ body.has-wintitle .bundle{top:36px}
           <button class="btn ghost" type="button" data-act="find" title="Find in document (Ctrl+F)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span class="tlabel">Find</span></button>
           <button class="btn ghost" type="button" data-act="thumbs" aria-pressed="false" title="Show page thumbnails"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg><span class="tlabel">Pages</span></button>
           <button class="btn ghost desktop-only" type="button" data-act="organise" title="Delete, reorder, rotate, extract, insert and split pages"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg><span class="tlabel">Organise</span></button>
+          <button class="btn ghost desktop-only" type="button" data-act="stamp" aria-pressed="false" title="Annexure stamp: click the pages where annexures start; they are numbered in order"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 22h14"/><path d="M19.27 13.73A2.5 2.5 0 0 0 17.5 13h-11A2.5 2.5 0 0 0 4 15.5V17a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1.5c0-.66-.26-1.3-.73-1.77Z"/><path d="M14 13V8.5C14 7 15 7 15 5a3 3 0 0 0-6 0c0 2 1 2 1 3.5V13"/></svg><span class="tlabel">Stamp</span></button>
           <button class="btn ghost" type="button" data-act="notes" aria-pressed="false" title="Facts and notes: admitted and disputed facts, highlights and comments (Ctrl+Shift+N)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span class="tlabel">Facts</span></button>
           <button class="btn ghost" type="button" data-act="ws" aria-pressed="false" title="Workspace: arrange excerpts, notes and links (Ctrl+Shift+W)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span class="tlabel">Workspace</span></button>
           <span class="tsep" aria-hidden="true"></span>
@@ -935,6 +984,20 @@ body.has-wintitle .bundle{top:36px}
       <button class="btn ghost iconbtn" type="button" data-act="findnext" aria-label="Next match" title="Next match (Enter)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
       <button class="btn ghost iconbtn" type="button" data-act="findclose" aria-label="Close find" title="Close (Esc)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
     </div>
+    <div class="stampbar" hidden>
+      <div class="sb-row">
+        <strong class="sb-title">Annexure stamp</strong>
+        <label>Prefix <input class="sb-prefix" type="text" placeholder="FA" aria-label="Annexure prefix"></label>
+        <label>Start at <input class="sb-start" type="number" min="0" value="1" aria-label="First annexure number"></label>
+        <div class="seg sb-size" role="group" aria-label="Size"><button class="btn" type="button" data-size="14" aria-pressed="false">Medium</button><button class="btn" type="button" data-size="18" aria-pressed="true">Large</button></div>
+        <label class="check"><input type="checkbox" class="sb-num"> Page numbers too</label>
+        <span class="sb-sp"></span>
+        <button class="btn primary" type="button" data-act="stampsave">Save stamped copy…</button>
+        <button class="btn ghost" type="button" data-act="stampclose">Done</button>
+      </div>
+      <div class="sb-help">Click each page where an annexure starts, or press S for the page on screen. The numbers always run in page order: stamp a page you missed and the later annexures renumber themselves. Click a stamp to remove it. Your PDF only changes when you save a stamped copy.</div>
+      <div class="sb-list"></div>
+    </div>
     <div class="body">
       <div class="thumbs" hidden></div>
       <div class="stage" tabindex="-1"></div>
@@ -944,6 +1007,7 @@ body.has-wintitle .bundle{top:36px}
 
 <script src="pdf.min.js"></script>
 <script src="pdf-lib.min.js"></script>
+<script src="fontkit.min.js"></script>
 <script>
 (function(){
   const lib = window.pdfjsLib;
@@ -997,16 +1061,24 @@ body.has-wintitle .bundle{top:36px}
   const bOpt = () => ({
     bates: $("bBates").checked, prefix: ocrText($("bPrefix").value), suffix: ocrText($("bSuffix").value),
     start: Math.max(0, parseInt($("bStart").value, 10) || 0), digits: parseInt($("bDigits").value, 10) || 6,
-    pos: $("bPos").value, size: parseInt($("bSize").value, 10) || 10, box: $("bBox").checked,
+    pos: $("bPos").value, size: parseInt($("bSize").value, 10) || 18, box: $("bBox").checked, v: 2,
+    edge: Math.max(3, Math.min(40, parseFloat($("bEdge").value) || 8)),
+    ann: $("bAnn").checked, annPrefix: ocrText($("bAnnPrefix").value), annStart: Math.max(0, parseInt($("bAnnStart").value, 10) || 0),
+    annSize: parseInt($("bAnnSize").value, 10) || 18, annTop: Math.max(5, Math.min(90, parseFloat($("bAnnTop").value) || 25)), annWhere: $("bAnnWhere").value,
     index: $("bIndex").checked, title: ocrText($("bTitle").value) || "INDEX", marks: $("bMarks").checked });
+  const annLabel = (o, it, i) => it.annSet ? it.ann : o.annPrefix + (o.annStart + i);
+  const mmPt = mm => mm * 72 / 25.4;
   const bLabel = (o, i) => o.bates ? o.prefix + String(o.start + i).padStart(o.digits, "0") + o.suffix : String(i + 1);
   function saveBundlePrefs(){ try { const o = bOpt(); localStorage.setItem("bundlePrefs", JSON.stringify(o)); } catch(e){} }
   function loadBundlePrefs(){
     try {
       const o = JSON.parse(localStorage.getItem("bundlePrefs") || "null"); if (!o) return;
       $("bBates").checked = o.bates !== false; $("bPrefix").value = o.prefix || ""; $("bSuffix").value = o.suffix || "";
-      $("bStart").value = o.start != null ? o.start : 1; $("bDigits").value = String(o.digits || 6); $("bPos").value = o.pos || "br";
-      $("bSize").value = String(o.size || 10); $("bBox").checked = o.box !== false; $("bIndex").checked = o.index !== false;
+      $("bStart").value = o.start != null ? o.start : 1; $("bDigits").value = String(o.digits || 6);
+      /* settings saved before 3.3 used small numbers at the bottom; from 3.3 the default is 18 point at the top right */
+      $("bPos").value = o.v >= 2 ? o.pos || "tr" : "tr"; $("bSize").value = o.v >= 2 && o.size === 14 ? "14" : "18"; $("bEdge").value = o.edge || 8;
+      $("bAnn").checked = !!o.ann; $("bAnnPrefix").value = o.annPrefix || ""; $("bAnnStart").value = o.annStart != null ? o.annStart : 1;
+      $("bAnnSize").value = o.annSize === 14 ? "14" : "18"; $("bAnnTop").value = o.annTop || 25; $("bAnnWhere").value = o.annWhere || "first"; $("bBox").checked = o.box !== false; $("bIndex").checked = o.index !== false;
       $("bTitle").value = o.title || "INDEX"; $("bMarks").checked = o.marks !== false;
     } catch(e){}
   }
@@ -1030,6 +1102,8 @@ body.has-wintitle .bundle{top:36px}
       if (f.path && have.has(f.path.toLowerCase())) continue;
       const it = { key: bundle.key++, path: f.path || "", name: f.name, folder: f.folder || "", kind: f.kind || "pdf", doc: f.doc || null,
         desc: (f.desc || f.name).replace(/\.(pdf|jpe?g|png)$/i, ""), pages: null, error: "" };
+      /* a file name that starts with an annexure label (FA1, POC2, AA3 ...) keeps that label */
+      const lm = String(f.name || "").match(/^([A-Z]{1,4}\s?\d{1,3}[A-Z]?)(?=[\s._-])/); if (lm){ it.ann = lm[1].replace(/\s/, ""); it.annSet = true; }
       bundle.items.push(it); added.push(it); if (it.path) have.add(it.path.toLowerCase());
     }
     renderBundle();
@@ -1046,8 +1120,9 @@ body.has-wintitle .bundle{top:36px}
   function renderBundle(){
     const box = $("bList"), o = bOpt();
     $("bBatesOpts").classList.toggle("off", !o.bates);
+    $("bAnnOpts").classList.toggle("off", !o.ann); $("bAnnNote").classList.toggle("off", !o.ann); $("bList").classList.toggle("ann-on", o.ann);
     $("bPreview").textContent = o.bates ? bLabel(o, 0) : "1";
-    const active = document.activeElement && document.activeElement.classList.contains("bdesc") ? document.activeElement.dataset.key : null;
+    const ae = document.activeElement, active = ae && (ae.classList.contains("bdesc") || ae.classList.contains("bann")) ? ae.dataset.key : null, activeCls = active ? (ae.classList.contains("bann") ? "bann" : "bdesc") : null;
     box.innerHTML = "";
     if (!bundle.items.length){
       box.innerHTML = '<div class="bempty"><strong>No documents yet</strong>Use Add files or Add folder, or drag PDFs here from File Explorer. Then drag the documents into the order you want.</div>';
@@ -1057,7 +1132,7 @@ body.has-wintitle .bundle{top:36px}
     bundle.items.forEach((it, i) => {
       const row = document.createElement("div"); row.className = "brow"; row.draggable = true; row.dataset.key = it.key;
       const start = p, end = p + (it.pages || 0) - 1; if (it.pages) p += it.pages;
-      row.innerHTML = '<span class="grip" aria-hidden="true"></span><span class="bnum"></span><span class="bkind"></span>' +
+      row.innerHTML = '<span class="grip" aria-hidden="true"></span><span class="bnum"></span><span class="bkind"></span><input class="bann" type="text" aria-label="Annexure label">' +
         '<div class="bmain"><input class="bdesc" type="text" aria-label="Description in the index"><span class="bmeta"></span></div>' +
         '<span class="brange"></span><span class="bbtns"></span>';
       row.querySelector(".bnum").textContent = (i + 1) + ".";
@@ -1065,6 +1140,10 @@ body.has-wintitle .bundle{top:36px}
       const inp = row.querySelector(".bdesc"); inp.value = it.desc; inp.dataset.key = it.key; inp.title = "Description used in the index. Click to edit.";
       inp.addEventListener("input", () => { it.desc = inp.value; });
       inp.addEventListener("keydown", e => { if (e.key === "Enter") inp.blur(); });
+      const an = row.querySelector(".bann"); an.value = annLabel(o, it, i); an.dataset.key = it.key;
+      an.title = "Annexure label stamped on this document. Type over it to change it, or clear it to leave this document unlabelled.";
+      an.addEventListener("input", () => { it.ann = ocrText(an.value); it.annSet = true; });
+      an.addEventListener("keydown", e => { if (e.key === "Enter") an.blur(); if (e.key === "Escape"){ e.stopPropagation(); it.annSet = false; renderBundle(); } });
       const meta = row.querySelector(".bmeta");
       if (it.error){ meta.textContent = it.error; meta.classList.add("err"); }
       else meta.textContent = (it.pages === null ? "Counting pages…" : it.pages + (it.pages === 1 ? " page" : " pages")) + " · " + (it.doc ? "open document" : it.name + (it.folder ? " · " + it.folder : ""));
@@ -1075,7 +1154,7 @@ body.has-wintitle .bundle{top:36px}
       mk(UP_IC, "Move up", () => moveBundle([it.key], bundle.items[i - 1].key, false), i === 0);
       mk(DOWN_IC, "Move down", () => moveBundle([it.key], bundle.items[i + 1].key, true), i === bundle.items.length - 1);
       mk(X_IC, "Remove", () => { bundle.items = bundle.items.filter(x => x !== it); renderBundle(); });
-      row.addEventListener("dragstart", e => { if (e.target.closest(".bdesc")) { e.preventDefault(); return; } bundle.drag = it.key; row.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", "bundle"); });
+      row.addEventListener("dragstart", e => { if (e.target.closest(".bdesc,.bann")) { e.preventDefault(); return; } bundle.drag = it.key; row.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", "bundle"); });
       row.addEventListener("dragend", () => { bundle.drag = null; box.querySelectorAll(".dragging,.drop-before,.drop-after").forEach(x => x.classList.remove("dragging","drop-before","drop-after")); });
       row.addEventListener("dragover", e => {
         if (bundle.drag === null) return; e.preventDefault(); e.stopPropagation();
@@ -1086,7 +1165,7 @@ body.has-wintitle .bundle{top:36px}
       row.addEventListener("drop", e => { if (bundle.drag === null) return; e.preventDefault(); e.stopPropagation(); const k2 = bundle.drag; bundle.drag = null; moveBundle([k2], it.key, !!row.dataset.after); });
       box.appendChild(row);
     });
-    if (active){ const el = box.querySelector('.bdesc[data-key="' + active + '"]'); if (el) el.focus(); }
+    if (active){ const el = box.querySelector("." + activeCls + '[data-key="' + active + '"]'); if (el) el.focus(); }
     const total = p, docsN = bundle.items.length, bad = bundle.items.filter(x => x.error).length, counting = bundle.items.some(x => x.pages === null);
     $("bSummary").innerHTML = docsN
       ? "<strong>" + docsN + (docsN === 1 ? " document" : " documents") + "</strong>, " + (counting ? "counting pages…" : "<strong>" + total + " pages</strong>" + (idxPages ? " including the index" : "")) +
@@ -1109,7 +1188,7 @@ body.has-wintitle .bundle{top:36px}
     const descW = A4[0] - IDX.margin * 2 - IDX.numW - IDX.rangeW - 12, pages = [[]];
     let y = A4[1] - IDX.top - 60;
     items.forEach((it, i) => {
-      const lines = wrapText(ocrText(it.desc) || ocrText(it.name), font, IDX.size, descW);
+      const lines = wrapText((it.label ? it.label + "   " : "") + (ocrText(it.desc) || ocrText(it.name)), font, IDX.size, descW);
       const h = lines.length * IDX.line + IDX.rowGap;
       if (y - h < IDX.margin + 20){ pages.push([]); y = A4[1] - IDX.top - 40; }
       pages[pages.length - 1].push({ i, lines }); y -= h;
@@ -1125,18 +1204,29 @@ body.has-wintitle .bundle{top:36px}
     });
     return pages;
   }
-  function stampPlace(page, tw, th, pos, m){
+  function stampPlace(page, tw, th, pos, m, my){
+    if (my === undefined) my = m;
     const cb = page.getCropBox(), rot = ((page.getRotation().angle % 360) + 360) % 360;
     const dw = rot % 180 ? cb.height : cb.width, dh = rot % 180 ? cb.width : cb.height;
     const px = pos[1] === "l" ? m : pos[1] === "c" ? (dw - tw) / 2 : dw - m - tw;
-    const py = pos[0] === "b" ? m : dh - m - th;
+    const py = pos[0] === "b" ? my : dh - my - th;
     const map = (dx, dy) => rot === 90 ? [cb.x + cb.width - dy, cb.y + dx] : rot === 180 ? [cb.x + cb.width - dx, cb.y + cb.height - dy] : rot === 270 ? [cb.x + dy, cb.y + cb.height - dx] : [cb.x + dx, cb.y + dy];
     return { map, px, py, rot };
+  }
+  let arialBold = null;
+  async function stampFont(out){
+    try {
+      if (!arialBold && window.pdfReader && window.fontkit){ const b = await window.pdfReader.fontRead("arial-bold"); if (b) arialBold = new Uint8Array(b); }
+      if (arialBold){ out.registerFontkit(window.fontkit); return await out.embedFont(arialBold, { subset: true }); }
+    } catch(e){}
+    return out.embedFont(PDFLib.StandardFonts.HelveticaBold);  /* looks the same as Arial Bold */
   }
   async function buildBundle(items, o, progress){
     const { PDFDocument, StandardFonts, rgb, degrees, PDFName, PDFHexString, PDFNull } = PDFLib;
     const out = await PDFDocument.create();
     const font = await out.embedFont(StandardFonts.Helvetica), bold = await out.embedFont(StandardFonts.HelveticaBold);
+    const sfont = await stampFont(out);  /* Arial Bold for page numbers and annexure labels */
+    items.forEach((it, i) => { it.label = o.ann ? annLabel(o, it, i) : ""; });
     const plan = o.index ? planIndex(items, font) : [];
     const idxPages = plan.map(() => out.addPage(A4));
     for (let k = 0; k < items.length; k++){
@@ -1160,12 +1250,23 @@ body.has-wintitle .bundle{top:36px}
     if (o.bates){
       progress("Numbering " + total + " pages…");
       for (let i = 0; i < total; i++){
-        const page = out.getPage(i), text = bLabel(o, i), tw = bold.widthOfTextAtSize(text, o.size), th = o.size * 0.72;
-        const { map, px, py, rot } = stampPlace(page, tw, th, o.pos, 22);
-        if (o.box){ const [bx, by] = map(px - 4, py - 4); page.drawRectangle({ x: bx, y: by, width: tw + 8, height: th + 8, color: rgb(1, 1, 1), rotate: degrees(rot) }); }
-        const [x, y] = map(px, py);
-        page.drawText(text, { x, y, size: o.size, font: bold, color: rgb(0, 0, 0), rotate: degrees(rot) });
+        stampText(out.getPage(i), bLabel(o, i), o.size, o.pos, mmPt(o.edge), mmPt(o.edge));
       }
+    }
+    if (o.ann){
+      progress("Labelling the annexures…");
+      items.forEach(it => {
+        if (!it.label) return;
+        const last = o.annWhere === "all" ? it.end : it.start;
+        for (let i = it.start; i <= last; i++) stampText(out.getPage(i), it.label, o.annSize, "tr", mmPt(o.edge), mmPt(o.annTop));
+      });
+    }
+    function stampText(page, text, size, pos, mx, my){
+      const tw = sfont.widthOfTextAtSize(text, size), th = size * 0.72;
+      const { map, px, py, rot } = stampPlace(page, tw, th, pos, mx, my);
+      if (o.box){ const pad = Math.max(3, size * 0.25), [bx, by] = map(px - pad, py - pad); page.drawRectangle({ x: bx, y: by, width: tw + pad * 2, height: th + pad * 2, color: rgb(1, 1, 1), rotate: degrees(rot) }); }
+      const [x, y] = map(px, py);
+      page.drawText(text, { x, y, size, font: sfont, color: rgb(0, 0, 0), rotate: degrees(rot) });
     }
     if (plan.length){
       progress("Writing the index…");
@@ -1196,7 +1297,7 @@ body.has-wintitle .bundle{top:36px}
     }
     if (o.marks){
       const ctx = out.context, outline = ctx.nextRef();
-      const marks = (plan.length ? [{ title: o.title, page: 0 }] : []).concat(items.map(it => ({ title: (it.desc || it.name) + (o.bates ? "  (" + bLabel(o, it.start) + ")" : ""), page: it.start })));
+      const marks = (plan.length ? [{ title: o.title, page: 0 }] : []).concat(items.map(it => ({ title: (it.label ? it.label + "  " : "") + (it.desc || it.name) + (o.bates ? "  (" + bLabel(o, it.start) + ")" : ""), page: it.start })));
       const refs = marks.map(() => ctx.nextRef());
       marks.forEach((mk, i) => {
         const d = ctx.obj({ Title: PDFHexString.fromText(mk.title), Parent: outline, Dest: [out.getPage(mk.page).ref, "XYZ", null, null, null] });
@@ -1224,7 +1325,7 @@ body.has-wintitle .bundle{top:36px}
       const saved = await D.writePdf({ path, data: bytes.slice(), mode: "new" });
       bundle.busy = false; $("bundle").hidden = true;
       await openSaved(saved, bytes, active);
-      toast("Bundle created: " + total + " pages" + (o.bates ? ", numbered " + bLabel(o, 0) + " to " + bLabel(o, total - 1) : "") + ". Saved as " + saved.split(/[\\/]/).pop() + ".");
+      toast("Bundle created: " + total + " pages" + (o.bates ? ", numbered " + bLabel(o, 0) + " to " + bLabel(o, total - 1) : "") + (o.ann ? ", annexures labelled" : "") + ". Saved as " + saved.split(/[\\/]/).pop() + ".");
     } catch(e){
       bundle.busy = false; toast("Could not create the bundle: " + errText(e));
     } finally { $("bCreate").textContent = "Create bundle…"; renderBundle(); }
@@ -1256,7 +1357,7 @@ body.has-wintitle .bundle{top:36px}
     if (!window.pdfReader || !notesState.loaded) return;
     const out = {}; Object.keys(notesState.loose).forEach(k => { if (notesState.loose[k].length) out[k] = notesState.loose[k]; });
     if (notesState.looseBoard && notesState.looseBoard.items.length) out["*board"] = notesState.looseBoard;
-    const lx = notesState.looseXref; if (lx && (lx.links.length || lx.issues.length || Object.keys(lx.kinds).length)) out["*xref"] = lx;
+    const lx = notesState.looseXref; if (lx && (lx.links.length || lx.issues.length || Object.keys(lx.kinds).length || Object.keys(lx.stamps || {}).length)) out["*xref"] = lx;
     window.pdfReader.notesSave(out).catch(e => toast("Could not save your marks: " + errText(e)));
   }
   function saveLooseSoon(){ if (!window.pdfReader) return; clearTimeout(notesState.saveT); notesState.saveT = setTimeout(saveLooseNow, notesState.loaded ? 500 : 1500); }
@@ -1267,7 +1368,7 @@ body.has-wintitle .bundle{top:36px}
   function pushUndo(d){ markUndo.push({ d, before: JSON.stringify(marksOf(d)) }); if (markUndo.length > 60) markUndo.shift(); }
   function undoMark(){
     const u = markUndo.pop(); if (!u) return false;
-    if (u.xref){ const X = xref(), b = JSON.parse(u.before); X.links = b.links; X.issues = b.issues; X.kinds = b.kinds; xrefChanged(); toast("Undone."); return true; }
+    if (u.xref){ const X = xref(), b = JSON.parse(u.before); X.links = b.links; X.issues = b.issues; X.kinds = b.kinds; X.stamps = b.stamps || {}; xrefChanged(); toast("Undone."); return true; }
     if (u.board){ const B = curBoard(), b = JSON.parse(u.before); B.items = b.items; B.links = b.links; wsSel = null; boardChanged(); renderBoard(); toast("Undone."); return true; }
     barCtx = null; $("markBar").hidden = true; selMark = null;
     const arr = marksOf(u.d); arr.splice(0, arr.length, ...JSON.parse(u.before));
@@ -1284,7 +1385,7 @@ body.has-wintitle .bundle{top:36px}
     const d = pane.doc, n = +el.dataset.n;
     const list = d ? marksOf(d).filter(m => m.page === n) : [];
     let layer = el.querySelector(".markLayer");
-    paintTabs(pane, el, list);
+    paintTabs(pane, el, list); paintStamps(pane, el);
     if (!list.length){ if (layer) layer.remove(); return; }
     if (!layer){
       layer = document.createElement("div"); layer.className = "markLayer"; layer.setAttribute("aria-hidden", "true");
@@ -1640,14 +1741,14 @@ body.has-wintitle .bundle{top:36px}
   const ISS_COLORS = ["#2f5bdb", "#e8590c", "#2b8a3e", "#ae3ec9", "#e03131", "#0c8599", "#f08c00", "#5f3dc4"];
   const kindRank = k => { const i = KINDS.findIndex(x => x[0] === k); return i < 0 ? 9 : i; };
   const kindLabel = k => (KINDS.find(x => x[0] === k) || [0, "Other"])[1];
-  const newXref = () => ({ links: [], issues: [], kinds: {} });
+  const newXref = () => ({ links: [], issues: [], kinds: {}, stamps: {} });
   let pendingLink = null;
   function xref(){
     const P = notesState.proj;
     if (P) return P.xref || (P.xref = newXref());
     return notesState.looseXref || (notesState.looseXref = newXref());
   }
-  function xrefChanged(){ boardChanged(); repaintAll(); notesSoon(); renderList(); }
+  function xrefChanged(){ boardChanged(); repaintAll(); notesSoon(); renderList(); visiblePanes().forEach(p => { if (p.stamping) fillStampBar(p); }); }
   function pushXUndo(){ markUndo.push({ xref: true, before: JSON.stringify(xref()) }); if (markUndo.length > 60) markUndo.shift(); }
   function guessKind(name){
     const n = " " + String(name || "").toLowerCase().replace(/\.pdf$/, "") + " ";
@@ -1937,6 +2038,125 @@ body.has-wintitle .bundle{top:36px}
     });
     html += "</table>";
     copyRich(html, lines.join("\n")).then(() => toast("Copied the issues table. Paste it into Word or Outlook.")).catch(e => toast("Could not copy: " + errText(e)));
+  }
+
+  /* ---- Annexure stamper: like a numbering machine. You mark the pages where annexures start; the labels are
+     worked out from page order every time, so they always run in sequence and never repeat. Nothing is written
+     into the PDF until you save a stamped copy, so the original can be restamped at any time. ---- */
+  function stampKey(d){ return docRef(d); }
+  function stampPeek(d){ if (!d) return null; const X = xref(); X.stamps = X.stamps || {}; return X.stamps[stampKey(d)] || (d.path && X.stamps["p:" + lc(d.path)]) || null; }
+  function stampCfg(d){
+    let c = stampPeek(d); if (c) return c;
+    let pr = {}; try { pr = JSON.parse(localStorage.getItem("stampPrefs") || "{}") || {}; } catch(e){}
+    c = { pages: [], prefix: pr.prefix || "", start: 1, size: pr.size === 14 ? 14 : 18, numbers: false };
+    xref().stamps[stampKey(d)] = c; return c;
+  }
+  const stampPages = c => [...new Set(c.pages)].sort((a, b) => a - b);
+  const stampLabel = (c, i) => (c.prefix || "") + (c.start + i);
+  function paintStamps(pane, el){
+    const d = pane.doc, n = +el.dataset.n, c = d && stampPeek(d);
+    let lay = el.querySelector(".stampLayer");
+    const labs = [];
+    if (c){
+      const i = stampPages(c).indexOf(n);
+      if (c.numbers) labs.push({ text: String(n), top: 8, kind: "num" });
+      if (i >= 0) labs.push({ text: stampLabel(c, i), top: 25, kind: "ann" });
+    }
+    if (!labs.length){ if (lay) lay.remove(); return; }
+    if (!lay){ lay = document.createElement("div"); lay.className = "stampLayer"; el.appendChild(lay); }
+    lay.textContent = "";
+    const bw = +el.dataset.bw || 595, bh = +el.dataset.bh || 842;
+    labs.forEach(l => {
+      const t = document.createElement("div"); t.className = "stp" + (l.kind === "num" ? " num" : ""); t.dataset.kind = l.kind; t.textContent = l.text;
+      t.style.right = (mmPt(8) / bw * 100).toFixed(3) + "%"; t.style.top = (mmPt(l.top) / bh * 100).toFixed(3) + "%";
+      t.style.fontSize = (c.size / bw * 100).toFixed(3) + "cqw";
+      if (l.kind === "ann") t.title = "Annexure " + l.text + " (page " + n + "). In stamp mode, click to remove.";
+      lay.appendChild(t);
+    });
+  }
+  function initStampBar(pane){
+    const b = pane.stampbar, q = sel => b.querySelector(sel);
+    const upd = fn => { const d = pane.doc; if (!d || !d.pdf) return; const c = stampCfg(d); pushXUndo(); fn(c);
+      try { localStorage.setItem("stampPrefs", JSON.stringify({ prefix: c.prefix, size: c.size })); } catch(e){}
+      xrefChanged(); fillStampBar(pane); };
+    q(".sb-prefix").addEventListener("input", () => upd(c => { c.prefix = ocrText(q(".sb-prefix").value).replace(/\s+$/, ""); }));
+    q(".sb-start").addEventListener("change", () => upd(c => { c.start = Math.max(0, parseInt(q(".sb-start").value, 10) || 0); }));
+    q(".sb-num").addEventListener("change", () => upd(c => { c.numbers = q(".sb-num").checked; }));
+    q(".sb-size").addEventListener("click", e => { const t = e.target.closest("[data-size]"); if (t) upd(c => { c.size = +t.dataset.size; }); });
+  }
+  function fillStampBar(pane){
+    const b = pane.stampbar, d = pane.doc; if (!d || !d.pdf) return;
+    const c = stampCfg(d), q = sel => b.querySelector(sel);
+    if (document.activeElement !== q(".sb-prefix")) q(".sb-prefix").value = c.prefix;
+    if (document.activeElement !== q(".sb-start")) q(".sb-start").value = c.start;
+    q(".sb-num").checked = !!c.numbers;
+    b.querySelectorAll("[data-size]").forEach(x => x.setAttribute("aria-pressed", String(+x.dataset.size === c.size)));
+    const list = q(".sb-list"); list.textContent = "";
+    stampPages(c).forEach((p, i) => {
+      const ch = document.createElement("button"); ch.type = "button"; ch.className = "sb-chip"; ch.title = "Go to page " + p;
+      ch.innerHTML = "<b></b>"; ch.firstChild.textContent = stampLabel(c, i); ch.appendChild(document.createTextNode("p " + p));
+      ch.addEventListener("click", () => pane.goTo(p, true)); list.appendChild(ch);
+    });
+  }
+  function toggleStamp(pane, on){
+    if (on === undefined) on = !pane.stamping;
+    if (on && (!pane.doc || !pane.doc.pdf)){ toast("Open a document first."); return; }
+    pane.stamping = on; pane.el.classList.toggle("stamping", on); pane.stampbar.hidden = !on;
+    pane.el.querySelector('[data-act="stamp"]').setAttribute("aria-pressed", String(on));
+    if (on){ hideMarkBar(); window.getSelection().removeAllRanges(); fillStampBar(pane); repaintDoc(pane.doc); }
+  }
+  function addStamp(pane, n){
+    const d = pane.doc, c = stampCfg(d);
+    if (c.pages.includes(n)) return;
+    pushXUndo(); c.pages.push(n); xrefChanged(); fillStampBar(pane);
+    const ps = stampPages(c), i = ps.indexOf(n), later = ps.length - 1 - i;
+    toast("Stamped " + stampLabel(c, i) + " on page " + n + "." + (later ? " " + (later === 1 ? stampLabel(c, i + 1) + " was" : stampLabel(c, i + 1) + " to " + stampLabel(c, ps.length - 1) + " were") + " renumbered." : ""));
+  }
+  function removeStamp(pane, n){
+    const d = pane.doc, c = stampCfg(d), ps = stampPages(c), i = ps.indexOf(n); if (i < 0) return;
+    const was = stampLabel(c, i);
+    pushXUndo(); c.pages = c.pages.filter(p => p !== n); xrefChanged(); fillStampBar(pane);
+    toast("Removed " + was + " from page " + n + "." + (i < ps.length - 1 ? " The later annexures moved up one number." : "") + " Ctrl+Z undoes.");
+  }
+  function burnText(page, font, text, size, mx, my){
+    const { rgb, degrees } = PDFLib, tw = font.widthOfTextAtSize(text, size), th = size * 0.72;
+    const { map, px, py, rot } = stampPlace(page, tw, th, "tr", mx, my);
+    const pad = Math.max(3, size * 0.25), [bx, by] = map(px - pad, py - pad);
+    page.drawRectangle({ x: bx, y: by, width: tw + pad * 2, height: th + pad * 2, color: rgb(1, 1, 1), rotate: degrees(rot) });
+    const [x, y] = map(px, py); page.drawText(text, { x, y, size, font, color: rgb(0, 0, 0), rotate: degrees(rot) });
+  }
+  async function saveStamped(pane){
+    const D = window.pdfReader, d = pane.doc; if (!D || !d || !d.pdf) return;
+    const c = stampCfg(d), ps = stampPages(c).filter(p => p <= d.pdf.numPages);
+    if (!ps.length && !c.numbers){ toast("Click the pages where annexures start first."); return; }
+    let last = ""; try { last = localStorage.getItem("lastSaveDir") || ""; } catch(e){}
+    const dir = d.path && !isTempPath(d.path) ? dirOf(d.path) : last;
+    const path = await D.saveDialog({ title: "Save the stamped copy", defaultPath: joinPath(dir, cleanName(d.name) + " (stamped).pdf") });
+    if (!path) return;
+    toast("Stamping…", true);
+    try {
+      const out = await PDFLib.PDFDocument.load(await d.pdf.getData(), { ignoreEncryption: true });
+      const font = await stampFont(out), mx = mmPt(8);
+      if (c.numbers) for (let i = 0; i < out.getPageCount(); i++) burnText(out.getPage(i), font, String(i + 1), c.size, mx, mmPt(8));
+      ps.forEach((p, i) => burnText(out.getPage(p - 1), font, stampLabel(c, i), c.size, mx, mmPt(25)));
+      const saved = await D.writePdf({ path, data: await out.save(), mode: "new" });
+      try { localStorage.setItem("lastSaveDir", dirOf(saved)); } catch(e){}
+      toast("Saved " + saved.split(/[\\/]/).pop() + (ps.length ? " with " + ps.length + (ps.length === 1 ? " annexure (" + stampLabel(c, 0) + ")" : " annexures (" + stampLabel(c, 0) + " to " + stampLabel(c, ps.length - 1) + ")") : "") +
+        ". This document stays unstamped, so you can change the stamps and save again.");
+    } catch(e){ toast("Could not save the stamped copy: " + errText(e)); }
+  }
+  /* after Organise pages is saved over the original: marks and stamps follow their pages; those on deleted pages go */
+  function remapPages(d, items){
+    const map = new Map(); items.forEach((it, i) => { if (it.src === d && !map.has(it.idx + 1)) map.set(it.idx + 1, i + 1); });
+    const arr = marksOf(d); let changed = false;
+    for (let i = arr.length - 1; i >= 0; i--){
+      const np = map.get(arr[i].page);
+      if (np === undefined){ unlinkMark(d, arr[i]); arr.splice(i, 1); changed = true; }
+      else if (np !== arr[i].page){ arr[i].page = np; changed = true; }
+    }
+    const c = stampPeek(d); if (c) c.pages = c.pages.map(p => map.get(p)).filter(Boolean);
+    if (changed) marksChanged(d);
+    if (c) xrefChanged();
   }
 
   /* ---- Workspace: a board beside the documents for excerpts, notes and headings, joined by links.
@@ -2278,7 +2498,7 @@ body.has-wintitle .bundle{top:36px}
     notesState.proj = { path: p, name, created: new Date().toISOString(), docs: [], notes: {} };
     /* a workspace started before the project was made moves into it */
     const lb = notesState.looseBoard; if (lb && lb.items.length){ notesState.proj.board = lb; notesState.looseBoard = null; saveLooseSoon(); }
-    const lx = notesState.looseXref; if (lx && (lx.links.length || lx.issues.length || Object.keys(lx.kinds).length)){ notesState.proj.xref = lx; notesState.looseXref = null; saveLooseSoon(); }
+    const lx = notesState.looseXref; if (lx && (lx.links.length || lx.issues.length || Object.keys(lx.kinds).length || Object.keys(lx.stamps || {}).length)){ notesState.proj.xref = lx; notesState.looseXref = null; saveLooseSoon(); }
     const skipped = docs.filter(d => d.pdf && !canJoin(d)).length;
     const n = addToProject(docs);
     await saveProjectNow(); renderProjBar(); renderList(); notesSoon(); repaintAll();
@@ -2485,11 +2705,12 @@ body.has-wintitle .bundle{top:36px}
         const f = ({ prev:()=>this.goTo(this.page-1), next:()=>this.goTo(this.page+1), in:()=>this.zoom(1.2), out:()=>this.zoom(1/1.2),
            fit:()=>{ this.fit = true; this.layout(true); }, print:()=>openPrint(this), toggle:()=>toggleRail(),
            find:()=>this.openFind(), findnext:()=>this.stepMatch(1), findprev:()=>this.stepMatch(-1), findclose:()=>this.closeFind(),
-           thumbs:()=>this.toggleThumbs(), organise:()=>this.openOrganise(), saveas:()=>saveDocAs(this), notes:()=>toggleNotes(), ws:()=>toggleWs() })[a.dataset.act];
+           thumbs:()=>this.toggleThumbs(), organise:()=>this.openOrganise(), saveas:()=>saveDocAs(this), notes:()=>toggleNotes(), ws:()=>toggleWs(), stamp:()=>toggleStamp(this), stampsave:()=>saveStamped(this), stampclose:()=>toggleStamp(this, false) })[a.dataset.act];
         if (f) f();
       };
       this.el.querySelector(".toolbar").addEventListener("click", onAct);
       this.findbar.addEventListener("click", onAct);
+      this.stampbar = this.el.querySelector(".stampbar"); this.stampbar.addEventListener("click", onAct); initStampBar(this);
       this.findinput.addEventListener("input", () => { clearTimeout(this.findT); this.findT = setTimeout(() => this.runSearch(this.findinput.value), 250); });
       this.findinput.addEventListener("keydown", e => {
         if (e.key === "Enter"){ e.preventDefault(); clearTimeout(this.findT);
@@ -2568,7 +2789,7 @@ body.has-wintitle .bundle{top:36px}
       }
       this.savePos();
       const changed = d !== this.doc;
-      this.doc = d; this.refreshSelect(); renderList(); notesSoon();
+      this.doc = d; this.refreshSelect(); renderList(); notesSoon(); if (this.stamping) fillStampBar(this);
       if (changed && this.find){ this.find = null; this.el.querySelector(".findcount").textContent = ""; if (!this.findbar.hidden && this.findinput.value.trim()) setTimeout(() => this.runSearch(this.findinput.value), 50); }
       if (d.error){ this.stage.innerHTML = '<p class="placeholder err"></p>'; this.stage.firstChild.textContent = "This file could not be opened as a PDF. " + d.error; return; }
       if (!d.pdf){ this.stage.innerHTML = '<p class="placeholder">Opening…</p>'; return; }
@@ -3282,7 +3503,7 @@ body.has-wintitle .bundle{top:36px}
       if (cmd === "save"){
         const d = this.opts.doc; if (!d || !d.path) return;
         if (!this.dirty){ toast("There are no changes to save."); return; }
-        const ok = await askConfirm("Replace the original file?", "This saves your changes over " + d.path.split(/[\\/]/).pop() + ". A backup copy of the original is kept in PDF Reader's backup folder for 30 days." + (marksOf(d).length ? " Your marks on this document are tied to page numbers, so check them after deleting or moving pages." : ""), "Replace original");
+        const ok = await askConfirm("Replace the original file?", "This saves your changes over " + d.path.split(/[\\/]/).pop() + ". A backup copy of the original is kept in PDF Reader's backup folder for 30 days." + (marksOf(d).length ? " Your marks and annexure stamps move with their pages." : ""), "Replace original");
         if (!ok){ this.el.focus(); return; }
         this.setBusy(true, "Saving…");
         try {
@@ -3290,6 +3511,7 @@ body.has-wintitle .bundle{top:36px}
           await D.writePdf({ path: d.path, data: bytes.slice(), mode: "overwrite" });
           const newSize = bytes.byteLength;
           const fresh = await lib.getDocument({ data: bytes }).promise;
+          remapPages(d, this.items);
           const old = d.pdf; d.pdf = fresh; d.size = newSize; d.tc = {}; d.error = null; d.ocr = d.ocr || { status: "done" };
           this.close();
           panes.forEach(p => { if (p.doc === d){ p.thumbDoc = null; p.find = null; p.layout(true); } });
@@ -3344,7 +3566,7 @@ body.has-wintitle .bundle{top:36px}
   $("bSort").addEventListener("click", () => { bundle.items.sort((a, b) => naturalCmp(a.name, b.name)); renderBundle(); });
   $("bClear").addEventListener("click", async () => { if (bundle.items.length && await askConfirm("Clear the bundle?", "This removes every document from the list. Your files are not affected.", "Clear")) { bundle.items = []; renderBundle(); } });
   $("bCreate").addEventListener("click", createBundle);
-  ["bBates","bPrefix","bStart","bDigits","bSuffix","bPos","bSize","bBox","bIndex","bTitle","bMarks"].forEach(id => $(id).addEventListener(id === "bPrefix" || id === "bSuffix" || id === "bTitle" ? "input" : "change", () => { renderBundle(); saveBundlePrefs(); }));
+  ["bBates","bPrefix","bStart","bDigits","bSuffix","bPos","bSize","bBox","bIndex","bTitle","bMarks","bEdge","bAnn","bAnnPrefix","bAnnStart","bAnnSize","bAnnTop","bAnnWhere"].forEach(id => $(id).addEventListener(id === "bPrefix" || id === "bSuffix" || id === "bTitle" || id === "bAnnPrefix" ? "input" : "change", () => { renderBundle(); saveBundlePrefs(); }));
   const bl = $("bList");
   bl.addEventListener("dragover", e => {
     if (bundle.drag !== null){ e.preventDefault(); e.stopPropagation(); return; }
@@ -3774,6 +3996,20 @@ body.has-wintitle .bundle{top:36px}
   });
   if (!window.pdfReader) document.body.classList.add("no-desktop");
   else { $("winBar").hidden = false; document.body.classList.add("has-wintitle"); }
+  /* ---- v3.3 wiring: annexure stamper ---- */
+  document.addEventListener("click", e => {
+    const pane = visiblePanes().find(p => p.stamping && p.stage.contains(e.target)); if (!pane || !pane.doc) return;
+    const pg = e.target.closest(".page"); if (!pg) return;
+    e.preventDefault(); e.stopPropagation();
+    const n = +pg.dataset.n, st = e.target.closest('.stp[data-kind="ann"]');
+    if (st) removeStamp(pane, n); else addStamp(pane, n);
+  }, true);
+  document.addEventListener("keydown", e => {
+    if (e.ctrlKey || e.metaKey || e.altKey || (e.target.closest && e.target.closest("input,textarea,select,[contenteditable]"))) return;
+    const pane = active && active.stamping ? active : null; if (!pane) return;
+    if (e.key.toLowerCase() === "s"){ e.preventDefault(); addStamp(pane, pane.page); }
+    else if (e.key === "Escape"){ e.preventDefault(); toggleStamp(pane, false); }
+  });
   /* ---- v3.2 wiring: links, issues and document types ---- */
   $("linkCancel").addEventListener("click", cancelLink);
   $("mbIssue").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); e.stopPropagation(); addIssueFromBar(); } });
@@ -3837,7 +4073,7 @@ body.has-wintitle .bundle{top:36px}
   $("mbComment").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)){ e.preventDefault(); hideMarkBar(); } });
   $("mbComment").addEventListener("blur", () => commitComment());
   document.addEventListener("mouseup", e => {
-    if (e.button !== 0 || !e.target.closest || e.target.closest("#markBar,.mk-tab,#xPop,#kindPop,#linkBanner")) return;
+    if (e.button !== 0 || !e.target.closest || e.target.closest("#markBar,.mk-tab,#xPop,#kindPop,#linkBanner,.pane.stamping .stage,.stampbar")) return;
     /* a selection made in a document shows the bar even if the mouse was let go over a panel */
     const outside = !!e.target.closest("#notes,#ws,.toolbar,.findbar,.organiser,.modal-back,.bundle,.rail");
     const pane = outside ? null : visiblePanes().find(p => p.stage.contains(e.target));

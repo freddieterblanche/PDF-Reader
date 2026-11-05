@@ -440,6 +440,13 @@ if (!app.requestSingleInstanceLock()) {
     const notesFile = () => path.join(app.getPath("userData"), "marks.json");
     ipcMain.handle("notes-load", () => { try { return JSON.parse(fs.readFileSync(notesFile(), "utf8")) || {}; } catch (e) { return {}; } });
     ipcMain.handle("notes-save", (_e, obj) => { writeAtomic(notesFile(), JSON.stringify(obj || {})); return true; });
+    /* Arial Bold for Bates numbers and annexure labels: read from the Windows fonts folder (Liberation Sans Bold, its metric twin, elsewhere) */
+    ipcMain.handle("font-read", (_e, name) => {
+      if (name !== "arial-bold") return null;
+      const cands = [path.join(process.env.WINDIR || "C:\\Windows", "Fonts", "arialbd.ttf"), "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", "/Library/Fonts/Arial Bold.ttf", "/System/Library/Fonts/Supplemental/Arial Bold.ttf"];
+      for (const c of cands) { try { return fs.readFileSync(c); } catch (e) {} }
+      return null;
+    });
     ipcMain.handle("copy-rich", (_e, html, text) => { clipboard.write({ html: String(html || ""), text: String(text || "") }); return true; });
 
     /* OCR: recognises text on scanned pages, offline, with Tesseract (English). A small pool of workers
