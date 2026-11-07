@@ -726,6 +726,16 @@ body.has-wintitle .bundle{top:36px}
 .pane.stamping .stp[data-kind="ann"]{pointer-events:auto;cursor:pointer}
 .pane.stamping .stp[data-kind="ann"]:hover{outline:2px solid var(--danger);text-decoration:line-through}
 .pane.stamping .page:hover{box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 60%,transparent),0 12px 28px rgba(16,24,40,.08)}
+
+/* v3.4: Lines and Box tools */
+.pane.tool-lines .textLayer,.pane.tool-lines .page{cursor:text}
+.pane.tool-box .stage,.pane.tool-box .page,.pane.tool-box .textLayer{cursor:crosshair}
+.pane.tool-box .textLayer{pointer-events:none}
+.lm-caret{position:absolute;z-index:5;width:3px;margin-left:-1px;background:var(--accent);border-radius:2px;pointer-events:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent);animation:lmblink 1s steps(2,start) infinite}
+.lm-caret::before{content:"";position:absolute;left:-4px;top:-6px;width:11px;height:6px;border-radius:2px;background:var(--accent)}
+@keyframes lmblink{50%{opacity:.35}}
+.box-band{position:absolute;z-index:5;border:1.5px dashed var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);pointer-events:none}
+.toolhint{position:fixed;z-index:41;left:50%;bottom:22px;transform:translateX(-50%);padding:8px 14px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:12.5px;box-shadow:0 8px 24px rgba(0,0,0,.25);pointer-events:none}
 </style>
 </head>
 <body>
@@ -735,7 +745,7 @@ body.has-wintitle .bundle{top:36px}
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Documents">
     <div class="rail-head">
-      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.3.1</button>
+      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.4</button>
         <button class="btn ghost iconbtn collapse" id="collapseBtn" type="button" aria-label="Hide sidebar" title="Hide sidebar (Ctrl+\)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg></button></div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -940,6 +950,7 @@ body.has-wintitle .bundle{top:36px}
 <div class="linkbanner" id="linkBanner" hidden role="status"><span id="linkBannerText"></span><button class="btn" type="button" id="linkCancel">Cancel</button></div>
 <div class="xpop" id="xPop" hidden role="menu"></div>
 <div class="kindpop" id="kindPop" hidden role="menu" aria-label="Document type"></div>
+<div class="toolhint" id="toolHint" hidden></div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <template id="paneTpl">
@@ -969,6 +980,8 @@ body.has-wintitle .bundle{top:36px}
           <button class="btn ghost" type="button" data-act="thumbs" aria-pressed="false" title="Show page thumbnails"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg><span class="tlabel">Pages</span></button>
           <button class="btn ghost desktop-only" type="button" data-act="organise" title="Delete, reorder, rotate, extract, insert and split pages"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg><span class="tlabel">Organise</span></button>
           <button class="btn ghost desktop-only" type="button" data-act="stamp" aria-pressed="false" title="Annexure stamp: click the pages where annexures start; they are numbered in order"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 22h14"/><path d="M19.27 13.73A2.5 2.5 0 0 0 17.5 13h-11A2.5 2.5 0 0 0 4 15.5V17a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1.5c0-.66-.26-1.3-.73-1.77Z"/><path d="M14 13V8.5C14 7 15 7 15 5a3 3 0 0 0-6 0c0 2 1 2 1 3.5V13"/></svg><span class="tlabel">Stamp</span></button>
+          <button class="btn ghost" type="button" data-act="lines" aria-pressed="false" title="Lines: click where a passage starts, then where it ends. The lines between are marked as straight bars."><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg><span class="tlabel">Lines</span></button>
+          <button class="btn ghost" type="button" data-act="box" aria-pressed="false" title="Box: drag a rectangle over a block of text (or any part of a scanned page) to mark it"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 3"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h6"/></svg><span class="tlabel">Box</span></button>
           <button class="btn ghost" type="button" data-act="notes" aria-pressed="false" title="Facts and notes: admitted and disputed facts, highlights and comments (Ctrl+Shift+N)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span class="tlabel">Facts</span></button>
           <button class="btn ghost" type="button" data-act="ws" aria-pressed="false" title="Workspace: arrange excerpts, notes and links (Ctrl+Shift+W)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span class="tlabel">Workspace</span></button>
           <span class="tsep" aria-hidden="true"></span>
@@ -1422,6 +1435,38 @@ body.has-wintitle .bundle{top:36px}
     });
     return out;
   }
+  /* boxes on the screen to one bar per line, all the same height and perfectly level (scanned text varies in size) */
+  function straightRects(el, tl, clientRects, clip){
+    const pr = el.getBoundingClientRect(); if (!pr.width || !pr.height) return [];
+    /* on pages turned a quarter, lines run up and down: work in turned coordinates, then turn back */
+    const turned = !!tl && /^(90|270)$/.test(tl.getAttribute("data-main-rotation") || "");
+    const W = turned ? pr.height : pr.width, H = turned ? pr.width : pr.height;
+    const tr = q => turned ? { l: q.t, r: q.b, t: q.l, b: q.r } : q;
+    const cl = clip ? tr({ l: clip.l - pr.left, r: clip.r - pr.left, t: clip.t - pr.top, b: clip.b - pr.top }) : null;
+    const raw = clientRects
+      .map(c => tr({ l: Math.max(0, c.left - pr.left), t: Math.max(0, c.top - pr.top), r: Math.min(pr.width, c.right - pr.left), b: Math.min(pr.height, c.bottom - pr.top) }))
+      .map(q => cl ? { l: Math.max(q.l, cl.l), r: Math.min(q.r, cl.r), t: q.t, b: q.b } : q)
+      .filter(q => q.r - q.l > 0.5 && q.b - q.t > 2 && q.b - q.t < H * 0.08 && q.r - q.l < W * 0.98);
+    if (!raw.length) return [];
+    const hs = raw.map(q => q.b - q.t).sort((a, b) => a - b), h = hs[Math.floor(hs.length / 2)];
+    /* words belong to the same line when they overlap vertically, even if their sizes and baselines wobble */
+    const lines = [];
+    raw.slice().sort((a, b) => a.l - b.l).forEach(q => {
+      const qh = q.b - q.t; let best = null, bo = 0;
+      lines.forEach(L => {
+        const ov = Math.min(L.b, q.b) - Math.max(L.t, q.t);
+        if (ov >= 0.4 * Math.min(qh, L.h0) && q.l <= L.r + 3 * Math.max(qh, L.h0) && ov > bo){ bo = ov; best = L; }
+      });
+      if (best){ best.l = Math.min(best.l, q.l); best.r = Math.max(best.r, q.r); best.t = Math.min(best.t, q.t); best.b = Math.max(best.b, q.b); }
+      else lines.push({ l: q.l, r: q.r, t: q.t, b: q.b, h0: qh });
+    });
+    lines.sort((a, b) => a.t - b.t);
+    /* one level bar per line, from its highest word to its lowest, kept to an even height */
+    lines.forEach(L => { if (L.b - L.t > h * 1.3) L.t = L.b - h * 1.3; });
+    for (let i = 1; i < lines.length; i++){ const a = lines[i - 1], b = lines[i]; if (b.t < a.b && b.l < a.r && b.r > a.l){ const m = (a.b + b.t) / 2; a.b = m - 0.5; b.t = m + 0.5; } }
+    return lines.map(q => (turned ? [q.t / pr.width, q.l / pr.height, (q.b - q.t) / pr.width, (q.r - q.l) / pr.height]
+      : [q.l / pr.width, q.t / pr.height, (q.r - q.l) / pr.width, (q.b - q.t) / pr.height]).map(v => +v.toFixed(5)));
+  }
   function selectionParts(pane){
     const s = window.getSelection(); if (!s || s.isCollapsed || !s.rangeCount) return [];
     const range = s.getRangeAt(0), parts = [];
@@ -1432,16 +1477,7 @@ body.has-wintitle .bundle{top:36px}
       if (tl.contains(range.endContainer)) r.setEnd(range.endContainer, range.endOffset); else r.setEnd(tl, tl.childNodes.length);
       const frag = r.cloneContents(); frag.querySelectorAll("br").forEach(x => x.replaceWith(" "));
       const text = frag.textContent.replace(/\s+/g, " ").trim(); if (!text) return;
-      const pr = el.getBoundingClientRect(); if (!pr.width || !pr.height) return;
-      /* on pages turned a quarter, lines run up and down: work in turned coordinates, then turn back */
-      const turned = /^(90|270)$/.test(tl.getAttribute("data-main-rotation") || "");
-      const W = turned ? pr.height : pr.width, H = turned ? pr.width : pr.height;
-      const raw = [...r.getClientRects()]
-        .map(c => { const q = { l: Math.max(0, c.left - pr.left), t: Math.max(0, c.top - pr.top), r: Math.min(pr.width, c.right - pr.left), b: Math.min(pr.height, c.bottom - pr.top) };
-          return turned ? { l: q.t, r: q.b, t: q.l, b: q.r } : q; })
-        .filter(q => q.r - q.l > 0.5 && q.b - q.t > 2 && q.b - q.t < H * 0.08 && q.r - q.l < W * 0.98);
-      const rects = mergeLines(raw).map(q => (turned ? [q.t / pr.width, q.l / pr.height, (q.b - q.t) / pr.width, (q.r - q.l) / pr.height]
-        : [q.l / pr.width, q.t / pr.height, (q.r - q.l) / pr.width, (q.b - q.t) / pr.height]).map(v => +v.toFixed(5)));
+      const rects = straightRects(el, tl, [...r.getClientRects()]);
       const rot = +(tl.getAttribute("data-main-rotation") || 0);
       if (rects.length) parts.push({ page: +el.dataset.n, rects, text, rot });
     });
@@ -2102,6 +2138,7 @@ body.has-wintitle .bundle{top:36px}
   function toggleStamp(pane, on){
     if (on === undefined) on = !pane.stamping;
     if (on && (!pane.doc || !pane.doc.pdf)){ toast("Open a document first."); return; }
+    if (on && pane.tool) setTool(pane, null);
     pane.stamping = on; pane.el.classList.toggle("stamping", on); pane.stampbar.hidden = !on;
     pane.el.querySelector('[data-act="stamp"]').setAttribute("aria-pressed", String(on));
     if (on){ hideMarkBar(); window.getSelection().removeAllRanges(); fillStampBar(pane); repaintDoc(pane.doc); }
@@ -2126,6 +2163,115 @@ body.has-wintitle .bundle{top:36px}
     pushXUndo(); c.pages = []; xrefChanged(); fillStampBar(pane);
     toast("All stamps cleared. Click the pages where annexures start to stamp again.");
   }
+  /* ---- Lines and Box tools: mark text without dragging a selection ---- */
+  function hint(t){ const h = $("toolHint"); if (!t){ h.hidden = true; return; } h.textContent = t; h.hidden = false; }
+  function setTool(pane, tool){
+    if (tool && (!pane.doc || !pane.doc.pdf)){ toast("Open a document first."); return; }
+    if (tool && pane.stamping) toggleStamp(pane, false);
+    visiblePanes().forEach(p => { if (p !== pane && p.tool && tool) setTool(p, null); });
+    pane.tool = tool; pane.lineStart = null; clearLineCaret();
+    pane.el.classList.toggle("tool-lines", tool === "lines"); pane.el.classList.toggle("tool-box", tool === "box");
+    pane.el.querySelector('[data-act="lines"]').setAttribute("aria-pressed", String(tool === "lines"));
+    pane.el.querySelector('[data-act="box"]').setAttribute("aria-pressed", String(tool === "box"));
+    if (tool){ hideMarkBar(); window.getSelection().removeAllRanges(); }
+    hint(tool === "lines" ? "Lines: click where the passage starts, then where it ends. Esc to stop."
+      : tool === "box" ? "Box: drag a rectangle over the text to mark. Esc to stop." : "");
+  }
+  function clearLineCaret(){ document.querySelectorAll(".lm-caret").forEach(x => x.remove()); }
+  /* the text position under the pointer, or the nearest end of the line beside it */
+  function caretAt(el, x, y){
+    const tl = el.querySelector(".textLayer"); if (!tl) return null;
+    const cr = document.caretRangeFromPoint ? document.caretRangeFromPoint(x, y) : null;
+    if (cr && cr.startContainer.nodeType === 3 && tl.contains(cr.startContainer)) return { node: cr.startContainer, offset: cr.startOffset };
+    let best = null, bd = Infinity;
+    tl.querySelectorAll("span").forEach(sp => {
+      const t = sp.firstChild; if (!t || t.nodeType !== 3 || !t.length) return;
+      const r = sp.getBoundingClientRect(); if (!r.width || !r.height) return;
+      const dy = y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0, dx = x < r.left ? r.left - x : x > r.right ? x - r.right : 0;
+      const d = dy * 6 + dx; if (d < bd){ bd = d; best = { t, r }; }
+    });
+    if (!best || bd > 240) return null;
+    const mid = (best.r.left + best.r.right) / 2;
+    return { node: best.t, offset: x < mid ? 0 : best.t.length };
+  }
+  function showLineCaret(el, c){
+    const r = document.createRange(), len = c.node.length;
+    if (c.offset < len){ r.setStart(c.node, c.offset); r.setEnd(c.node, c.offset + 1); } else { r.setStart(c.node, Math.max(0, len - 1)); r.setEnd(c.node, len); }
+    const q = r.getBoundingClientRect(), pr = el.getBoundingClientRect(), x = c.offset < len ? q.left : q.right;
+    const m = document.createElement("div"); m.className = "lm-caret";
+    m.style.left = (x - pr.left) + "px"; m.style.top = (q.top - pr.top) + "px"; m.style.height = Math.max(10, q.height) + "px";
+    el.appendChild(m);
+  }
+  function lineClick(pane, e){
+    const el = e.target.closest(".page"); if (!el) return;
+    const c = caretAt(el, e.clientX, e.clientY);
+    if (!c){ toast(el.querySelector(".textLayer span") ? "Click on or beside a line of text." : "This page has no text to select. Use Box to mark part of it."); return; }
+    if (!pane.lineStart){
+      pane.lineStart = c; clearLineCaret(); showLineCaret(el, c); hideMarkBar(); window.getSelection().removeAllRanges();
+      hint("Now click where the passage ends. Esc to stop."); return;
+    }
+    const a = pane.lineStart; pane.lineStart = null; clearLineCaret();
+    const r = document.createRange(), b = document.createRange();
+    r.setStart(a.node, a.offset); b.setStart(c.node, c.offset);
+    const [s1, s2] = r.compareBoundaryPoints(Range.START_TO_START, b) <= 0 ? [a, c] : [c, a];
+    const rng = document.createRange(); rng.setStart(s1.node, s1.offset); rng.setEnd(s2.node, s2.offset);
+    if (rng.collapsed){ hint("Lines: click where the passage starts, then where it ends. Esc to stop."); return; }
+    const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(rng);
+    if (!selectionParts(pane).length){ sel.removeAllRanges(); toast("Nothing to mark there."); return; }
+    showMarkBar(pane);
+    hint("Choose Admitted, Disputed or a colour (A, D or H). Then click the next start point, or Esc to stop.");
+  }
+  function boxDown(pane, e){
+    const el = e.target.closest(".page"); if (!el) return;
+    const sx = e.clientX, sy = e.clientY, band = document.createElement("div"); band.className = "box-band"; el.appendChild(band);
+    hideMarkBar();
+    const pr0 = () => el.getBoundingClientRect();
+    const draw = (x, y) => { const pr = pr0(); const l = Math.min(sx, x), t = Math.min(sy, y);
+      band.style.left = (l - pr.left) + "px"; band.style.top = (t - pr.top) + "px"; band.style.width = Math.abs(x - sx) + "px"; band.style.height = Math.abs(y - sy) + "px"; };
+    draw(sx, sy);
+    const move = ev => draw(ev.clientX, ev.clientY);
+    const up = ev => {
+      document.removeEventListener("mousemove", move, true); document.removeEventListener("mouseup", up, true); band.remove();
+      const pr = pr0();
+      const box = { l: Math.max(pr.left, Math.min(sx, ev.clientX)), r: Math.min(pr.right, Math.max(sx, ev.clientX)), t: Math.max(pr.top, Math.min(sy, ev.clientY)), b: Math.min(pr.bottom, Math.max(sy, ev.clientY)) };
+      if (box.r - box.l < 6 || box.b - box.t < 6) return;
+      boxMark(pane, el, box, ev.clientX, ev.clientY);
+    };
+    document.addEventListener("mousemove", move, true); document.addEventListener("mouseup", up, true);
+  }
+  /* text inside the box becomes level bars, clipped to the box; with no text, the box itself is the mark */
+  function boxMark(pane, el, box, x, y){
+    const d = pane.doc, tl = el.querySelector(".textLayer"), pr = el.getBoundingClientRect(), n = +el.dataset.n;
+    const inside = [], rects = [];
+    if (tl) tl.querySelectorAll("span").forEach(sp => {
+      const t = sp.firstChild; if (!t || t.nodeType !== 3 || !t.textContent.trim()) return;
+      const r = sp.getBoundingClientRect(); if (!r.width || !r.height) return;
+      const cy = (r.top + r.bottom) / 2, ow = Math.min(r.right, box.r) - Math.max(r.left, box.l);
+      if (cy < box.t || cy > box.b || ow <= 0) return;
+      /* a span that runs past the box contributes only the words inside it */
+      let text = t.textContent;
+      if (ow < r.width * 0.98){
+        const L = t.length, f0 = Math.max(0, (box.l - r.left) / r.width), f1 = Math.min(1, (box.r - r.left) / r.width);
+        text = t.textContent.slice(Math.floor(f0 * L), Math.ceil(f1 * L));
+      }
+      inside.push(text); rects.push(r);
+    });
+    let mrects, text;
+    if (rects.length){
+      mrects = straightRects(el, tl, rects, box); text = inside.join(" ").replace(/\s+/g, " ").trim();
+    }
+    if (!mrects || !mrects.length){
+      mrects = [[(box.l - pr.left) / pr.width, (box.t - pr.top) / pr.height, (box.r - box.l) / pr.width, (box.b - box.t) / pr.height].map(v => +v.toFixed(5))];
+      text = "[Area on page " + n + "]";
+    }
+    pushUndo(d);
+    const m = { id: newId(), type: "hl", color: "yellow", page: n, rects: mrects, text, created: new Date().toISOString() };
+    const rot = tl ? +(tl.getAttribute("data-main-rotation") || 0) : 0; if (rot) m.rot = rot;
+    marksOf(d).push(m); marksChanged(d);
+    editMark(pane, d, m, x, y);
+    hint("Marked. Press A or D to make it Admitted or Disputed, or pick a colour. Drag another box, or Esc to stop.");
+  }
+
   function burnText(page, font, text, size, mx, my){
     const { rgb, degrees } = PDFLib, tw = font.widthOfTextAtSize(text, size), th = size * 0.72;
     const { map, px, py, rot } = stampPlace(page, tw, th, "tr", mx, my);
@@ -2713,7 +2859,7 @@ body.has-wintitle .bundle{top:36px}
         const f = ({ prev:()=>this.goTo(this.page-1), next:()=>this.goTo(this.page+1), in:()=>this.zoom(1.2), out:()=>this.zoom(1/1.2),
            fit:()=>{ this.fit = true; this.layout(true); }, print:()=>openPrint(this), toggle:()=>toggleRail(),
            find:()=>this.openFind(), findnext:()=>this.stepMatch(1), findprev:()=>this.stepMatch(-1), findclose:()=>this.closeFind(),
-           thumbs:()=>this.toggleThumbs(), organise:()=>this.openOrganise(), saveas:()=>saveDocAs(this), notes:()=>toggleNotes(), ws:()=>toggleWs(), stamp:()=>toggleStamp(this), stampsave:()=>saveStamped(this), stampclose:()=>toggleStamp(this, false), stampclear:()=>clearStamps(this) })[a.dataset.act];
+           thumbs:()=>this.toggleThumbs(), organise:()=>this.openOrganise(), saveas:()=>saveDocAs(this), notes:()=>toggleNotes(), ws:()=>toggleWs(), stamp:()=>toggleStamp(this), stampsave:()=>saveStamped(this), stampclose:()=>toggleStamp(this, false), stampclear:()=>clearStamps(this), lines:()=>setTool(this, this.tool === "lines" ? null : "lines"), box:()=>setTool(this, this.tool === "box" ? null : "box") })[a.dataset.act];
         if (f) f();
       };
       this.el.querySelector(".toolbar").addEventListener("click", onAct);
@@ -2797,7 +2943,7 @@ body.has-wintitle .bundle{top:36px}
       }
       this.savePos();
       const changed = d !== this.doc;
-      this.doc = d; this.refreshSelect(); renderList(); notesSoon(); if (this.stamping) fillStampBar(this);
+      this.doc = d; this.refreshSelect(); renderList(); notesSoon(); if (this.stamping) fillStampBar(this); if (this.lineStart){ this.lineStart = null; clearLineCaret(); }
       if (changed && this.find){ this.find = null; this.el.querySelector(".findcount").textContent = ""; if (!this.findbar.hidden && this.findinput.value.trim()) setTimeout(() => this.runSearch(this.findinput.value), 50); }
       if (d.error){ this.stage.innerHTML = '<p class="placeholder err"></p>'; this.stage.firstChild.textContent = "This file could not be opened as a PDF. " + d.error; return; }
       if (!d.pdf){ this.stage.innerHTML = '<p class="placeholder">Opening…</p>'; return; }
@@ -4004,6 +4150,22 @@ body.has-wintitle .bundle{top:36px}
   });
   if (!window.pdfReader) document.body.classList.add("no-desktop");
   else { $("winBar").hidden = false; document.body.classList.add("has-wintitle"); }
+  /* ---- v3.4 wiring: Lines and Box tools ---- */
+  document.addEventListener("mousedown", e => {
+    if (e.button !== 0) return;
+    const pane = visiblePanes().find(p => p.tool && p.stage.contains(e.target)); if (!pane || !pane.doc) return;
+    if (e.target.closest(".mk-tab,.stp")) return;
+    if (!e.target.closest(".page")) return;
+    e.preventDefault(); setActive(pane);
+    if (pane.tool === "box") boxDown(pane, e); else lineClick(pane, e);
+  }, true);
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Escape") return;
+    const pane = visiblePanes().find(p => p.tool); if (!pane) return;
+    if (!$("markBar").hidden) return;
+    if (pane.lineStart){ pane.lineStart = null; clearLineCaret(); hint("Lines: click where the passage starts, then where it ends. Esc to stop."); return; }
+    setTool(pane, null);
+  });
   /* ---- v3.3 wiring: annexure stamper ---- */
   document.addEventListener("click", e => {
     const pane = visiblePanes().find(p => p.stamping && p.stage.contains(e.target)); if (!pane || !pane.doc) return;
@@ -4081,7 +4243,7 @@ body.has-wintitle .bundle{top:36px}
   $("mbComment").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)){ e.preventDefault(); hideMarkBar(); } });
   $("mbComment").addEventListener("blur", () => commitComment());
   document.addEventListener("mouseup", e => {
-    if (e.button !== 0 || !e.target.closest || e.target.closest("#markBar,.mk-tab,#xPop,#kindPop,#linkBanner,.pane.stamping .stage,.stampbar")) return;
+    if (e.button !== 0 || !e.target.closest || e.target.closest("#markBar,.mk-tab,#xPop,#kindPop,#linkBanner,.pane.stamping .stage,.stampbar,.pane.tool-lines .stage,.pane.tool-box .stage")) return;
     /* a selection made in a document shows the bar even if the mouse was let go over a panel */
     const outside = !!e.target.closest("#notes,#ws,.toolbar,.findbar,.organiser,.modal-back,.bundle,.rail");
     const pane = outside ? null : visiblePanes().find(p => p.stage.contains(e.target));
