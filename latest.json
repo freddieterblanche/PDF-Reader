@@ -1,0 +1,7 @@
+{
+  "version": "3.4.0",
+  "file": "PDF-Reader-Setup-3.4.0.exe",
+  "sha256": "4a52f2e41c9fc508d13445bcdb972473bc6a6447ceb3ab5e76bd3843e80d5159",
+  "size": 94102659,
+  "notes": "Lines tool: click where a passage starts and where it ends. Box tool: drag a rectangle over a block of text or a scanned page. Highlights are now one straight, even bar per line."
+}
