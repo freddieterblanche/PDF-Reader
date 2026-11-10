@@ -750,6 +750,30 @@ body.has-wintitle .bundle{top:36px}
 .set-ver .ver{border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--muted);font-family:var(--mono);font-size:12px;padding:2px 7px;cursor:pointer}
 .keep-off{display:none}
 
+/* v3.9 view button, multi-select, print several */
+.viewslot #viewSeg{display:none}
+.viewbtn{font:inherit;font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:5px 9px 5px 10px;cursor:pointer;white-space:nowrap}
+.viewbtn:hover,.viewbtn[aria-expanded="true"]{border-color:var(--accent);color:var(--accent)}
+.viewbtn .ic{width:17px;height:17px}
+.viewbtn .vcount{font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:5px;padding:0 5px}
+.doc.sel{background:color-mix(in srgb,var(--accent) 13%,transparent);border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
+.doc.sel .doc-ico{border-color:var(--accent)}
+.selbar{border-top:1px solid var(--line);padding:10px 10px 12px;display:flex;flex-direction:column;gap:8px;background:var(--surface);box-shadow:0 -8px 24px rgba(16,24,40,.08)}
+.selbar[hidden]{display:none}
+.sb-top{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600}
+.sb-top span{flex:1}
+.sb-acts{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sb-act{font:inherit;font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid color-mix(in srgb,var(--tc) 30%,var(--line));border-radius:8px;background:color-mix(in srgb,var(--tc) 6%,var(--surface));color:var(--ink);cursor:pointer;text-align:left}
+.sb-act:hover{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 12%,var(--surface))}
+.sb-act .ic{width:17px;height:17px;color:var(--tc);flex:none}
+.sb-act[aria-disabled="true"]{opacity:.45;cursor:default}
+.sb-hint{font-size:12px;color:var(--muted);line-height:1.4}
+.prwhich{display:flex;gap:18px;flex-wrap:wrap;margin:2px 0 10px}
+.prwhich label{display:flex;align-items:center;gap:7px;font-size:14.5px;cursor:pointer}
+.prlist{display:flex;flex-direction:column;gap:2px;max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px;margin-bottom:12px}
+.prlist label{display:grid;grid-template-columns:20px 1fr auto;gap:8px;align-items:center;padding:5px 6px;border-radius:6px;font-size:14px;cursor:pointer}
+.prlist label:hover{background:var(--hover)}
+.prlist .mono{font-size:12px;color:var(--muted)}
 /* v3.8 Projects Library */
 .nameinput{width:100%;font:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line-strong,var(--line));border-radius:8px;background:var(--surface);color:var(--ink);margin:4px 0 2px}
 .nameinput:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
@@ -875,7 +899,7 @@ body.has-wintitle .bundle{top:36px}
         <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
         <div class="set-sec desktop-only"><span class="set-lab">Projects Library</span><div class="set-lib"><span class="lib-path" id="libPath">…</span><button class="linkbtn" type="button" id="libChange">Change…</button></div></div>
         <button class="set-link" type="button" id="helpBtn"><span>Keyboard shortcuts</span><kbd>?</kbd></button>
-        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.8.0</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
+        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.9.0</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
       </div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -903,6 +927,7 @@ body.has-wintitle .bundle{top:36px}
       <div class="rail-title railtabs" role="tablist" aria-label="Sidebar"><button class="rtab" type="button" role="tab" id="tabDocs" aria-selected="true">Documents <span class="count" id="count">0</span></button><button class="rtab" type="button" role="tab" id="tabTools" aria-selected="false" title="All tools (Ctrl+Shift+T)">All tools</button></div>
     </div>
     <div class="list" id="list" role="list"></div>
+    <div class="selbar" id="selBar" hidden role="toolbar" aria-label="Selected documents"></div>
     <div class="toolsview" id="toolsView" hidden><input class="toolfind" id="toolFind" type="search" placeholder="Find a tool" aria-label="Find a tool"><div class="toolgroups" id="toolGroups"></div></div>
   </aside>
   <div class="resizer" id="resizer" role="separator" aria-orientation="vertical" aria-label="Resize document panel"></div>
@@ -956,6 +981,11 @@ body.has-wintitle .bundle{top:36px}
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="printTitle">
     <h2 id="printTitle">Print document</h2>
     <p class="sub" id="printDocName"></p>
+    <div class="prwhich" id="prWhich" hidden role="radiogroup" aria-label="What to print">
+      <label><input type="radio" name="printWhich" value="one" checked> This document</label>
+      <label><input type="radio" name="printWhich" value="many"> <span id="prManyLabel">All open documents</span></label>
+    </div>
+    <div class="prlist" id="prList" hidden></div>
     <fieldset id="printOpts">
       <label><input type="radio" name="printRange" id="prAll" value="all" checked> All pages <span class="mono" id="prAllCount"></span></label>
       <label><input type="radio" name="printRange" id="prCurrent" value="current"> Current page <span class="mono" id="prCurNum"></span></label>
@@ -1186,6 +1216,7 @@ body.has-wintitle .bundle{top:36px}
 <script src="fontkit.min.js"></script>
 <script>
 (function(){
+  const selected = new Set(); let selAnchor = null;
   const lib = window.pdfjsLib;
   if (lib) lib.GlobalWorkerOptions.workerSrc = "pdf.worker.min.js";
   const $ = id => document.getElementById(id);
@@ -3945,6 +3976,7 @@ body.has-wintitle .bundle{top:36px}
     document.title = (active.doc ? active.doc.name + " \u00b7 " : "") + "PDF Reader";
     if ($("winTitle")) $("winTitle").textContent = document.title;
     const list = $("list"); list.innerHTML = ""; $("count").textContent = docs.length;
+    selected.forEach(x => { if (!docs.includes(x)) selected.delete(x); }); setTimeout(renderSelBar, 0);
     panes.forEach(p => p.refreshSelect());
     if (!docs.length){ list.innerHTML = '<p class="empty">No documents open.</p>'; return; }
     docs.forEach(d => {
@@ -4016,9 +4048,16 @@ body.has-wintitle .bundle{top:36px}
       void mk;
       acts.append(ren, pr, x);
       b.appendChild(acts);
-      b.addEventListener("click", () => { active.show(d); $("app").classList.remove("open"); });
+      if (selected.has(d)){ b.classList.add("sel"); b.setAttribute("aria-selected", "true"); }
+      b.addEventListener("click", e => {
+        if (e.ctrlKey || e.metaKey){ e.preventDefault(); toggleSel(d); return; }
+        if (e.shiftKey){ e.preventDefault(); rangeSel(d); return; }
+        clearSel(); selAnchor = d; active.show(d); $("app").classList.remove("open");
+      });
       b.addEventListener("keydown", e => {
         if (e.key === "F2"){ e.preventDefault(); startRename(d); return; }
+        if (!e.altKey && (e.key === "ArrowUp" || e.key === "ArrowDown")){ e.preventDefault(); e.stopPropagation(); stepSel(d, e.key === "ArrowUp" ? -1 : 1, e.ctrlKey || e.metaKey || e.shiftKey); return; }
+        if (e.key === "Escape" && selected.size){ e.preventDefault(); clearSel(); return; }
         if (e.altKey && (e.key === "ArrowUp" || e.key === "ArrowDown")){ e.preventDefault(); e.stopPropagation(); moveDoc(d, idx + (e.key === "ArrowUp" ? -1 : 1), true); }
       });
       row.draggable = true;
@@ -4052,7 +4091,7 @@ body.has-wintitle .bundle{top:36px}
   /* Printing: render the chosen pages to images, then open the system print dialog */
   const embedded = (() => { try { return window.self !== window.top; } catch(e){ return true; } })();
   let printPane = null, printing = false;
-  function openPrint(p){
+  function openPrint(p, many){
     if (!p.doc || !p.doc.pdf) return;
     printPane = p; const n = p.doc.pdf.numPages;
     $("printDocName").textContent = p.doc.name;
@@ -4065,6 +4104,7 @@ body.has-wintitle .bundle{top:36px}
     $("printNote").textContent = embedded
       ? "Printing is blocked inside this preview. Open the downloaded PDF Reader file in your browser to print."
       : "The next window is your system print dialog, where you choose the printer, copies and paper size, or save as PDF.";
+    setupWhich(many);
     $("printModal").hidden = false; $("printGo").focus();
     if (window.pdfReader) setupNativePrint();
   }
@@ -4110,6 +4150,7 @@ body.has-wintitle .bundle{top:36px}
   async function setupNativePrint(){
     $("nativeOpts").hidden = false; $("printMore").hidden = false; $("printMore").disabled = false; $("printGo").disabled = false;
     $("printNote").textContent = "Printing runs in the background, so you can keep reading. More settings opens the full Windows print dialog.";
+    syncWhich();
     const prefs = loadPrintPrefs();
     $("prEngine").value = prefs.engine || "fast"; syncEngine();
     $("prCopies").value = 1; $("prSides").value = prefs.sides || ""; $("prColor").value = prefs.color || ""; $("prScale").value = prefs.scale || "fit";
@@ -4127,6 +4168,7 @@ body.has-wintitle .bundle{top:36px}
   function syncEngine(){ const std = $("prEngine").value === "standard"; document.querySelectorAll(".colorRow").forEach(el => el.hidden = !std); }
   $("prEngine").addEventListener("change", syncEngine);
   async function runNativePrint(more){
+    if (!more && printingMany()) return runPrintMany();
     const p = printPane; if (!p || !p.doc || !p.doc.pdf || printing) return;
     const D = window.pdfReader, n = p.doc.pdf.numPages; let from = 1, to = n;
     const mode = document.querySelector('input[name="printRange"]:checked').value;
@@ -4389,7 +4431,7 @@ body.has-wintitle .bundle{top:36px}
         ic: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M15 3v18"/><path d="M6.5 8h5"/><path d="M6.5 12h5"/>' },
       { id: "ws", name: "Workspace board", desc: "Lay out facts, excerpts and notes on a board", c: "#b45309", act: "ws", state: () => !!(typeof wsState !== "undefined" && wsState.open),
         ic: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>' },
-      { id: "compare", name: "Side by side", desc: "Read two documents next to each other", c: "#4f46e5", nodoc: true, run: () => setPaneCount(paneCount === 1 ? 2 : 1), state: () => paneCount > 1,
+      { id: "compare", name: "Compare side by side", desc: "Read two or three documents next to each other", c: "#4f46e5", nodoc: true, run: () => setPaneCount(paneCount === 1 ? 2 : 1), state: () => paneCount > 1,
         ic: '<rect x="2" y="4" width="9" height="16" rx="1.5"/><rect x="13" y="4" width="9" height="16" rx="1.5"/>' }
     ]},
     { name: "Find and output", tools: [
@@ -4397,6 +4439,8 @@ body.has-wintitle .bundle{top:36px}
         ic: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>' },
       { id: "thumbs", name: "Page thumbnails", desc: "Show small pages beside the document", c: "#475569", act: "thumbs", state: p => !!p.thumbsOn,
         ic: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/>' },
+      { id: "printall", name: "Print all open documents", desc: "Send every open PDF to the printer in one go", c: "#1f9d55", nodoc: true, run: () => printAllOpen(),
+        ic: '<path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/><path d="M9 6h6"/>' },
       { id: "print", name: "Print", desc: "Print all or some pages", c: "#1f9d55", act: "print",
         ic: '<path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/>' },
       { id: "saveas", name: "Save as", desc: "Save a copy of this document", c: "#2f5bdb", desk: true, act: "saveas",
@@ -4455,6 +4499,166 @@ body.has-wintitle .bundle{top:36px}
   });
   try { if (localStorage.getItem("railTab") === "tools") setRailTab("tools"); } catch(e){}
 
+
+  /* ---- v3.9: View button, selecting several documents, printing several ---- */
+  function selChanged(){ renderList(); }
+  function toggleSel(d){
+    if (!selected.size && active.doc && active.doc !== d && docs.includes(active.doc)) selected.add(active.doc);
+    if (selected.has(d)) selected.delete(d); else selected.add(d);
+    selAnchor = d; selChanged(); focusRow(d);
+  }
+  function rangeSel(d){
+    const a = selAnchor && docs.includes(selAnchor) ? selAnchor : (active.doc && docs.includes(active.doc) ? active.doc : d);
+    const i = docs.indexOf(a), j = docs.indexOf(d);
+    selected.clear(); docs.slice(Math.min(i, j), Math.max(i, j) + 1).forEach(x => selected.add(x));
+    selChanged(); focusRow(d);
+  }
+  function stepSel(d, dir, extend){
+    const j = docs.indexOf(d) + dir; if (j < 0 || j >= docs.length) return;
+    const n = docs[j];
+    if (extend){
+      if (!selected.size) selected.add(d);
+      if (selected.has(n) && selected.size > 1 && !selected.has(docs[j + dir])) selected.delete(d); else selected.add(n);
+      selAnchor = selAnchor || d; selChanged();
+    }
+    focusRow(n);
+  }
+  function clearSel(){ if (!selected.size) return; selected.clear(); selAnchor = null; selChanged(); }
+  function focusRow(d){ requestAnimationFrame(() => { const b = $("list").querySelector('.doc[data-id="' + d.id + '"]'); if (b) b.focus(); }); }
+  const selList = () => docs.filter(d => selected.has(d));
+  const SB_IC = {
+    compare: '<rect x="2" y="4" width="9" height="16" rx="1.5"/><rect x="13" y="4" width="9" height="16" rx="1.5"/>',
+    bundle: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M9 7h7"/><path d="M9 11h5"/>',
+    print: '<path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/>',
+    proj: '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M12 10v6"/><path d="M9 13h6"/>',
+    close: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'
+  };
+  function renderSelBar(){
+    const bar = $("selBar"), list = selList();
+    if (list.length < 2){ bar.hidden = true; bar.textContent = ""; return; }
+    bar.hidden = false; bar.textContent = "";
+    const top = document.createElement("div"); top.className = "sb-top";
+    const t = document.createElement("span"); t.textContent = list.length + " documents selected";
+    const x = document.createElement("button"); x.type = "button"; x.className = "btn ghost iconbtn"; x.title = "Clear the selection (Esc)"; x.setAttribute("aria-label", "Clear the selection");
+    x.innerHTML = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + SB_IC.close + '</svg>'; x.addEventListener("click", clearSel);
+    top.append(t, x); bar.appendChild(top);
+    const acts = document.createElement("div"); acts.className = "sb-acts";
+    const P = notesState.proj, desk = !!window.pdfReader;
+    const ready = list.filter(d => d.pdf && !d.error);
+    const defs = [
+      { k: "compare", label: "Compare", c: "#4f46e5", off: list.length > 3 ? "Compare works with 2 or 3 documents" : "", tip: "Show them side by side", run: () => compareDocs(list) },
+      { k: "bundle", label: "Make a bundle", c: "#d64545", off: desk ? "" : "Bundles need the desktop app", tip: "Combine them into one paginated bundle", run: () => bundleDocs(ready) },
+      { k: "print", label: "Print", c: "#1f9d55", tip: "Print them all in one go", run: () => printDocs(ready) },
+      P ? { k: "proj", label: "Add to project", c: "#b45309", tip: "Add them to " + P.name, run: () => { const n = addToProject(list); toast(n ? n + (n === 1 ? " document" : " documents") + " added to " + P.name + "." : "They are already in " + P.name + "."); } }
+        : { k: "close", label: "Close", c: "#64748b", tip: "Close the selected documents", run: () => { list.forEach(d => removeDoc(d)); clearSel(); } }
+    ];
+    defs.forEach(dft => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "sb-act"; b.style.setProperty("--tc", dft.c);
+      b.innerHTML = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + SB_IC[dft.k] + '</svg><span></span>';
+      b.querySelector("span").textContent = dft.label; b.title = dft.off || dft.tip;
+      if (dft.off) b.setAttribute("aria-disabled", "true");
+      b.addEventListener("click", () => { if (dft.off){ toast(dft.off + "."); return; } dft.run(); });
+      acts.appendChild(b);
+    });
+    bar.appendChild(acts);
+    const h = document.createElement("div"); h.className = "sb-hint"; h.textContent = "Ctrl+click or Shift+arrow keys to add or remove documents.";
+    bar.appendChild(h);
+  }
+  async function compareDocs(list){
+    list = list.filter(d => !d.error).slice(0, 3); if (list.length < 2) return;
+    setPaneCount(list.length);
+    const vp = visiblePanes();
+    for (let i = 0; i < list.length; i++){ if (vp[i] && vp[i].doc !== list[i]) await vp[i].show(list[i]); }
+    clearSel(); renderList();
+  }
+  function bundleDocs(list){
+    if (!list.length) return;
+    openBundle();
+    addBundleItems(list.map(d => ({ path: d.path, name: d.orig, desc: d.name, folder: dirOf(d.path), kind: "pdf", doc: d })));
+  }
+  async function printDocs(list){
+    list = list.filter(d => d.pdf && !d.error); if (!list.length){ toast("The documents are still opening."); return; }
+    const p = visiblePanes().find(q => q.doc && list.includes(q.doc)) || active;
+    if (!p.doc || !p.doc.pdf) await p.show(list[0]);
+    openPrint(p, list);
+  }
+  function printAllOpen(){
+    const list = docs.filter(d => d.pdf && !d.error);
+    if (!list.length){ toast("No documents are open."); return; }
+    printDocs(list);
+  }
+  function setupWhich(many){
+    const open = docs.filter(d => d.pdf && !d.error);
+    const set = many && many.length ? many : open;
+    const show = !!window.pdfReader && set.length > 1;
+    $("prWhich").hidden = !show;
+    $("prManyLabel").textContent = (many && many.length && many.length < open.length ? "Selected documents (" : "All open documents (") + set.length + ")";
+    const l = $("prList"); l.textContent = "";
+    set.forEach(d => {
+      const lab = document.createElement("label"), c = document.createElement("input"), s = document.createElement("span"), n = document.createElement("span");
+      c.type = "checkbox"; c.checked = true; c.value = d.id; s.textContent = d.name; n.className = "mono";
+      n.textContent = d.pdf.numPages + (d.pdf.numPages === 1 ? " page" : " pages"); lab.append(c, s, n); l.appendChild(lab);
+    });
+    document.querySelector('input[name="printWhich"][value="' + (show && many && many.length ? "many" : "one") + '"]').checked = true;
+    syncWhich();
+  }
+  const printingMany = () => !$("prWhich").hidden && document.querySelector('input[name="printWhich"]:checked').value === "many";
+  function syncWhich(){
+    const many = printingMany();
+    $("prList").hidden = !many; $("printOpts").hidden = many; $("printDocName").hidden = many;
+    $("printTitle").textContent = many ? "Print documents" : "Print document";
+    if (window.pdfReader){ $("printMore").hidden = many;
+      $("printNote").textContent = many ? "The ticked documents print one after another, in this order, in the background." : "Printing runs in the background, so you can keep reading. More settings opens the full Windows print dialog."; }
+  }
+  document.querySelectorAll('input[name="printWhich"]').forEach(r => r.addEventListener("change", syncWhich));
+  async function runPrintMany(){
+    const D = window.pdfReader; if (printing) return;
+    const list = [...$("prList").querySelectorAll("input:checked")].map(i => docs.find(d => String(d.id) === i.value)).filter(d => d && d.pdf);
+    if (!list.length){ $("printNote").textContent = "Tick at least one document to print."; return; }
+    const base = { printer: $("prPrinter").value, copies: Math.max(1, Math.min(99, parseInt($("prCopies").value,10) || 1)),
+      sides: $("prSides").value, color: $("prColor").value, scale: $("prScale").value, pages: "", from: 0, to: 0, engine: $("prEngine").value };
+    savePrintPrefs({ printer: base.printer, sides: base.sides, color: base.color, scale: base.scale, engine: base.engine });
+    $("printModal").hidden = true;
+    const where = base.printer || (printerInfo && printerInfo.defaultPrinter) || "the default printer";
+    printJobs++; let ok = 0; const fails = [];
+    for (let i = 0; i < list.length; i++){
+      const d = list[i];
+      toast("Printing " + (i + 1) + " of " + list.length + ": " + d.name + " to " + where + "…", true);
+      try { await D.print(Object.assign({}, base, { file: d.path || await D.writeTemp(d.orig, await d.pdf.getData()) })); ok++; }
+      catch(e){ fails.push(d.name); }
+    }
+    printJobs--;
+    toast("Sent " + ok + (ok === 1 ? " document" : " documents") + " to " + where + "." + (fails.length ? " Could not print: " + fails.join(", ") + "." : ""));
+  }
+  function viewItems(){
+    const linked = $("linkPages");
+    return [
+      { head: "Documents on screen" },
+      { label: "One document", check: paneCount === 1, run: () => setPaneCount(1) },
+      { label: "Compare two side by side", check: paneCount === 2, run: () => setPaneCount(2) },
+      { label: "Compare three side by side", check: paneCount === 3, run: () => setPaneCount(3) },
+      { label: "Keep page numbers in step", check: !!linked.checked, dis: paneCount === 1, run: () => { linked.checked = !linked.checked; linked.dispatchEvent(new Event("change", { bubbles: true })); } },
+      { sep: true },
+      { label: "Page thumbnails", check: !!(active && active.thumbsOn), doc: true, run: paneAct("thumbs") },
+      { label: "Fit width", kbd: "Ctrl+0", doc: true, run: paneAct("fit") },
+      { label: "Sidebar", kbd: "Ctrl+\\", check: !$("app").classList.contains("collapsed"), run: () => toggleRail() },
+      { sep: true },
+      { head: "Tip" },
+      { empty: "Ctrl+click documents in the list to compare, bundle or print several at once." }
+    ];
+  }
+  (function addViewBtn(){
+    const slot = panes[0].el.querySelector(".viewslot"); if (!slot) return;
+    const b = document.createElement("button"); b.type = "button"; b.className = "viewbtn"; b.id = "viewBtn";
+    b.setAttribute("aria-haspopup", "menu"); b.setAttribute("aria-expanded", "false"); b.title = "View: one document, or compare two or three side by side";
+    b.innerHTML = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="9" height="16" rx="1.5"/><rect x="13" y="4" width="9" height="16" rx="1.5"/></svg><span>View</span><span class="vcount" hidden></span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px"><path d="m6 9 6 6 6-6"/></svg>';
+    b.addEventListener("click", () => { if (!$("appMenu").hidden && menuAnchor === b) closeMenu(); else openMenuAt(b, viewItems()); });
+    slot.appendChild(b);
+  })();
+  function syncViewBtn(){ const v = $("viewBtn"); if (!v) return; const c = v.querySelector(".vcount"); c.hidden = paneCount === 1; c.textContent = paneCount + " up"; }
+  const _setPaneCount = setPaneCount;
+  setPaneCount = function(n){ _setPaneCount(n); syncViewBtn(); };
+  syncViewBtn();
   /* ---- v3.8 Projects Library ---- */
   function libLabel(lib){
     if (!lib) return "";
@@ -4484,17 +4688,20 @@ body.has-wintitle .bundle{top:36px}
     pop.appendChild(el("pp-sep"));
     const head = el("pp-head", "Projects Library"); pop.appendChild(head);
     const others = list.filter(r => !P || lc(r.path) !== lc(P.path));
-    if (others.length > 6){
+    const away0 = recents.filter(r => r.exists && !inLib(r.path) && (!P || lc(r.path) !== lc(P.path)));
+    if (others.length + away0.length > 0){
       const f = document.createElement("input"); f.type = "search"; f.className = "pp-find"; f.placeholder = "Find a project"; f.value = libFilter; f.setAttribute("aria-label", "Find a project");
-      f.addEventListener("input", () => { libFilter = f.value; paint(); }); pop.appendChild(f);
-      setTimeout(() => { if (libFilter) f.focus(); }, 0);
+      f.addEventListener("input", () => { libFilter = f.value; paint(); paintAway(); });
+      f.addEventListener("keydown", e => { if (e.key === "Enter"){ const b = pop.querySelector(".pp-list .pp-item, .pp-away .pp-item"); if (b){ e.preventDefault(); b.click(); } } });
+      pop.insertBefore(f, head); pop.insertBefore(head, f);
+      setTimeout(() => f.focus(), 0);
     }
     const box = el("pp-list"); pop.appendChild(box);
     const paint = () => {
       box.textContent = "";
       const q = libFilter.trim().toLowerCase();
-      const show = others.filter(r => !q || (r.name + " " + r.matter).toLowerCase().includes(q));
-      if (!list.length) box.appendChild(el("pp-tip", "No projects here yet. New project saves one here."));
+      const show = others.filter(r => !q || q.split(/\s+/).every(w => (r.name + " " + r.matter + " " + (r.docNames || "")).toLowerCase().includes(w)));
+      if (!list.length) box.appendChild(el("pp-tip", q ? "No project in the library matches that." : "No projects here yet. New project saves one here."));
       else if (!show.length) box.appendChild(el("pp-tip", q ? "No project matches that." : "This is the only project."));
       show.forEach(r => {
         const row = el("pp-doc");
@@ -4508,10 +4715,15 @@ body.has-wintitle .bundle{top:36px}
     };
     paint();
     // projects saved in matter folders, offered for moving into the library
-    const away = recents.filter(r => r.exists && !inLib(r.path) && (!P || lc(r.path) !== lc(P.path)));
-    if (away.length){
-      pop.appendChild(el("pp-sep")); pop.appendChild(el("pp-head", "In matter folders"));
-      away.forEach(r => {
+    const away = away0;
+    const awayBox = el("pp-away");
+    const paintAway = () => {
+      awayBox.textContent = "";
+      const q = libFilter.trim().toLowerCase();
+      const show = away.filter(r => !q || q.split(/\s+/).every(w => (r.name + " " + r.path).toLowerCase().includes(w)));
+      if (!show.length) return;
+      awayBox.appendChild(el("pp-sep")); awayBox.appendChild(el("pp-head", "In matter folders"));
+      show.forEach(r => {
         const row = el("pp-doc three");
         const b = document.createElement("button"); b.type = "button"; b.className = "pp-item"; b.title = r.path; b.innerHTML = svg("folder");
         const main = el("pp-main"); main.append(el("pp-name", r.name), el("pp-meta", whenText(r.last) + " · " + dirOf(r.path).split(/[\\/]/).pop()));
@@ -4524,8 +4736,11 @@ body.has-wintitle .bundle{top:36px}
         const rm = document.createElement("button"); rm.type = "button"; rm.className = "btn ghost iconbtn icon"; rm.innerHTML = svg("x");
         rm.title = "Remove from this list"; rm.setAttribute("aria-label", "Remove " + r.name + " from this list");
         rm.addEventListener("click", async ev => { ev.stopPropagation(); await D.projectRecentRemove(r.path); renderProjPop(); });
-        row.append(b, mv, rm); pop.appendChild(row);
+        row.append(b, mv, rm); awayBox.appendChild(row);
       });
+    };
+    if (away.length){
+      pop.appendChild(awayBox); paintAway();
       if (away.length > 1) item("open", "Move all " + away.length + " to the library", () => { closeProjPop(); moveToLibrary(away.map(r => r.path)); });
     }
     if (lib){
@@ -4638,6 +4853,7 @@ body.has-wintitle .bundle{top:36px}
       { label: "Show in folder", ic: "folder", doc: true, run: paneAct("showfolder"), desk: true },
       { sep: true },
       { label: "Print…", ic: "print", kbd: "Ctrl+P", doc: true, run: paneAct("print") },
+      { label: "Print all open documents…", ic: "print", doc: true, run: () => printAllOpen() },
       { label: "Find…", ic: "find", kbd: "Ctrl+F", doc: true, run: paneAct("find") },
       { label: "Undo last mark", ic: "undo", kbd: "Ctrl+Z", doc: true, run: () => undoMark() },
       { sep: true },
@@ -4718,7 +4934,16 @@ body.has-wintitle .bundle{top:36px}
     const a = menuSub._anchor; if (a){ a.classList.remove("open"); a.setAttribute("aria-expanded", "false"); }
     menuSub.remove(); menuSub = null;
   }
-  function closeMenu(){ closeSub(); $("appMenu").hidden = true; $("menuBtn").setAttribute("aria-expanded", "false"); }
+  let menuAnchor = null;
+  function closeMenu(){ closeSub(); $("appMenu").hidden = true; $("menuBtn").setAttribute("aria-expanded", "false"); if (menuAnchor){ menuAnchor.setAttribute("aria-expanded", "false"); menuAnchor = null; } }
+  function openMenuAt(anchor, items){
+    closeMenu(); toggleSettings(false); closeMores();
+    const m = $("appMenu"); buildMenu(m, items, 0); m.hidden = false; menuAnchor = anchor; anchor.setAttribute("aria-expanded", "true");
+    const r = anchor.getBoundingClientRect();
+    m.style.left = Math.max(8, Math.min(window.innerWidth - m.offsetWidth - 8, r.left)) + "px";
+    m.style.top = Math.min(r.bottom + 4, window.innerHeight - m.offsetHeight - 8) + "px";
+    const f = m.querySelector(".am-item:not([aria-disabled])"); if (f) f.focus();
+  }
   function openMenu(){
     toggleSettings(false); closeMores(); if (typeof closeRecent === "function") closeRecent();
     const m = $("appMenu"); buildMenu(m, menuModel(), 0); m.hidden = false; $("menuBtn").setAttribute("aria-expanded", "true");
@@ -4729,7 +4954,7 @@ body.has-wintitle .bundle{top:36px}
   $("menuBtn").addEventListener("click", () => { if ($("appMenu").hidden) openMenu(); else closeMenu(); });
   document.addEventListener("pointerdown", e => {
     if ($("appMenu").hidden) return;
-    if (e.target.closest("#appMenu, .appsub, #menuBtn")) return;
+    if (e.target.closest("#appMenu, .appsub, #menuBtn, .viewbtn")) return;
     closeMenu();
   }, true);
   window.addEventListener("resize", () => { if (!$("appMenu").hidden) closeMenu(); });

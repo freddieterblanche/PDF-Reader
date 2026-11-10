@@ -477,7 +477,7 @@ if (!app.requestSingleInstanceLock()) {
         try { raw = JSON.parse(fs.readFileSync(full, "utf8")) || {}; } catch (e) {}
         try { last = fs.statSync(full).mtimeMs; } catch (e) {}
         allowProj(full);
-        return { path: full, name: raw.name || n.replace(/\.pdfrproj$/i, ""), docs: Array.isArray(raw.docs) ? raw.docs.length : 0, matter: raw.matter || "", last };
+        return { path: full, name: raw.name || n.replace(/\.pdfrproj$/i, ""), docs: Array.isArray(raw.docs) ? raw.docs.length : 0, docNames: Array.isArray(raw.docs) ? raw.docs.map(e => e && e.name || "").join(" | ") : "", matter: raw.matter || "", last };
       }).sort((a, b) => b.last - a.last);
     });
     ipcMain.handle("library-choose", async () => {
