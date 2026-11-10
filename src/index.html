@@ -301,8 +301,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
 @font-face{font-family:"Geist";font-weight:100 900;font-style:normal;font-display:swap;src:url(fonts/geist-latin-wght-normal.woff2) format("woff2")}
 @font-face{font-family:"Geist Mono";font-weight:100 900;font-style:normal;font-display:swap;src:url(fonts/geist-mono-latin-wght-normal.woff2) format("woff2")}
 :root{
-  --bg:#f3f4f6; --rail:#f3f4f6; --surface:#ffffff; --ink:#16181d; --muted:#6b7280; --line:#e4e6eb; --line-strong:#d6d9df;
-  --accent:#2f5bdb; --accent-ink:#ffffff; --accent-soft:#e9eefc; --danger:#d14343; --desk:#eceef2; --hover:rgba(22,24,29,.06);
+  --bg:#ffffff; --rail:#ffffff; --surface:#ffffff; --ink:#16181d; --muted:#6b7280; --line:#e4e6eb; --line-strong:#d6d9df;
+  --accent:#2f5bdb; --accent-ink:#ffffff; --accent-soft:#e9eefc; --danger:#d14343; --desk:#f1f2f4; --hover:rgba(22,24,29,.06);
   --sans:"Geist","Segoe UI Variable Text","Segoe UI",system-ui,sans-serif; --mono:"Geist Mono",ui-monospace,Consolas,monospace;
   --radius:8px; --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
 }
@@ -749,6 +749,25 @@ body.has-wintitle .bundle{top:36px}
 .set-ver{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
 .set-ver .ver{border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--muted);font-family:var(--mono);font-size:11px;padding:2px 7px;cursor:pointer}
 .keep-off{display:none}
+
+/* v3.7 main menu */
+.menubtn{font:inherit;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;border:1px solid transparent;background:none;color:var(--ink);border-radius:8px;padding:6px 10px 6px 8px;cursor:pointer}
+.menubtn:hover,.menubtn[aria-expanded="true"]{background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.appmenu,.appsub{position:fixed;z-index:60;min-width:270px;max-height:calc(100vh - 16px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 18px 48px rgba(16,24,40,.22);padding:5px;display:flex;flex-direction:column}
+.appmenu[hidden],.appsub[hidden]{display:none}
+.am-item{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:10px;font:inherit;font-size:13.5px;text-align:left;color:var(--ink);background:none;border:0;border-radius:6px;padding:8px 10px;cursor:pointer;white-space:nowrap}
+.am-item .ic{width:17px;height:17px;color:var(--am,var(--muted))}
+.am-item kbd{font-family:var(--sans);font-size:12px;color:var(--muted);background:none;border:0;padding:0}
+.am-item .am-arrow{color:var(--muted);font-size:15px;line-height:1}
+.am-item:hover,.am-item:focus-visible,.am-item.open{background:var(--accent);color:#fff;outline:none}
+.am-item:hover .ic,.am-item:focus-visible .ic,.am-item.open .ic,.am-item:hover kbd,.am-item:focus-visible kbd,.am-item.open kbd,.am-item:hover .am-arrow,.am-item:focus-visible .am-arrow,.am-item.open .am-arrow{color:#fff}
+.am-item[aria-disabled="true"]{color:var(--muted);opacity:.55;cursor:default;background:none}
+.am-item[aria-disabled="true"] .ic{color:var(--muted)}
+.am-item .am-check{visibility:hidden}
+.am-item[aria-checked="true"] .am-check{visibility:visible}
+.am-sep{height:1px;background:var(--line);margin:5px 8px}
+.am-head{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 10px 3px}
+.am-empty{font-size:12.5px;color:var(--muted);padding:8px 10px}
 /* v3.6 All tools */
 .bundlebtn{width:100%;justify-content:center;color:#b42318;border-color:color-mix(in srgb,#d64545 35%,var(--line))}
 .bundlebtn .ic{color:#d64545}
@@ -831,10 +850,11 @@ body.has-wintitle .bundle{top:36px}
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Documents">
     <div class="rail-head">
-      <div class="brand"><span class="app-name">PDF Reader</span><span class="brand-sp"></span>
+      <div class="brand"><button class="menubtn" id="menuBtn" type="button" aria-haspopup="menu" aria-expanded="false" title="Menu (Alt+M)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg>Menu</button><span class="brand-sp"></span>
         <button class="btn ghost iconbtn" id="settingsBtn" type="button" aria-label="Settings" aria-expanded="false" title="Settings: appearance, OCR, shortcuts, updates"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
         <button class="btn ghost iconbtn collapse" id="collapseBtn" type="button" aria-label="Hide sidebar" title="Hide sidebar (Ctrl+\)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg></button>
       </div>
+      <div class="appmenu" id="appMenu" hidden role="menu" aria-label="Menu"></div>
       <div class="settings-pop" id="settingsPop" hidden role="dialog" aria-label="Settings">
         <div class="set-sec"><span class="set-lab" id="themeLabel">Appearance</span><div class="seg" id="themeSeg" role="group" aria-labelledby="themeLabel">
           <button class="btn" type="button" data-theme-src="system" aria-pressed="true" title="Follow Windows" aria-label="System"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></button>
@@ -843,7 +863,7 @@ body.has-wintitle .bundle{top:36px}
         </div></div>
         <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
         <button class="set-link" type="button" id="helpBtn"><span>Keyboard shortcuts</span><kbd>?</kbd></button>
-        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.6.0</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
+        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.7.0</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
       </div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -4404,6 +4424,171 @@ body.has-wintitle .bundle{top:36px}
     }
   });
   try { if (localStorage.getItem("railTab") === "tools") setRailTab("tools"); } catch(e){}
+  /* ---- v3.7 main Menu (Adobe style) ---- */
+  const MI = {
+    open: '<path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>',
+    recent: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    bundle: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M9 7h7"/><path d="M9 11h5"/>',
+    proj: '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+    save: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+    marked: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+    stamp: '<path d="M5 22h14"/><path d="M19.3 13.7A2.5 2.5 0 0 0 17.5 13h-11A2.5 2.5 0 0 0 4 15.5V17a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1.5c0-.7-.3-1.3-.7-1.8"/><path d="M14 13V8.5C14 7 15 7 15 5a3 3 0 0 0-6 0c0 2 1 2 1 3.5V13"/>',
+    print: '<path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/>',
+    find: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+    undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+    view: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+    tools: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/>',
+    win: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/>',
+    keys: '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01"/><path d="M10 10h.01"/><path d="M14 10h.01"/><path d="M18 10h.01"/><path d="M7 14h10"/>',
+    prefs: '<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
+    upd: '<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>',
+    folder: '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M12 10v6"/><path d="m9 13 3 3 3-3"/>',
+    check: '<path d="M20 6 9 17l-5-5"/>'
+  };
+  const paneAct = act => () => { const p = active; const b = p && p.el.querySelector('[data-act="' + act + '"]'); if (b) b.click(); };
+  const hasDoc = () => !!(active && active.doc);
+  function menuModel(){
+    const desk = !!window.pdfReader;
+    const recent = () => {
+      const list = (typeof recentCache !== "undefined" ? recentCache : []).filter(r => r.exists).slice(0, 12);
+      const items = list.map(r => ({ label: r.name, title: r.path, run: () => openRecent(r.path) }));
+      if (!items.length) items.push({ empty: "Documents you open will be listed here." });
+      items.push({ sep: true }, { label: "Show all and pin…", run: () => openRecentPop() });
+      return items;
+    };
+    const toolsSub = () => {
+      const out = [];
+      TOOL_GROUPS.forEach((g, gi) => {
+        if (gi) out.push({ sep: true });
+        out.push({ head: g.name });
+        g.tools.filter(t => desk || !t.desk).forEach(t => out.push({ label: t.name, svg: t.ic, color: t.c, dis: !t.nodoc && !t.run && !hasDoc(), run: () => runTool(t) }));
+      });
+      out.push({ sep: true }, { label: "Show All tools in the sidebar", kbd: "Ctrl+Shift+T", run: () => { if ($("app").classList.contains("collapsed")) toggleRail(); setRailTab("tools"); } });
+      return out;
+    };
+    const theme = (() => { try { return localStorage.getItem("theme") || "system"; } catch(e){ return "system"; } })();
+    return [
+      { label: "Open…", ic: "open", kbd: "Ctrl+O", run: () => openFiles() },
+      { label: "Open recent files", ic: "recent", sub: recent, desk: true },
+      { label: "Make a bundle…", ic: "bundle", color: "#d64545", run: () => openBundle(), desk: true },
+      { label: "Projects…", ic: "proj", run: () => $("projBtn").click(), desk: true },
+      { sep: true },
+      { label: "Save as…", ic: "save", kbd: "Ctrl+S", doc: true, run: paneAct("saveas"), desk: true },
+      { label: "Save marked-up copy…", ic: "marked", doc: true, run: paneAct("markedup"), desk: true },
+      { label: "Stamp annexures", ic: "stamp", doc: true, run: paneAct("stamp"), desk: true },
+      { label: "Show in folder", ic: "folder", doc: true, run: paneAct("showfolder"), desk: true },
+      { sep: true },
+      { label: "Print…", ic: "print", kbd: "Ctrl+P", doc: true, run: paneAct("print") },
+      { label: "Find…", ic: "find", kbd: "Ctrl+F", doc: true, run: paneAct("find") },
+      { label: "Undo last mark", ic: "undo", kbd: "Ctrl+Z", doc: true, run: () => undoMark() },
+      { sep: true },
+      { label: "View", ic: "view", sub: () => [
+        { label: "One document", check: paneCount === 1, run: () => setPaneCount(1) },
+        { label: "Two side by side", check: paneCount === 2, run: () => setPaneCount(2) },
+        { label: "Three side by side", check: paneCount === 3, run: () => setPaneCount(3) },
+        { sep: true },
+        { label: "Page thumbnails", check: !!(active && active.thumbsOn), doc: true, run: paneAct("thumbs") },
+        { label: "Fit width", kbd: "Ctrl+0", doc: true, run: paneAct("fit") },
+        { label: "Zoom in", kbd: "Ctrl++", doc: true, run: paneAct("in") },
+        { label: "Zoom out", kbd: "Ctrl+−", doc: true, run: paneAct("out") },
+        { sep: true },
+        { label: "Sidebar", kbd: "Ctrl+\\", check: !$("app").classList.contains("collapsed"), run: () => toggleRail() },
+        { sep: true },
+        { head: "Appearance" },
+        { label: "Follow Windows", check: theme === "system", run: () => applyTheme("system") },
+        { label: "Light", check: theme === "light", run: () => applyTheme("light") },
+        { label: "Dark", check: theme === "dark", run: () => applyTheme("dark") }
+      ]},
+      { label: "Tools", ic: "tools", sub: toolsSub },
+      { label: "Window", ic: "win", sub: () => [
+        { label: "Facts and issues panel", kbd: "Ctrl+Shift+N", check: !$("notes").hidden, run: () => toggleNotes() },
+        { label: "Workspace board", kbd: "Ctrl+Shift+W", check: !!(typeof wsState !== "undefined" && wsState.open), run: () => toggleWs() },
+        { label: "All tools", kbd: "Ctrl+Shift+T", check: !$("toolsView").hidden && !$("app").classList.contains("collapsed"), run: () => { if ($("app").classList.contains("collapsed")) toggleRail(); setRailTab($("toolsView").hidden ? "tools" : "docs"); } }
+      ]},
+      { sep: true },
+      { label: "Keyboard shortcuts", ic: "keys", kbd: "?", run: () => toggleHelp(true) },
+      { label: "Preferences…", ic: "prefs", kbd: "Ctrl+K", run: () => toggleSettings(true) },
+      { label: "Check for updates", ic: "upd", run: () => $("checkUpd").click(), desk: true }
+    ].filter(i => desk || !i.desk);
+  }
+  let menuSub = null;
+  function buildMenu(box, items, level){
+    box.innerHTML = "";
+    for (const it of items){
+      if (it.desk && !window.pdfReader) continue;
+      if (it.sep){ const d = document.createElement("div"); d.className = "am-sep"; d.setAttribute("role", "separator"); box.append(d); continue; }
+      if (it.head){ const d = document.createElement("div"); d.className = "am-head"; d.textContent = it.head; box.append(d); continue; }
+      if (it.empty){ const d = document.createElement("div"); d.className = "am-empty"; d.textContent = it.empty; box.append(d); continue; }
+      const b = document.createElement("button"); b.type = "button"; b.className = "am-item";
+      b.setAttribute("role", it.check !== undefined ? "menuitemcheckbox" : "menuitem");
+      if (it.title) b.title = it.title;
+      const off = it.dis || (it.doc && !hasDoc());
+      if (off){ b.setAttribute("aria-disabled", "true"); b.title = "Open a document first"; }
+      let icon = "";
+      if (it.check !== undefined){ b.setAttribute("aria-checked", String(!!it.check)); icon = '<svg class="ic am-check" viewBox="0 0 24 24" aria-hidden="true">' + MI.check + '</svg>'; }
+      else if (it.ic || it.svg) icon = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + (it.svg || MI[it.ic]) + '</svg>';
+      b.innerHTML = '<span>' + icon + '</span><span class="am-label"></span><span>' + (it.sub ? '<span class="am-arrow">›</span>' : it.kbd ? '<kbd></kbd>' : '') + '</span>';
+      b.querySelector(".am-label").textContent = it.label;
+      if (it.kbd && !it.sub) b.querySelector("kbd").textContent = it.kbd;
+      if (it.color) b.style.setProperty("--am", it.color);
+      if (it.sub){
+        b.setAttribute("aria-haspopup", "menu"); b.setAttribute("aria-expanded", "false");
+        const show = () => openSub(b, it.sub());
+        b.addEventListener("mouseenter", show); b.addEventListener("click", show);
+        b._openSub = show;
+      } else {
+        b.addEventListener("mouseenter", () => { if (level === 0) closeSub(); });
+        b.addEventListener("click", () => { if (off) return; closeMenu(); it.run(); });
+      }
+      box.append(b);
+    }
+  }
+  function openSub(anchor, items){
+    if (menuSub && menuSub._anchor === anchor) return;
+    closeSub();
+    const sub = document.createElement("div"); sub.className = "appsub"; sub.setAttribute("role", "menu"); sub._anchor = anchor;
+    document.body.append(sub); buildMenu(sub, items, 1);
+    anchor.classList.add("open"); anchor.setAttribute("aria-expanded", "true");
+    const r = anchor.getBoundingClientRect(), w = sub.offsetWidth, h = sub.offsetHeight;
+    let x = r.right + 2; if (x + w > window.innerWidth - 8) x = Math.max(8, r.left - w - 2);
+    sub.style.left = x + "px"; sub.style.top = Math.max(8, Math.min(window.innerHeight - h - 8, r.top - 5)) + "px";
+    menuSub = sub;
+  }
+  function closeSub(){
+    if (!menuSub) return;
+    const a = menuSub._anchor; if (a){ a.classList.remove("open"); a.setAttribute("aria-expanded", "false"); }
+    menuSub.remove(); menuSub = null;
+  }
+  function closeMenu(){ closeSub(); $("appMenu").hidden = true; $("menuBtn").setAttribute("aria-expanded", "false"); }
+  function openMenu(){
+    toggleSettings(false); closeMores(); if (typeof closeRecent === "function") closeRecent();
+    const m = $("appMenu"); buildMenu(m, menuModel(), 0); m.hidden = false; $("menuBtn").setAttribute("aria-expanded", "true");
+    const r = $("menuBtn").getBoundingClientRect();
+    m.style.left = Math.max(8, r.left) + "px"; m.style.top = Math.min(r.bottom + 4, window.innerHeight - m.offsetHeight - 8) + "px";
+    const f = m.querySelector(".am-item:not([aria-disabled])"); if (f) f.focus();
+  }
+  $("menuBtn").addEventListener("click", () => { if ($("appMenu").hidden) openMenu(); else closeMenu(); });
+  document.addEventListener("pointerdown", e => {
+    if ($("appMenu").hidden) return;
+    if (e.target.closest("#appMenu, .appsub, #menuBtn")) return;
+    closeMenu();
+  }, true);
+  window.addEventListener("resize", () => { if (!$("appMenu").hidden) closeMenu(); });
+  document.addEventListener("keydown", e => {
+    if (e.altKey && !e.ctrlKey && (e.key === "m" || e.key === "M")){ e.preventDefault(); if ($("appMenu").hidden) openMenu(); else closeMenu(); return; }
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && (e.key === "k" || e.key === "K")){ e.preventDefault(); toggleSettings(); return; }
+    if ($("appMenu").hidden) return;
+    const inSub = menuSub && menuSub.contains(document.activeElement);
+    const box = inSub ? menuSub : $("appMenu");
+    const items = [...box.querySelectorAll(".am-item:not([aria-disabled])")];
+    const i = items.indexOf(document.activeElement);
+    if (e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); if (inSub){ const a = menuSub._anchor; closeSub(); a.focus(); } else { closeMenu(); $("menuBtn").focus(); } }
+    else if (e.key === "ArrowDown"){ e.preventDefault(); (items[(i + 1) % items.length] || items[0]).focus(); }
+    else if (e.key === "ArrowUp"){ e.preventDefault(); (items[(i - 1 + items.length) % items.length] || items[0]).focus(); }
+    else if (e.key === "ArrowRight" && document.activeElement && document.activeElement._openSub){ e.preventDefault(); document.activeElement._openSub(); const f = menuSub && menuSub.querySelector(".am-item:not([aria-disabled])"); if (f) f.focus(); }
+    else if (e.key === "ArrowLeft" && inSub){ e.preventDefault(); const a = menuSub._anchor; closeSub(); a.focus(); }
+  }, true);
+
 
   document.addEventListener("click", e => {
     if (!$("settingsPop").hidden && !e.target.closest("#settingsPop,#settingsBtn") && $("confirmModal").hidden) toggleSettings(false);
