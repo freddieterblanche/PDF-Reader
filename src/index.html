@@ -785,6 +785,17 @@ body.has-wintitle .bundle{top:36px}
 .help-col div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;font-size:13px;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
 .help-col kbd{font-family:var(--mono);font-size:11.5px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 6px;white-space:nowrap}
 @media (max-width:640px){.help-grid{grid-template-columns:1fr}}
+
+/* v3.5.1: coloured actions on document rows */
+.actions .icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.actions .act-rename{color:#2f5bdb}
+.actions .act-print{color:#1f9d55}
+.actions .act-close{color:#d64545}
+.actions .icon.act-rename:hover{color:#2f5bdb;background:color-mix(in srgb,#2f5bdb 14%,transparent)}
+.actions .icon.act-print:hover{color:#1f9d55;background:color-mix(in srgb,#1f9d55 14%,transparent)}
+.actions .icon.act-close:hover{color:#d64545;background:color-mix(in srgb,#d64545 14%,transparent)}
+:root[data-theme="dark"] .actions .act-rename{color:#8ea8ff} :root[data-theme="dark"] .actions .act-print{color:#4fd18b} :root[data-theme="dark"] .actions .act-close{color:#ff8a80}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .actions .act-rename{color:#8ea8ff} :root:not([data-theme="light"]) .actions .act-print{color:#4fd18b} :root:not([data-theme="light"]) .actions .act-close{color:#ff8a80}}
 </style>
 </head>
 <body>
@@ -806,7 +817,7 @@ body.has-wintitle .bundle{top:36px}
         </div></div>
         <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
         <button class="set-link" type="button" id="helpBtn"><span>Keyboard shortcuts</span><kbd>?</kbd></button>
-        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.5</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
+        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.5.1</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
       </div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -3898,7 +3909,8 @@ body.has-wintitle .bundle{top:36px}
         meta.appendChild(o);
       }
       const x = document.createElement("span"); x.className = "icon"; x.setAttribute("role","button"); x.tabIndex = 0;
-      x.setAttribute("aria-label", "Close " + d.name); x.textContent = "×";
+      x.setAttribute("aria-label", "Close " + d.name); x.title = "Close this document"; x.classList.add("act-close");
+      x.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
       const close = e => { e.stopPropagation(); removeDoc(d); };
       x.addEventListener("click", close); x.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") close(e); });
       const acts = document.createElement("span"); acts.className = "actions";
@@ -3913,10 +3925,18 @@ body.has-wintitle .bundle{top:36px}
         return m;
       };
       const ren = document.createElement("span"); ren.className = "icon move"; ren.setAttribute("role","button"); ren.tabIndex = 0;
-      ren.setAttribute("aria-label", "Rename " + d.name); ren.textContent = "✎";
+      ren.setAttribute("aria-label", "Rename " + d.name); ren.title = "Rename"; ren.classList.add("act-rename");
+      ren.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
       const goRen = e => { e.stopPropagation(); startRename(d); };
       ren.addEventListener("click", goRen); ren.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") goRen(e); });
-      acts.append(ren, mk("Move up", "↑", -1, idx === 0), mk("Move down", "↓", 1, idx === docs.length - 1), x);
+      /* print straight from the list; documents are reordered by dragging */
+      const pr = document.createElement("span"); pr.className = "icon move act-print"; pr.setAttribute("role","button"); pr.tabIndex = 0;
+      pr.setAttribute("aria-label", "Print " + d.name); pr.title = "Print this document";
+      pr.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>';
+      const goPr = async e => { e.stopPropagation(); if (!d.pdf){ toast(d.name + " is still opening."); return; } const p = visiblePanes().find(q => q.doc === d) || active; if (p.doc !== d) await p.show(d); openPrint(p); };
+      pr.addEventListener("click", goPr); pr.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") goPr(e); });
+      void mk;
+      acts.append(ren, pr, x);
       b.appendChild(acts);
       b.addEventListener("click", () => { active.show(d); $("app").classList.remove("open"); });
       b.addEventListener("keydown", e => {
