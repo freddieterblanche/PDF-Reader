@@ -749,6 +749,32 @@ body.has-wintitle .bundle{top:36px}
 .set-ver{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
 .set-ver .ver{border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--muted);font-family:var(--mono);font-size:11px;padding:2px 7px;cursor:pointer}
 .keep-off{display:none}
+/* v3.6 All tools */
+.bundlebtn{width:100%;justify-content:center;color:#b42318;border-color:color-mix(in srgb,#d64545 35%,var(--line))}
+.bundlebtn .ic{color:#d64545}
+.bundlebtn:hover{background:color-mix(in srgb,#d64545 9%,var(--surface));border-color:#d64545}
+.railtabs{display:flex;gap:2px;padding:3px;border-radius:9px;background:color-mix(in srgb,var(--ink) 6%,transparent);align-items:stretch}
+.rtab{flex:1;font:inherit;font-size:12.5px;font-weight:500;border:0;background:none;color:var(--muted);border-radius:7px;padding:6px 8px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.rtab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(16,24,40,.12)}
+.rtab:hover{color:var(--ink)}
+.rtab .count{font-size:11px}
+.toolsview{flex:1;overflow:auto;min-height:0;padding:10px 10px 16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.toolsview[hidden]{display:none}
+.toolfind{font:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:100%}
+.toolgroups{display:flex;flex-direction:column;gap:14px}
+.tgroup h3{margin:0 0 4px 6px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.trow{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:center;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:1px solid transparent;border-radius:8px;padding:6px;cursor:pointer}
+.trow:hover{background:color-mix(in srgb,var(--tc) 8%,transparent);border-color:color-mix(in srgb,var(--tc) 25%,transparent)}
+.trow:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.trow[aria-pressed="true"]{background:color-mix(in srgb,var(--tc) 12%,transparent);border-color:color-mix(in srgb,var(--tc) 45%,transparent)}
+.ttile{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--tc) 14%,transparent);color:var(--tc)}
+.ttile svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tname{display:block;font-weight:500;font-size:13.5px}
+.tdesc{display:block;font-size:11.5px;color:var(--muted);line-height:1.35;margin-top:1px}
+.trow.primary .tname{font-weight:600}
+.trow.primary{border-color:color-mix(in srgb,var(--tc) 30%,transparent);background:color-mix(in srgb,var(--tc) 5%,transparent)}
+.toolnone{font-size:12.5px;color:var(--muted);padding:6px}
+
 .opensplit{display:flex}
 .opensplit .openmain{flex:1;border-top-right-radius:0;border-bottom-right-radius:0;justify-content:center}
 .opensplit .opencaret{border-top-left-radius:0;border-bottom-left-radius:0;border-left:1px solid rgba(255,255,255,.35);padding:0 10px;min-width:38px;justify-content:center}
@@ -817,7 +843,7 @@ body.has-wintitle .bundle{top:36px}
         </div></div>
         <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
         <button class="set-link" type="button" id="helpBtn"><span>Keyboard shortcuts</span><kbd>?</kbd></button>
-        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.5.1</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
+        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.6.0</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
       </div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -826,6 +852,7 @@ body.has-wintitle .bundle{top:36px}
       </div>
       <div class="openwrap">
         <div class="opensplit"><button class="btn primary openmain" id="openBtn" type="button" title="Open PDFs (Ctrl+O)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>Open</button><button class="btn primary opencaret desktop-only" id="recentBtn" type="button" aria-expanded="false" aria-label="Recent documents and new bundle" title="Recent documents, new bundle"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></div>
+        <button class="btn bundlebtn desktop-only" id="bundleBtn" type="button" title="Make a bundle: combine PDFs into one paginated bundle with annexure labels"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M9 7h7"/><path d="M9 11h5"/></svg>Make a bundle</button>
         <span class="keep-off"><button class="btn" id="combineBtn" type="button" title="Bundle maker: combine documents into one numbered bundle" hidden><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>Bundle</button></span>
         <div class="recent-pop" id="recentPop" hidden role="dialog" aria-label="Recent documents">
           <div class="recent-acts"><button class="pp-item" type="button" id="omOpen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span>Open PDFs…</span><kbd>Ctrl+O</kbd></button><button class="pp-item desktop-only" type="button" id="omBundle"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg><span>New bundle…</span></button></div>
@@ -841,9 +868,10 @@ body.has-wintitle .bundle{top:36px}
         </div></div>
       <label class="check" id="linkWrap" hidden><input type="checkbox" id="linkPages"> Keep page numbers in step</label>
       <p class="drop-hint" id="hint" hidden>Or drag PDF files onto this panel. Files stay in your browser and are not uploaded. Each document reopens where you left off.</p>
-      <div class="rail-title"><h1>Documents</h1><span class="count" id="count">0</span></div>
+      <div class="rail-title railtabs" role="tablist" aria-label="Sidebar"><button class="rtab" type="button" role="tab" id="tabDocs" aria-selected="true">Documents <span class="count" id="count">0</span></button><button class="rtab" type="button" role="tab" id="tabTools" aria-selected="false" title="All tools (Ctrl+Shift+T)">All tools</button></div>
     </div>
     <div class="list" id="list" role="list"></div>
+    <div class="toolsview" id="toolsView" hidden><input class="toolfind" id="toolFind" type="search" placeholder="Find a tool" aria-label="Find a tool"><div class="toolgroups" id="toolGroups"></div></div>
   </aside>
   <div class="resizer" id="resizer" role="separator" aria-orientation="vertical" aria-label="Resize document panel"></div>
   <div class="panes" id="panes"></div>
@@ -4290,6 +4318,93 @@ body.has-wintitle .bundle{top:36px}
   $("helpModal").addEventListener("click", e => { if (e.target === $("helpModal")) toggleHelp(false); });
   $("omOpen").addEventListener("click", () => { closeRecent(); $("openBtn").click(); });
   $("omBundle").addEventListener("click", () => { closeRecent(); openBundle(); });
+  /* ---- v3.6 All tools panel ---- */
+  const TOOL_GROUPS = [
+    { name: "Prepare", tools: [
+      { id: "bundle", name: "Make a bundle", desc: "Combine PDFs into one paginated bundle, with annexure labels", c: "#d64545", desk: true, nodoc: true, primary: true, run: () => openBundle(),
+        ic: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M9 7h7"/><path d="M9 11h5"/>' },
+      { id: "organise", name: "Organise pages", desc: "Reorder, rotate, delete or insert pages", c: "#1f9d55", desk: true, act: "organise",
+        ic: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/>' },
+      { id: "stamp", name: "Stamp annexures", desc: "Number annexures FA1, FA2 and paginate", c: "#c2410c", desk: true, act: "stamp", state: p => !!p.stamping,
+        ic: '<path d="M5 22h14"/><path d="M19.3 13.7A2.5 2.5 0 0 0 17.5 13h-11A2.5 2.5 0 0 0 4 15.5V17a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1.5c0-.7-.3-1.3-.7-1.8"/><path d="M14 13V8.5C14 7 15 7 15 5a3 3 0 0 0-6 0c0 2 1 2 1 3.5V13"/>' },
+      { id: "proj", name: "Projects", desc: "Keep a matter's documents, marks and notes together", c: "#64748b", desk: true, nodoc: true, run: () => $("projBtn").click(),
+        ic: '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>' }
+    ]},
+    { name: "Analyse", tools: [
+      { id: "lines", name: "Underline passages", desc: "Click a start and an end: admitted, disputed or highlight", c: "#2f5bdb", act: "lines", state: p => p.tool === "lines",
+        ic: '<path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/><path d="M3 21h18"/>' },
+      { id: "box", name: "Box highlight", desc: "Drag a rectangle over a block of text", c: "#7c3aed", act: "box", state: p => p.tool === "box",
+        ic: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 3"/><path d="M8 9h8"/><path d="M8 13h8"/>' },
+      { id: "notes", name: "Facts and issues", desc: "Admitted and disputed facts, issues, highlights", c: "#0e7490", act: "notes", state: () => !$("notes").hidden,
+        ic: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M15 3v18"/><path d="M6.5 8h5"/><path d="M6.5 12h5"/>' },
+      { id: "ws", name: "Workspace board", desc: "Lay out facts, excerpts and notes on a board", c: "#b45309", act: "ws", state: () => !!(typeof wsState !== "undefined" && wsState.open),
+        ic: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>' },
+      { id: "compare", name: "Side by side", desc: "Read two documents next to each other", c: "#4f46e5", nodoc: true, run: () => setPaneCount(paneCount === 1 ? 2 : 1), state: () => paneCount > 1,
+        ic: '<rect x="2" y="4" width="9" height="16" rx="1.5"/><rect x="13" y="4" width="9" height="16" rx="1.5"/>' }
+    ]},
+    { name: "Find and output", tools: [
+      { id: "find", name: "Find text", desc: "Search this document", c: "#0f766e", act: "find",
+        ic: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>' },
+      { id: "thumbs", name: "Page thumbnails", desc: "Show small pages beside the document", c: "#475569", act: "thumbs", state: p => !!p.thumbsOn,
+        ic: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/>' },
+      { id: "print", name: "Print", desc: "Print all or some pages", c: "#1f9d55", act: "print",
+        ic: '<path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/>' },
+      { id: "saveas", name: "Save as", desc: "Save a copy of this document", c: "#2f5bdb", desk: true, act: "saveas",
+        ic: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>' },
+      { id: "markedup", name: "Save marked-up copy", desc: "A PDF with your underlining and comments", c: "#d64545", desk: true, act: "markedup",
+        ic: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>' }
+    ]}
+  ];
+  function renderTools(){
+    const host = $("toolGroups"), q = ($("toolFind").value || "").trim().toLowerCase(), desk = !!window.pdfReader;
+    host.innerHTML = ""; let any = false;
+    for (const g of TOOL_GROUPS){
+      const list = g.tools.filter(t => (desk || !t.desk) && (!q || (t.name + " " + t.desc).toLowerCase().includes(q)));
+      if (!list.length) continue; any = true;
+      const sec = document.createElement("div"); sec.className = "tgroup";
+      const h = document.createElement("h3"); h.textContent = g.name; sec.append(h);
+      for (const t of list){
+        const b = document.createElement("button"); b.type = "button"; b.className = "trow" + (t.primary ? " primary" : ""); b.dataset.tool = t.id;
+        b.style.setProperty("--tc", t.c); b.title = t.desc;
+        if (t.state) b.setAttribute("aria-pressed", String(!!(active && t.state(active))));
+        b.innerHTML = '<span class="ttile"><svg viewBox="0 0 24 24" aria-hidden="true">' + t.ic + '</svg></span><span><span class="tname"></span><span class="tdesc"></span></span>';
+        b.querySelector(".tname").textContent = t.name; b.querySelector(".tdesc").textContent = t.desc;
+        b.addEventListener("click", () => runTool(t));
+        sec.append(b);
+      }
+      host.append(sec);
+    }
+    if (!any){ const p = document.createElement("p"); p.className = "toolnone"; p.textContent = "No tool matches that."; host.append(p); }
+  }
+  function runTool(t){
+    if (t.run) t.run();
+    else {
+      const p = active;
+      if (!p || !p.doc){ toast("Open a document first, then choose " + t.name + "."); return; }
+      const b = p.el.querySelector('[data-act="' + t.act + '"]'); if (b) b.click();
+    }
+    setTimeout(() => { if (!$("toolsView").hidden) renderTools(); }, 60);
+  }
+  function setRailTab(tab){
+    const tools = tab === "tools";
+    $("tabDocs").setAttribute("aria-selected", String(!tools)); $("tabTools").setAttribute("aria-selected", String(tools));
+    $("list").hidden = tools; $("toolsView").hidden = !tools;
+    if (tools) renderTools();
+    try { localStorage.setItem("railTab", tools ? "tools" : "docs"); } catch(e){}
+  }
+  $("tabDocs").addEventListener("click", () => setRailTab("docs"));
+  $("tabTools").addEventListener("click", () => setRailTab("tools"));
+  $("toolFind").addEventListener("input", renderTools);
+  $("toolFind").addEventListener("keydown", e => { if (e.key === "Enter"){ const f = $("toolGroups").querySelector(".trow"); if (f) f.click(); } else if (e.key === "Escape"){ $("toolFind").value = ""; renderTools(); } });
+  $("bundleBtn").addEventListener("click", openBundle);
+  document.addEventListener("keydown", e => {
+    if (e.ctrlKey && e.shiftKey && !e.altKey && (e.key === "T" || e.key === "t")){
+      e.preventDefault(); if (document.getElementById("app").classList.contains("collapsed")) toggleRail();
+      const show = $("toolsView").hidden; setRailTab(show ? "tools" : "docs"); if (show) $("toolFind").focus();
+    }
+  });
+  try { if (localStorage.getItem("railTab") === "tools") setRailTab("tools"); } catch(e){}
+
   document.addEventListener("click", e => {
     if (!$("settingsPop").hidden && !e.target.closest("#settingsPop,#settingsBtn") && $("confirmModal").hidden) toggleSettings(false);
     if (!e.target.closest(".morewrap")) closeMores();
