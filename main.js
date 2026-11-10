@@ -41,6 +41,21 @@ function writeAtomic(target, data) {
     throw e;
   }
 }
+/* Looks for files by name in a folder and its subfolders (used to re-find a project's documents) */
+function findByName(dir, names, depth) {
+  const out = {}, want = new Map(names.filter(Boolean).map(n => [String(n).toLowerCase(), String(n)]));
+  const walk = (d, lvl) => {
+    let ents = []; try { ents = fs.readdirSync(d, { withFileTypes: true }); } catch (e) { return; }
+    for (const x of ents) {
+      if (!want.size) return;
+      const f = path.join(d, x.name), k = x.name.toLowerCase();
+      if (x.isFile() && want.has(k)) { out[want.get(k)] = f; want.delete(k); }
+      else if (x.isDirectory() && lvl < depth && !x.name.startsWith(".")) walk(f, lvl + 1);
+    }
+  };
+  if (dir && want.size) walk(dir, 0);
+  return out;
+}
 function readProject(p) {
   const full = path.resolve(p);
   let raw;
@@ -55,6 +70,12 @@ function readProject(p) {
     e.abs = hit || e.abs || (e.rel ? path.resolve(dir, e.rel) : "");
     e.missing = !hit;
   });
+  // A project in the Projects Library remembers its matter folder: look there for anything that has moved
+  const lost = raw.docs.filter(e => e.missing);
+  if (lost.length && raw.matter && fs.existsSync(raw.matter)) {
+    const found = findByName(raw.matter, lost.map(e => e.name || path.basename(e.abs || "")), 3);
+    lost.forEach(e => { const f = found[e.name || path.basename(e.abs || "")]; if (f) { e.abs = f; e.missing = false; } });
+  }
   allowProj(full); noteRecentProj(full, raw.name);
   return { path: full, project: raw };
 }
@@ -436,6 +457,69 @@ if (!app.requestSingleInstanceLock()) {
       try { fs.writeFileSync(recentProjFile(), JSON.stringify(recentProj)); } catch (e) {}
     });
     ipcMain.handle("project-show", (_e, p) => { if (projAllowed.has(path.resolve(String(p)).toLowerCase())) shell.showItemInFolder(p); });
+
+    /* ---- Projects Library: one central folder for all project files, in OneDrive when there is one ---- */
+    const libFile = () => path.join(app.getPath("userData"), "library.json");
+    const oneDrives = () => [process.env.OneDriveCommercial, process.env.OneDrive, path.join(app.getPath("home"), "OneDrive")].filter(d => d && fs.existsSync(d));
+    const defaultLibDir = () => path.join(oneDrives()[0] || app.getPath("documents"), "PDF Reader Projects");
+    function libDir() { try { const j = JSON.parse(fs.readFileSync(libFile(), "utf8")); if (j && j.dir) return j.dir; } catch (e) {} return defaultLibDir(); }
+    const inOneDrive = d => oneDrives().some(o => (path.resolve(d).toLowerCase() + path.sep).startsWith(path.resolve(o).toLowerCase() + path.sep));
+    const libInfo = () => { const d = libDir(); return { dir: d, exists: fs.existsSync(d), oneDrive: inOneDrive(d), sep: path.sep }; };
+    const inLib = p => path.resolve(path.dirname(p)).toLowerCase() === path.resolve(libDir()).toLowerCase();
+    const safeName = n => String(n || "Project").replace(/[<>:"/\\|?*\x00-\x1f]/g, " ").replace(/\s+/g, " ").trim().replace(/[. ]+$/, "").slice(0, 120) || "Project";
+    function uniqueIn(dir, base) { let p = path.join(dir, base + ".pdfrproj"), i = 2; while (fs.existsSync(p)) p = path.join(dir, base + " (" + (i++) + ").pdfrproj"); return p; }
+    ipcMain.handle("library-info", () => libInfo());
+    ipcMain.handle("library-list", () => {
+      const d = libDir(); let names = [];
+      try { names = fs.readdirSync(d).filter(n => /\.pdfrproj$/i.test(n)); } catch (e) { return []; }
+      return names.map(n => {
+        const full = path.join(d, n); let raw = {}, last = 0;
+        try { raw = JSON.parse(fs.readFileSync(full, "utf8")) || {}; } catch (e) {}
+        try { last = fs.statSync(full).mtimeMs; } catch (e) {}
+        allowProj(full);
+        return { path: full, name: raw.name || n.replace(/\.pdfrproj$/i, ""), docs: Array.isArray(raw.docs) ? raw.docs.length : 0, matter: raw.matter || "", last };
+      }).sort((a, b) => b.last - a.last);
+    });
+    ipcMain.handle("library-choose", async () => {
+      const cur = libDir();
+      const r = await dialog.showOpenDialog(win, { title: "Choose the folder for your Projects Library", buttonLabel: "Use this folder",
+        defaultPath: fs.existsSync(cur) ? cur : (oneDrives()[0] || app.getPath("documents")), properties: ["openDirectory", "createDirectory"] });
+      if (r.canceled || !r.filePaths[0]) return null;
+      fs.writeFileSync(libFile(), JSON.stringify({ dir: r.filePaths[0] }));
+      return libInfo();
+    });
+    ipcMain.handle("library-show", () => { const d = libDir(); fs.mkdirSync(d, { recursive: true }); shell.openPath(d); });
+    ipcMain.handle("project-create", (_e, name) => {
+      const d = libDir(); fs.mkdirSync(d, { recursive: true });
+      const p = uniqueIn(d, safeName(name)); allowProj(p); return p;
+    });
+    ipcMain.handle("library-move", (_e, p) => {
+      loadRecentProj();
+      const full = path.resolve(String(p));
+      if (!projAllowed.has(full.toLowerCase())) throw new Error("Open this project first.");
+      if (inLib(full)) return full;
+      if (!fs.existsSync(full)) throw new Error("The project file has been moved, renamed or deleted.");
+      const raw = readProject(full).project, d = libDir(); fs.mkdirSync(d, { recursive: true });
+      const target = uniqueIn(d, safeName(raw.name || path.basename(full, ".pdfrproj")));
+      raw.matter = raw.matter || path.dirname(full);
+      raw.docs = raw.docs.map(e => ({ id: e.id, name: e.name, rel: e.abs ? path.relative(d, e.abs) : e.rel, abs: e.abs }));
+      raw.saved = new Date().toISOString(); raw.savedWith = app.getVersion();
+      writeAtomic(target, JSON.stringify(raw, null, 1));
+      // the old file is kept, renamed, so nothing is lost
+      try { fs.renameSync(full, full + ".moved"); } catch (e) {}
+      allowProj(target);
+      recentProj = loadRecentProj().filter(r => r.path.toLowerCase() !== full.toLowerCase());
+      noteRecentProj(target, raw.name);
+      return target;
+    });
+    ipcMain.handle("project-locate", async (_e, name, others) => {
+      const r = await dialog.showOpenDialog(win, { title: "Where is " + String(name || "this document") + "?", buttonLabel: "Use this file", properties: ["openFile"], filters: [{ name: "PDF documents", extensions: ["pdf"] }] });
+      if (r.canceled || !r.filePaths[0]) return null;
+      const f = path.resolve(r.filePaths[0]); known.add(f);
+      const more = findByName(path.dirname(f), Array.isArray(others) ? others : [], 2);
+      Object.values(more).forEach(x => known.add(x));
+      return { path: f, more };
+    });
     // Marks on documents that are not in a project are kept in the app's data folder
     const notesFile = () => path.join(app.getPath("userData"), "marks.json");
     ipcMain.handle("notes-load", () => { try { return JSON.parse(fs.readFileSync(notesFile(), "utf8")) || {}; } catch (e) { return {}; } });
