@@ -736,6 +736,55 @@ body.has-wintitle .bundle{top:36px}
 @keyframes lmblink{50%{opacity:.35}}
 .box-band{position:absolute;z-index:5;border:1.5px dashed var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);pointer-events:none}
 .toolhint{position:fixed;z-index:41;left:50%;bottom:22px;transform:translateX(-50%);padding:8px 14px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:12.5px;box-shadow:0 8px 24px rgba(0,0,0,.25);pointer-events:none}
+
+/* v3.5: cleaner layout */
+.brand{display:flex;align-items:center;gap:2px}
+.brand-sp{flex:1}
+.settings-pop{position:fixed;z-index:45;width:300px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 44px rgba(16,24,40,.2);padding:14px;display:flex;flex-direction:column;gap:14px}
+.set-sec{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.set-lab{font-size:13px;color:var(--muted)}
+.set-link{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:0;padding:6px 0;font:inherit;font-size:13.5px;color:var(--ink);cursor:pointer;border-top:1px solid var(--line);padding-top:12px}
+.set-link:hover span{color:var(--accent)}
+.set-link kbd,.recent-acts kbd,.mitem kbd{font-family:var(--mono);font-size:11px;color:var(--muted);background:none;border:0}
+.set-ver{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+.set-ver .ver{border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--muted);font-family:var(--mono);font-size:11px;padding:2px 7px;cursor:pointer}
+.keep-off{display:none}
+.opensplit{display:flex}
+.opensplit .openmain{flex:1;border-top-right-radius:0;border-bottom-right-radius:0;justify-content:center}
+.opensplit .opencaret{border-top-left-radius:0;border-bottom-left-radius:0;border-left:1px solid rgba(255,255,255,.35);padding:0 10px;min-width:38px;justify-content:center}
+.recent-acts{display:flex;flex-direction:column;padding:6px;border-bottom:1px solid var(--line)}
+.recent-acts .pp-item span{flex:1}
+.rail-title{margin-top:4px}
+.panes.n1 .titlebar{display:none}
+.toolbar .titlebar{min-height:0;padding-bottom:2px}
+.toolbar .controls{flex-wrap:wrap;row-gap:6px}
+.toolseg{display:flex;align-items:center;gap:2px;padding:3px;border-radius:10px;background:color-mix(in srgb,var(--ink) 6%,transparent);margin:0 auto}
+.toolseg .btn{height:30px;padding:0 9px;border:0;border-radius:7px;background:transparent;color:var(--muted);gap:6px;box-shadow:none}
+.toolseg .btn:hover{color:var(--ink);background:color-mix(in srgb,var(--surface) 60%,transparent)}
+.toolseg .btn[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(16,24,40,.16)}
+.toolseg .btn:not([aria-pressed="true"]) .tlabel{display:none}
+.panes.n3 .toolseg .tlabel{display:none}
+.toolbar .tools{margin-left:0;flex-wrap:nowrap}
+.pane:not(:first-child) .viewslot{display:none}
+.viewslot #viewSeg .btn{padding:3px 9px;font-size:12px}
+.morewrap{position:relative}
+.moremenu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;min-width:250px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 40px rgba(16,24,40,.2);padding:6px;display:flex;flex-direction:column}
+.mitem{display:flex;align-items:center;gap:10px;padding:8px 10px;border:0;background:none;border-radius:8px;font:inherit;font-size:13.5px;color:var(--ink);text-align:left;cursor:pointer;white-space:nowrap}
+.mitem:hover,.mitem:focus-visible{background:var(--hover)}
+.mitem .ic{width:16px;height:16px;color:var(--muted)}
+.mitem span{flex:1}
+.mitem[aria-pressed="true"]::after{content:"\2713";color:var(--accent);font-weight:700}
+.msep{height:1px;background:var(--line);margin:5px 4px}
+.helpback{position:fixed;inset:0;z-index:60;background:rgba(10,12,16,.35);display:flex;align-items:center;justify-content:center;padding:16px}
+.helpback[hidden]{display:none}
+.helpcard{background:var(--surface);color:var(--ink);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.3);padding:18px 22px 22px;width:min(680px,100%);max-height:90vh;overflow:auto}
+.help-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.help-top h2{margin:0;font-size:16px;font-weight:650}
+.help-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 28px}
+.help-col h3{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+.help-col div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;font-size:13px;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
+.help-col kbd{font-family:var(--mono);font-size:11.5px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 6px;white-space:nowrap}
+@media (max-width:640px){.help-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -745,42 +794,43 @@ body.has-wintitle .bundle{top:36px}
 <div class="app" id="app">
   <aside class="rail" id="rail" aria-label="Documents">
     <div class="rail-head">
-      <div class="brand"><span class="app-name">PDF Reader</span><button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.4</button>
-        <button class="btn ghost iconbtn collapse" id="collapseBtn" type="button" aria-label="Hide sidebar" title="Hide sidebar (Ctrl+\)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg></button></div>
+      <div class="brand"><span class="app-name">PDF Reader</span><span class="brand-sp"></span>
+        <button class="btn ghost iconbtn" id="settingsBtn" type="button" aria-label="Settings" aria-expanded="false" title="Settings: appearance, OCR, shortcuts, updates"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        <button class="btn ghost iconbtn collapse" id="collapseBtn" type="button" aria-label="Hide sidebar" title="Hide sidebar (Ctrl+\)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg></button>
+      </div>
+      <div class="settings-pop" id="settingsPop" hidden role="dialog" aria-label="Settings">
+        <div class="set-sec"><span class="set-lab" id="themeLabel">Appearance</span><div class="seg" id="themeSeg" role="group" aria-labelledby="themeLabel">
+          <button class="btn" type="button" data-theme-src="system" aria-pressed="true" title="Follow Windows" aria-label="System"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></button>
+          <button class="btn" type="button" data-theme-src="light" aria-pressed="false" title="Light" aria-label="Light"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></button>
+          <button class="btn" type="button" data-theme-src="dark" aria-pressed="false" title="Dark" aria-label="Dark"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
+        </div></div>
+        <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
+        <button class="set-link" type="button" id="helpBtn"><span>Keyboard shortcuts</span><kbd>?</kbd></button>
+        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.5</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
+      </div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
         <button class="projbtn" id="projBtn" type="button" aria-expanded="false" title="Projects: keep a matter's documents, marks and notes together"><svg class="ic pj-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg><span class="pj-text"><span class="pj-label">Project</span><span class="pj-name" id="projName">No project open</span></span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="proj-pop" id="projPop" hidden role="dialog" aria-label="Projects"></div>
       </div>
-      <div class="rail-title"><h1>Documents</h1><span class="count" id="count">0</span></div>
       <div class="openwrap">
-        <button class="btn primary openmain" id="openBtn" type="button" title="Open PDFs (Ctrl+O)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>Open PDFs</button>
-        <div class="openrow"><button class="btn desktop-only" id="recentBtn" type="button" aria-expanded="false" title="Recently opened and pinned documents"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Recent</button><button class="btn" id="combineBtn" type="button" title="Bundle maker: combine documents into one numbered bundle" hidden><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>Bundle</button></div>
+        <div class="opensplit"><button class="btn primary openmain" id="openBtn" type="button" title="Open PDFs (Ctrl+O)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>Open</button><button class="btn primary opencaret desktop-only" id="recentBtn" type="button" aria-expanded="false" aria-label="Recent documents and new bundle" title="Recent documents, new bundle"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></div>
+        <span class="keep-off"><button class="btn" id="combineBtn" type="button" title="Bundle maker: combine documents into one numbered bundle" hidden><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>Bundle</button></span>
         <div class="recent-pop" id="recentPop" hidden role="dialog" aria-label="Recent documents">
+          <div class="recent-acts"><button class="pp-item" type="button" id="omOpen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span>Open PDFs…</span><kbd>Ctrl+O</kbd></button><button class="pp-item desktop-only" type="button" id="omBundle"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg><span>New bundle…</span></button></div>
           <div class="recent-list" id="recentList"></div>
           <div class="recent-foot"><span class="recent-tip">Pin a document to keep it at the top.</span><button class="linkbtn" type="button" id="recentClear">Clear list</button></div>
         </div>
       </div>
       <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple hidden>
-      <div class="viewrow">
-        <span class="viewlabel" id="viewLabel">Side by side</span>
-        <div class="seg" id="viewSeg" role="group" aria-labelledby="viewLabel">
+      <div id="viewHome" hidden><div class="seg" id="viewSeg" title="Side by side: 1, 2 or 3 documents" role="group" aria-label="Documents side by side">
           <button class="btn" type="button" data-n="1" aria-pressed="true" aria-label="One document">1</button>
           <button class="btn" type="button" data-n="2" aria-pressed="false" aria-label="Two documents side by side">2</button>
           <button class="btn" type="button" data-n="3" aria-pressed="false" aria-label="Three documents side by side">3</button>
-        </div>
-      </div>
-      <div class="viewrow desktop-only">
-        <span class="viewlabel" id="themeLabel">Appearance</span>
-        <div class="seg" id="themeSeg" role="group" aria-labelledby="themeLabel">
-          <button class="btn" type="button" data-theme-src="system" aria-pressed="true" title="Follow Windows" aria-label="System"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></button>
-          <button class="btn" type="button" data-theme-src="light" aria-pressed="false" title="Light" aria-label="Light"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></button>
-          <button class="btn" type="button" data-theme-src="dark" aria-pressed="false" title="Dark" aria-label="Dark"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
-        </div>
-      </div>
+        </div></div>
       <label class="check" id="linkWrap" hidden><input type="checkbox" id="linkPages"> Keep page numbers in step</label>
-      <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
-      <p class="drop-hint" id="hint">Or drag PDF files onto this panel. Files stay in your browser and are not uploaded. Each document reopens where you left off.</p>
+      <p class="drop-hint" id="hint" hidden>Or drag PDF files onto this panel. Files stay in your browser and are not uploaded. Each document reopens where you left off.</p>
+      <div class="rail-title"><h1>Documents</h1><span class="count" id="count">0</span></div>
     </div>
     <div class="list" id="list" role="list"></div>
   </aside>
@@ -951,18 +1001,39 @@ body.has-wintitle .bundle{top:36px}
 <div class="xpop" id="xPop" hidden role="menu"></div>
 <div class="kindpop" id="kindPop" hidden role="menu" aria-label="Document type"></div>
 <div class="toolhint" id="toolHint" hidden></div>
+<div class="helpback" id="helpModal" hidden>
+  <div class="helpcard" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="help-top"><h2 id="helpTitle">Keyboard shortcuts</h2><button class="btn ghost iconbtn" type="button" id="helpClose" aria-label="Close" title="Close (Esc)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+    <div class="help-grid">
+      <div class="help-col">
+        <h3>Marking selected text</h3>
+        <div><span>Admitted</span><kbd>A</kbd></div><div><span>Disputed</span><kbd>D</kbd></div><div><span>Highlight</span><kbd>H</kbd></div>
+        <div><span>Comment</span><kbd>C</kbd></div><div><span>Link to another passage</span><kbd>L</kbd></div><div><span>Add to an issue</span><kbd>I</kbd></div>
+        <div><span>Send to the workspace</span><kbd>W</kbd></div><div><span>Delete a selected mark</span><kbd>Delete</kbd></div><div><span>Undo</span><kbd>Ctrl+Z</kbd></div>
+      </div>
+      <div class="help-col">
+        <h3>Documents</h3>
+        <div><span>Open PDFs</span><kbd>Ctrl+O</kbd></div><div><span>Save as</span><kbd>Ctrl+S</kbd></div><div><span>Print</span><kbd>Ctrl+P</kbd></div>
+        <div><span>Find</span><kbd>Ctrl+F</kbd></div><div><span>Zoom</span><kbd>Ctrl + scroll</kbd></div><div><span>Fit width / 100%</span><kbd>Ctrl+0 / Ctrl+1</kbd></div>
+        <h3>Panels and tools</h3>
+        <div><span>Facts panel</span><kbd>Ctrl+Shift+N</kbd></div><div><span>Workspace</span><kbd>Ctrl+Shift+W</kbd></div><div><span>Sidebar</span><kbd>Ctrl+\</kbd></div>
+        <div><span>Stamp the page on screen</span><kbd>S</kbd></div><div><span>Stop a tool</span><kbd>Esc</kbd></div><div><span>This list</span><kbd>?</kbd></div>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <template id="paneTpl">
   <section class="pane">
     <div class="toolbar">
       <div class="titlebar">
-        <button class="btn ghost iconbtn toggle" type="button" data-act="toggle" aria-label="Show sidebar" title="Show sidebar (Ctrl+\)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m14 9 3 3-3 3"/></svg></button>
         <span class="pane-label"></span>
         <span class="docname"></span>
         <select class="docsel" aria-label="Switch document in this pane" title="Switch document"></select>
       </div>
       <div class="controls">
+        <button class="btn ghost iconbtn toggle" type="button" data-act="toggle" aria-label="Show sidebar" title="Show sidebar (Ctrl+\)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m14 9 3 3-3 3"/></svg></button>
         <div class="seg">
           <button class="btn ghost iconbtn" type="button" data-act="prev" aria-label="Previous page" title="Previous page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
           <input class="pageinput" type="text" inputmode="numeric" aria-label="Page number" value="0">
@@ -975,18 +1046,29 @@ body.has-wintitle .bundle{top:36px}
           <button class="btn ghost iconbtn" type="button" data-act="in" aria-label="Zoom in" title="Zoom in (Ctrl+plus)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
           <button class="btn ghost iconbtn" type="button" data-act="fit" aria-label="Fit width" title="Fit width (Ctrl+0). Ctrl+1 for 100%"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m18 8 4 4-4 4"/><path d="M2 12h20"/><path d="m6 8-4 4 4 4"/></svg></button>
         </div>
+        <div class="toolseg" role="group" aria-label="Tools">
+          <button class="btn ghost" type="button" data-act="select" aria-pressed="true" title="Select: read, select text and click marks"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l7.07 17 2.51-7.39L21 11.07z"/></svg><span class="tlabel">Select</span></button>
+          <button class="btn ghost" type="button" data-act="lines" aria-pressed="false" title="Lines: click where a passage starts, then where it ends"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg><span class="tlabel">Lines</span></button>
+          <button class="btn ghost" type="button" data-act="box" aria-pressed="false" title="Box: drag a rectangle over a block of text or part of a scanned page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 3"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h6"/></svg><span class="tlabel">Box</span></button>
+          <button class="btn ghost desktop-only" type="button" data-act="stamp" aria-pressed="false" title="Stamp: number annexures FA1, FA2 … by clicking the pages where they start"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 22h14"/><path d="M19.27 13.73A2.5 2.5 0 0 0 17.5 13h-11A2.5 2.5 0 0 0 4 15.5V17a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1.5c0-.66-.26-1.3-.73-1.77Z"/><path d="M14 13V8.5C14 7 15 7 15 5a3 3 0 0 0-6 0c0 2 1 2 1 3.5V13"/></svg><span class="tlabel">Stamp</span></button>
+        </div>
+        <div class="viewslot"></div>
         <div class="tools">
-          <button class="btn ghost" type="button" data-act="find" title="Find in document (Ctrl+F)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span class="tlabel">Find</span></button>
-          <button class="btn ghost" type="button" data-act="thumbs" aria-pressed="false" title="Show page thumbnails"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg><span class="tlabel">Pages</span></button>
-          <button class="btn ghost desktop-only" type="button" data-act="organise" title="Delete, reorder, rotate, extract, insert and split pages"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg><span class="tlabel">Organise</span></button>
-          <button class="btn ghost desktop-only" type="button" data-act="stamp" aria-pressed="false" title="Annexure stamp: click the pages where annexures start; they are numbered in order"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 22h14"/><path d="M19.27 13.73A2.5 2.5 0 0 0 17.5 13h-11A2.5 2.5 0 0 0 4 15.5V17a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1.5c0-.66-.26-1.3-.73-1.77Z"/><path d="M14 13V8.5C14 7 15 7 15 5a3 3 0 0 0-6 0c0 2 1 2 1 3.5V13"/></svg><span class="tlabel">Stamp</span></button>
-          <button class="btn ghost" type="button" data-act="lines" aria-pressed="false" title="Lines: click where a passage starts, then where it ends. The lines between are marked as straight bars."><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg><span class="tlabel">Lines</span></button>
-          <button class="btn ghost" type="button" data-act="box" aria-pressed="false" title="Box: drag a rectangle over a block of text (or any part of a scanned page) to mark it"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 3"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h6"/></svg><span class="tlabel">Box</span></button>
-          <button class="btn ghost" type="button" data-act="notes" aria-pressed="false" title="Facts and notes: admitted and disputed facts, highlights and comments (Ctrl+Shift+N)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span class="tlabel">Facts</span></button>
-          <button class="btn ghost" type="button" data-act="ws" aria-pressed="false" title="Workspace: arrange excerpts, notes and links (Ctrl+Shift+W)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span class="tlabel">Workspace</span></button>
-          <span class="tsep" aria-hidden="true"></span>
-          <button class="btn ghost desktop-only" type="button" data-act="saveas" title="Save a copy of this document to a folder (Ctrl+S)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span class="tlabel">Save as</span></button>
-          <button class="btn ghost" type="button" data-act="print" aria-label="Print document" title="Print (Ctrl+P)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg><span class="tlabel">Print</span></button>
+          <button class="btn ghost iconbtn" type="button" data-act="find" aria-label="Find" title="Find in document (Ctrl+F)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
+          <button class="btn ghost iconbtn" type="button" data-act="print" aria-label="Print" title="Print (Ctrl+P)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg></button>
+          <button class="btn ghost iconbtn" type="button" data-act="notes" aria-pressed="false" aria-label="Facts and notes panel" title="Facts, issues, highlights and comments (Ctrl+Shift+N)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M15 3v18"/></svg></button>
+          <div class="morewrap">
+            <button class="btn ghost iconbtn" type="button" data-act="more" aria-label="More" aria-expanded="false" aria-haspopup="menu" title="More: thumbnails, organise pages, workspace, saving"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
+            <div class="moremenu" hidden role="menu" aria-label="More">
+              <button class="mitem" type="button" role="menuitem" data-act="thumbs" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg><span>Page thumbnails</span></button>
+              <button class="mitem desktop-only" type="button" role="menuitem" data-act="organise"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg><span>Organise pages</span></button>
+              <button class="mitem" type="button" role="menuitem" data-act="ws" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Workspace</span><kbd>Ctrl+Shift+W</kbd></button>
+              <div class="msep" role="separator"></div>
+              <button class="mitem desktop-only" type="button" role="menuitem" data-act="saveas"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Save as…</span><kbd>Ctrl+S</kbd></button>
+              <button class="mitem desktop-only" type="button" role="menuitem" data-act="markedup"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Save marked-up copy…</span></button>
+              <button class="mitem desktop-only" type="button" role="menuitem" data-act="showfolder"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg><span>Show in folder</span></button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -2139,7 +2221,7 @@ body.has-wintitle .bundle{top:36px}
     if (on === undefined) on = !pane.stamping;
     if (on && (!pane.doc || !pane.doc.pdf)){ toast("Open a document first."); return; }
     if (on && pane.tool) setTool(pane, null);
-    pane.stamping = on; pane.el.classList.toggle("stamping", on); pane.stampbar.hidden = !on;
+    pane.stamping = on; pane.el.classList.toggle("stamping", on); setTimeout(() => syncToolSeg(pane), 0); pane.stampbar.hidden = !on;
     pane.el.querySelector('[data-act="stamp"]').setAttribute("aria-pressed", String(on));
     if (on){ hideMarkBar(); window.getSelection().removeAllRanges(); fillStampBar(pane); repaintDoc(pane.doc); }
   }
@@ -2163,6 +2245,31 @@ body.has-wintitle .bundle{top:36px}
     pushXUndo(); c.pages = []; xrefChanged(); fillStampBar(pane);
     toast("All stamps cleared. Click the pages where annexures start to stamp again.");
   }
+  /* ---- v3.5: toolbar tools, More menu, settings and the shortcut list ---- */
+  function syncToolSeg(pane){
+    const sel = pane.el.querySelector('[data-act="select"]'); if (!sel) return;
+    sel.setAttribute("aria-pressed", String(!pane.tool && !pane.stamping));
+  }
+  function closeMores(except){
+    document.querySelectorAll(".moremenu").forEach(m => { if (m !== except){ m.hidden = true; const b = m.parentElement.querySelector('[data-act="more"]'); if (b) b.setAttribute("aria-expanded", "false"); } });
+  }
+  function toggleMore(pane){
+    const m = pane.el.querySelector(".moremenu"), b = pane.el.querySelector('[data-act="more"]');
+    closeMores(m); m.hidden = !m.hidden; b.setAttribute("aria-expanded", String(!m.hidden));
+    if (!m.hidden){ const f = m.querySelector(".mitem:not([hidden])"); if (f) f.focus(); }
+  }
+  function toggleSettings(on){
+    const p = $("settingsPop"), b = $("settingsBtn");
+    if (on === undefined) on = p.hidden;
+    if (!on){ p.hidden = true; b.setAttribute("aria-expanded", "false"); return; }
+    placePop(p, b); b.setAttribute("aria-expanded", "true");
+    const r = b.getBoundingClientRect(); p.style.left = Math.max(8, Math.min(window.innerWidth - p.offsetWidth - 8, r.right - p.offsetWidth)) + "px";
+  }
+  function toggleHelp(on){
+    const h = $("helpModal"); if (on === undefined) on = h.hidden;
+    h.hidden = !on; if (on){ toggleSettings(false); $("helpClose").focus(); }
+  }
+
   /* ---- Lines and Box tools: mark text without dragging a selection ---- */
   function hint(t){ const h = $("toolHint"); if (!t){ h.hidden = true; return; } h.textContent = t; h.hidden = false; }
   function setTool(pane, tool){
@@ -2173,6 +2280,7 @@ body.has-wintitle .bundle{top:36px}
     pane.el.classList.toggle("tool-lines", tool === "lines"); pane.el.classList.toggle("tool-box", tool === "box");
     pane.el.querySelector('[data-act="lines"]').setAttribute("aria-pressed", String(tool === "lines"));
     pane.el.querySelector('[data-act="box"]').setAttribute("aria-pressed", String(tool === "box"));
+    syncToolSeg(pane);
     if (tool){ hideMarkBar(); window.getSelection().removeAllRanges(); }
     hint(tool === "lines" ? "Lines: click where the passage starts, then where it ends. Esc to stop."
       : tool === "box" ? "Box: drag a rectangle over the text to mark. Esc to stop." : "");
@@ -2676,10 +2784,10 @@ body.has-wintitle .bundle{top:36px}
     const got = want.length ? await window.pdfReader.readFiles(want) : [];
     const added = (await Promise.all(got.map(f => addDoc(f.name, f.data, false, f.path)))).filter(Boolean);
     const v = P.view, find = p => p && added.find(d => d.path && lc(d.path) === lc(p));
-    if (v && v.panes && v.docs && v.docs.some(find)){
-      setPaneCount(v.panes); visiblePanes().forEach(p => p.clear());
-      for (let i = 0; i < visiblePanes().length; i++){ const d = find(v.docs[i]) || added.find(x => !visiblePanes().some(q => q.doc === x)); if (d) await panes[i].show(d); }
-    } else showAdded(added);
+    /* a project opens on one document: the one you were reading last */
+    setPaneCount(1);
+    const first = (v && v.docs && v.docs.map(find).find(Boolean)) || added.find(d => !d.error) || added[0];
+    if (first) await panes[0].show(first);
     const miss = P.docs.filter(e => e.missing);
     toast("Opened " + P.name + "." + (miss.length ? " Not found: " + miss.map(e => e.name).join(", ") + "." : ""));
     renderProjBar(); renderList(); notesSoon(); repaintAll();
@@ -2859,7 +2967,9 @@ body.has-wintitle .bundle{top:36px}
         const f = ({ prev:()=>this.goTo(this.page-1), next:()=>this.goTo(this.page+1), in:()=>this.zoom(1.2), out:()=>this.zoom(1/1.2),
            fit:()=>{ this.fit = true; this.layout(true); }, print:()=>openPrint(this), toggle:()=>toggleRail(),
            find:()=>this.openFind(), findnext:()=>this.stepMatch(1), findprev:()=>this.stepMatch(-1), findclose:()=>this.closeFind(),
-           thumbs:()=>this.toggleThumbs(), organise:()=>this.openOrganise(), saveas:()=>saveDocAs(this), notes:()=>toggleNotes(), ws:()=>toggleWs(), stamp:()=>toggleStamp(this), stampsave:()=>saveStamped(this), stampclose:()=>toggleStamp(this, false), stampclear:()=>clearStamps(this), lines:()=>setTool(this, this.tool === "lines" ? null : "lines"), box:()=>setTool(this, this.tool === "box" ? null : "box") })[a.dataset.act];
+           thumbs:()=>this.toggleThumbs(), organise:()=>this.openOrganise(), saveas:()=>saveDocAs(this), notes:()=>toggleNotes(), ws:()=>toggleWs(), stamp:()=>toggleStamp(this), stampsave:()=>saveStamped(this), stampclose:()=>toggleStamp(this, false), select:()=>{ if (this.stamping) toggleStamp(this, false); setTool(this, null); },
+           more:()=>toggleMore(this), markedup:()=>{ setActive(this); saveMarkedUp(); }, showfolder:()=>{ if (this.doc && this.doc.path && window.pdfReader) window.pdfReader.showInFolder(this.doc.path); else toast("This document is not saved in a folder yet. Use Save as."); }, stampclear:()=>clearStamps(this), lines:()=>setTool(this, this.tool === "lines" ? null : "lines"), box:()=>setTool(this, this.tool === "box" ? null : "box") })[a.dataset.act];
+        if (a.closest(".moremenu")) closeMores();
         if (f) f();
       };
       this.el.querySelector(".toolbar").addEventListener("click", onAct);
@@ -3763,14 +3873,15 @@ body.has-wintitle .bundle{top:36px}
       const pos = positions[keyOf(d)];
       const txt = document.createElement("span");
       txt.textContent = d.error ? "Could not open" : !d.pdf ? "Opening" :
-        (pos ? "p. " + pos.page + " of " + d.pdf.numPages : d.pdf.numPages + (d.pdf.numPages === 1 ? " page" : " pages")) + " · " + fmtSize(d.size);
+        (pos ? "p " + pos.page + " of " + d.pdf.numPages : d.pdf.numPages + (d.pdf.numPages === 1 ? " page" : " pages"));
+      if (d.pdf) txt.title = fmtSize(d.size);
       meta.appendChild(txt);
       if (d.pdf){
         const kt = document.createElement("span"); const kk = kindOf(d); kt.className = "kindtag k-" + kk; kt.setAttribute("role", "button"); kt.tabIndex = 0;
         kt.textContent = kindLabel(kk); kt.title = "Document type, used to order cross-references. Click to change.";
         const openK = e => { e.stopPropagation(); e.preventDefault(); showKindPop(kt, d); };
         kt.addEventListener("click", openK); kt.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") openK(e); });
-        meta.appendChild(kt);
+        if (notesState.proj) meta.appendChild(kt);
         let na = 0, nd = 0; marksOf(d).forEach(m => { if (m.type === "adm") na++; else if (m.type === "dis") nd++; });
         if (na || nd){ const f = document.createElement("span"); f.className = "factpill"; f.title = na + " admitted, " + nd + " disputed";
           f.innerHTML = (na ? '<i class="a"></i>' + na : "") + (nd ? '<i class="d"></i>' + nd : ""); meta.appendChild(f); }
@@ -4132,8 +4243,8 @@ body.has-wintitle .bundle{top:36px}
 
   if (!lib){ panes[0].stage.innerHTML = '<p class="placeholder err">The PDF engine did not load. Check your connection and reload the page.</p>'; renderList(); return; }
   renderList();
-  let saved = 1; try { saved = parseInt(localStorage.getItem("paneCount") || (localStorage.getItem("compareMode") === "1" ? "2" : "1"), 10) || 1; } catch(e){}
-  setPaneCount(saved);
+  /* PDF Reader always opens showing one document; side by side is chosen when needed */
+  setPaneCount(1);
   $("combineBtn").hidden = !window.pdfReader;
   $("recentBtn").addEventListener("click", e => { e.stopPropagation(); $("recentPop").hidden ? openRecentPop() : closeRecent(); });
   $("recentClear").addEventListener("click", async () => {
@@ -4150,6 +4261,29 @@ body.has-wintitle .bundle{top:36px}
   });
   if (!window.pdfReader) document.body.classList.add("no-desktop");
   else { $("winBar").hidden = false; document.body.classList.add("has-wintitle"); }
+  /* ---- v3.5 wiring ---- */
+  panes[0].el.querySelector(".viewslot").appendChild($("viewSeg"));
+  $("settingsBtn").addEventListener("click", e => { e.stopPropagation(); toggleSettings(); });
+  $("checkUpd").addEventListener("click", () => { toggleSettings(false); if (window.pdfReader) $("appVersion").click(); else toast("Updates are available in the Windows app."); });
+  $("helpBtn").addEventListener("click", () => toggleHelp(true));
+  $("helpClose").addEventListener("click", () => toggleHelp(false));
+  $("helpModal").addEventListener("click", e => { if (e.target === $("helpModal")) toggleHelp(false); });
+  $("omOpen").addEventListener("click", () => { closeRecent(); $("openBtn").click(); });
+  $("omBundle").addEventListener("click", () => { closeRecent(); openBundle(); });
+  document.addEventListener("click", e => {
+    if (!$("settingsPop").hidden && !e.target.closest("#settingsPop,#settingsBtn") && $("confirmModal").hidden) toggleSettings(false);
+    if (!e.target.closest(".morewrap")) closeMores();
+  });
+  document.addEventListener("keydown", e => {
+    const inField = e.target.closest && e.target.closest("input,textarea,select,[contenteditable]");
+    if (e.key === "Escape"){
+      if (!$("helpModal").hidden){ e.preventDefault(); e.stopPropagation(); toggleHelp(false); return; }
+      if (!$("settingsPop").hidden){ e.preventDefault(); e.stopPropagation(); toggleSettings(false); $("settingsBtn").focus(); return; }
+      const open = [...document.querySelectorAll(".moremenu")].find(m => !m.hidden);
+      if (open){ e.preventDefault(); e.stopPropagation(); closeMores(); const b = open.parentElement.querySelector('[data-act="more"]'); if (b) b.focus(); return; }
+    }
+    if (e.key === "?" && !inField && !e.ctrlKey && !e.metaKey && !e.altKey){ e.preventDefault(); toggleHelp(); }
+  }, true);
   /* ---- v3.4 wiring: Lines and Box tools ---- */
   document.addEventListener("mousedown", e => {
     if (e.button !== 0) return;
