@@ -750,6 +750,25 @@ body.has-wintitle .bundle{top:36px}
 .set-ver .ver{border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--muted);font-family:var(--mono);font-size:12px;padding:2px 7px;cursor:pointer}
 .keep-off{display:none}
 
+/* v3.10 rename files while open */
+.renamebar{flex:none;border-bottom:1px solid var(--line);background:color-mix(in srgb,#2f5bdb 5%,var(--surface));padding:10px 14px 9px;display:flex;flex-direction:column;gap:7px}
+.renamebar[hidden]{display:none}
+.rn-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rn-title{font-size:14px;color:#2f5bdb;white-space:nowrap}
+.rn-field{flex:1 1 320px;min-width:200px;display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding-right:10px}
+.rn-field:focus-within{border-color:#2f5bdb;outline:2px solid color-mix(in srgb,#2f5bdb 25%,transparent)}
+.rn-input{flex:1;min-width:0;font:inherit;font-size:15px;border:0;background:none;color:var(--ink);padding:8px 10px;outline:none}
+.rn-ext{font-size:13px;color:var(--muted)}
+.rn-chips{display:flex;flex-wrap:wrap;gap:6px}
+.rn-chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 11px;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rn-chip:hover{border-color:#2f5bdb;color:#2f5bdb}
+.rn-chip b{font-weight:600;color:var(--muted);margin-right:5px}
+.rn-hint{font-size:12.5px;color:var(--muted)}
+.rn-hint.err{color:#d64545}
+/* v3.10 swap windows */
+.panes.compare .titlebar{cursor:grab}
+.panes.compare .titlebar select,.panes.compare .titlebar button{cursor:pointer}
+.pane.pane-dragging{opacity:.55}
 /* v3.9.1 close a side-by-side window */
 .titlebar .paneclose{flex:none;width:28px;height:28px;padding:0;color:var(--muted);border-radius:8px}
 .titlebar .paneclose:hover{color:#d64545;background:color-mix(in srgb,#d64545 10%,transparent)}
@@ -903,7 +922,7 @@ body.has-wintitle .bundle{top:36px}
         <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
         <div class="set-sec desktop-only"><span class="set-lab">Projects Library</span><div class="set-lib"><span class="lib-path" id="libPath">…</span><button class="linkbtn" type="button" id="libChange">Change…</button></div></div>
         <button class="set-link" type="button" id="helpBtn"><span>Keyboard shortcuts</span><kbd>?</kbd></button>
-        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.9.1</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
+        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.10.0</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
       </div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -1194,6 +1213,17 @@ body.has-wintitle .bundle{top:36px}
       <button class="btn ghost iconbtn" type="button" data-act="findnext" aria-label="Next match" title="Next match (Enter)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
       <button class="btn ghost iconbtn" type="button" data-act="findclose" aria-label="Close find" title="Close (Esc)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
     </div>
+    <div class="renamebar" hidden>
+      <div class="rn-row">
+        <strong class="rn-title">Rename file</strong>
+        <div class="rn-field"><input class="rn-input" type="text" spellcheck="false" aria-label="New file name"><span class="rn-ext">.pdf</span></div>
+        <button class="btn primary rn-go" type="button" title="Rename the file (Enter)">Rename</button>
+        <button class="btn rn-skip" type="button" title="Leave this name and go to the next document (Tab on an empty change)">Next ›</button>
+        <button class="btn ghost iconbtn rn-close" type="button" aria-label="Stop renaming" title="Stop renaming (Esc)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <div class="rn-chips"></div>
+      <div class="rn-hint"></div>
+    </div>
     <div class="stampbar" hidden>
       <div class="sb-row">
         <strong class="sb-title">Annexure stamp</strong>
@@ -1221,7 +1251,7 @@ body.has-wintitle .bundle{top:36px}
 <script src="fontkit.min.js"></script>
 <script>
 (function(){
-  const selected = new Set(); let selAnchor = null;
+  const selected = new Set(); let selAnchor = null; let dragPane = null;
   const lib = window.pdfjsLib;
   if (lib) lib.GlobalWorkerOptions.workerSrc = "pdf.worker.min.js";
   const $ = id => document.getElementById(id);
@@ -3131,7 +3161,7 @@ body.has-wintitle .bundle{top:36px}
         rail.classList.remove("drag");
         if (!this.el.classList.contains("dropping")){
           panes.forEach(q => q.el.classList.remove("dropping"));
-          this.dzText.textContent = (dragDoc ? "Show \u201c" + dragDoc.name + "\u201d" : "Open PDF") + (comparing ? " in pane " + this.label : " here");
+          this.dzText.textContent = dragPane && dragPane !== this ? "Swap with \u201c" + (this.doc ? this.doc.name : "this window") + "\u201d" : (dragDoc ? "Show \u201c" + dragDoc.name + "\u201d" : "Open PDF") + (comparing ? " in pane " + this.label : " here");
           this.el.classList.add("dropping");
         }
       };
@@ -3142,7 +3172,16 @@ body.has-wintitle .bundle{top:36px}
         e.preventDefault(); e.stopPropagation();
         panes.forEach(q => q.el.classList.remove("dropping")); rail.classList.remove("drag");
         setActive(this);
-        if (dragDoc){ const d = dragDoc; dragDoc = null; clearDropMarks(); this.show(d); return; }
+        if (dragDoc){
+          const d = dragDoc, from = dragPane; dragDoc = null; dragPane = null; clearDropMarks();
+          if (from === this) return;
+          if (from && this.doc){
+            const other = this.doc; from.savePos(); from.doc = null;
+            Promise.resolve(this.show(d)).then(() => from.show(other)).then(() => { setActive(this); renderList(); });
+            return;
+          }
+          this.show(d); return;
+        }
         if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files, this);
       });
       this.stage.addEventListener("wheel", e => {
@@ -4040,9 +4079,9 @@ body.has-wintitle .bundle{top:36px}
         return m;
       };
       const ren = document.createElement("span"); ren.className = "icon move"; ren.setAttribute("role","button"); ren.tabIndex = 0;
-      ren.setAttribute("aria-label", "Rename " + d.name); ren.title = "Rename"; ren.classList.add("act-rename");
+      ren.setAttribute("aria-label", "Rename " + d.name); ren.title = d.path ? "Rename the file (F2)" : "Rename"; ren.classList.add("act-rename");
       ren.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
-      const goRen = e => { e.stopPropagation(); startRename(d); };
+      const goRen = e => { e.stopPropagation(); if (d.path && window.pdfReader && window.pdfReader.fileRename) openRenameBar(d); else startRename(d); };
       ren.addEventListener("click", goRen); ren.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") goRen(e); });
       /* print straight from the list; documents are reordered by dragging */
       const pr = document.createElement("span"); pr.className = "icon move act-print"; pr.setAttribute("role","button"); pr.tabIndex = 0;
@@ -4060,7 +4099,7 @@ body.has-wintitle .bundle{top:36px}
         clearSel(); selAnchor = d; active.show(d); $("app").classList.remove("open");
       });
       b.addEventListener("keydown", e => {
-        if (e.key === "F2"){ e.preventDefault(); startRename(d); return; }
+        if (e.key === "F2"){ e.preventDefault(); if (d.path && window.pdfReader && window.pdfReader.fileRename) openRenameBar(d); else startRename(d); return; }
         if (!e.altKey && (e.key === "ArrowUp" || e.key === "ArrowDown")){ e.preventDefault(); e.stopPropagation(); stepSel(d, e.key === "ArrowUp" ? -1 : 1, e.ctrlKey || e.metaKey || e.shiftKey); return; }
         if (e.key === "Escape" && selected.size){ e.preventDefault(); clearSel(); return; }
         if (e.altKey && (e.key === "ArrowUp" || e.key === "ArrowDown")){ e.preventDefault(); e.stopPropagation(); moveDoc(d, idx + (e.key === "ArrowUp" ? -1 : 1), true); }
@@ -4424,6 +4463,8 @@ body.has-wintitle .bundle{top:36px}
         ic: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/>' },
       { id: "stamp", name: "Stamp annexures", desc: "Number annexures FA1, FA2 and paginate", c: "#c2410c", desk: true, act: "stamp", state: p => !!p.stamping,
         ic: '<path d="M5 22h14"/><path d="M19.3 13.7A2.5 2.5 0 0 0 17.5 13h-11A2.5 2.5 0 0 0 4 15.5V17a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1.5c0-.7-.3-1.3-.7-1.8"/><path d="M14 13V8.5C14 7 15 7 15 5a3 3 0 0 0-6 0c0 2 1 2 1 3.5V13"/>' },
+      { id: "rename", name: "Rename files", desc: "Rename the open PDFs one after another while you read them", c: "#2f5bdb", desk: true, run: () => { if (active && active.doc) openRenameBar(active.doc); else toast("Open the documents first."); },
+        ic: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>' },
       { id: "proj", name: "Projects", desc: "Keep a matter's documents, marks and notes together", c: "#64748b", desk: true, nodoc: true, run: () => $("projBtn").click(),
         ic: '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>' }
     ]},
@@ -4505,6 +4546,121 @@ body.has-wintitle .bundle{top:36px}
   try { if (localStorage.getItem("railTab") === "tools") setRailTab("tools"); } catch(e){}
 
 
+
+  /* ---- v3.10 rename the files themselves while they are open, one after another ---- */
+  let rn = null;
+  const pad2 = n => String(n).padStart(2, "0");
+  const today = () => { const t = new Date(); return t.getFullYear() + "." + pad2(t.getMonth() + 1) + "." + pad2(t.getDate()); };
+  const stem = n => String(n || "").replace(/\.pdf$/i, "");
+  function sentenceCase(s){
+    const low = s.toLowerCase().replace(/\s+/g, " ").trim();
+    let out = low.charAt(0).toUpperCase() + low.slice(1);
+    out = out.replace(/\brule (\d)/g, "Rule $1").replace(/\bsection (\d)/g, "section $1").replace(/\b(pty|ltd|cc|inc)\b/g, m => m === "pty" ? "Pty" : m === "ltd" ? "Ltd" : m === "cc" ? "CC" : "Inc");
+    return out.replace(/[<>:"/\\|?*]/g, " ").replace(/\s+/g, " ").trim();
+  }
+  async function nameIdeas(d){
+    const ideas = [];
+    try {
+      const tc = await textFor(d, 1);
+      const rows = [];
+      tc.items.forEach(it => {
+        if (!it.str || !it.str.trim()) return;
+        const y = Math.round(it.transform[5]);
+        let r = rows.find(q => Math.abs(q.y - y) <= 3); if (!r){ r = { y, parts: [] }; rows.push(r); }
+        r.parts.push({ x: it.transform[4], s: it.str });
+      });
+      rows.sort((a, b) => b.y - a.y);
+      const lines = rows.map(r => r.parts.sort((a, b) => a.x - b.x).map(p => p.s).join(" ").replace(/\s+/g, " ").trim()).filter(Boolean);
+      const KEY = /NOTICE|AFFIDAVIT|REPLY|APPLICATION|PARTICULARS|PLEA|AGREEMENT|LETTER|ANNEXURE|HEADS|ORDER|SUMMONS|REPORT|DECLARATION|CONTRACT|MEMORANDUM|OPINION|INVOICE|STATEMENT|JUDGMENT|REPLICATION|EXCEPTION|INDEX|MINUTE|RULE \d/;
+      const caps = lines.filter(l => l.length >= 8 && l.length <= 140 && l === l.toUpperCase() && /[A-Z]{3}/.test(l)
+        && !/HIGH COURT|DIVISION|CASE NO|IN THE MATTER|^AND$|MAGISTRATE|REPUBLIC OF/.test(l));
+      caps.sort((a, b) => (KEY.test(b) ? 1 : 0) - (KEY.test(a) ? 1 : 0));
+      caps.slice(0, 3).forEach(l => ideas.push(sentenceCase(l.replace(/[:.]+$/, ""))));
+    } catch(e){}
+    return [...new Set(ideas)].filter(x => x.length > 3);
+  }
+  function hideRenameBars(){ panes.forEach(p => { const b = p.el.querySelector(".renamebar"); if (b) b.hidden = true; }); }
+  async function openRenameBar(d){
+    if (!d){ toast("Open a document first."); return; }
+    if (!d.path){ startRename(d); return; }
+    const p = visiblePanes().find(q => q.doc === d) || active;
+    if (p.doc !== d) await p.show(d);
+    hideRenameBars();
+    const bar = p.el.querySelector(".renamebar"); if (!bar) return;
+    rn = { d, p, bar };
+    const inp = bar.querySelector(".rn-input");
+    inp.value = stem(d.orig);
+    const folder = dirOf(d.path).split(/[\\/]/).filter(Boolean).pop() || "";
+    const left = docs.filter(x => x.path).length;
+    const pos = docs.filter(x => x.path).indexOf(d) + 1;
+    setRnHint("Enter renames and goes to the next document" + (left > 1 ? " (" + pos + " of " + left + ")" : "") + ". Esc stops. The file is renamed in " + (folder || "its folder") + ".");
+    bar.querySelector(".rn-skip").hidden = left < 2;
+    const chips = bar.querySelector(".rn-chips"); chips.textContent = "";
+    const chip = (label, kind, fn) => {
+      const c = document.createElement("button"); c.type = "button"; c.className = "rn-chip";
+      if (kind){ const b = document.createElement("b"); b.textContent = kind; c.appendChild(b); }
+      c.appendChild(document.createTextNode(label)); c.title = kind ? kind + " " + label : label;
+      c.addEventListener("click", () => { fn(); inp.focus(); }); chips.appendChild(c);
+    };
+    const t = today();
+    chip(t, "Date", () => { const v = inp.value.replace(/^\d{4}[.\-]\d{2}[.\-]\d{2}\s*/, ""); inp.value = t + " " + v; });
+    chip(stem(d.orig), "Original", () => { inp.value = stem(d.orig); });
+    bar.hidden = false;
+    requestAnimationFrame(() => { inp.focus(); inp.select(); });
+    const ideas = await nameIdeas(d);
+    if (rn && rn.d === d) ideas.forEach(x => chip(x, "From page 1", () => {
+      const m = inp.value.match(/^\d{4}[.\-]\d{2}[.\-]\d{2}\s+/); inp.value = (m ? m[0] : "") + x;
+    }));
+  }
+  function setRnHint(t, err){ if (!rn) return; const h = rn.bar.querySelector(".rn-hint"); h.textContent = t; h.classList.toggle("err", !!err); }
+  function closeRenameBar(){ if (rn){ rn.bar.hidden = true; const d = rn.d; rn = null; focusRow(d); } }
+  function nextForRename(d){
+    const list = docs.filter(x => x.path); const i = list.indexOf(d);
+    return list.length > 1 ? list[(i + 1) % list.length] : null;
+  }
+  async function doRename(){
+    if (!rn) return;
+    const { d, bar } = rn, inp = bar.querySelector(".rn-input");
+    const want = inp.value.trim();
+    if (!want){ setRnHint("Type a name first.", true); return; }
+    if (d.ocr && (d.ocr.status === "running" || d.ocr.status === "saving")){ setRnHint("Wait for the text recognition to finish, then rename.", true); return; }
+    const old = d.path;
+    let dst;
+    try { dst = await window.pdfReader.fileRename(old, want); }
+    catch(e){ setRnHint(errText(e), true); inp.focus(); return; }
+    if (dst !== old) applyRename(d, old, dst);
+    const nx = nextForRename(d);
+    if (nx && nx !== d) openRenameBar(nx); else { closeRenameBar(); }
+    toast("Renamed to " + d.orig + ".");
+  }
+  function applyRename(d, old, dst){
+    const base = dst.split(/[\\/]/).pop();
+    delete customNames[keyOf(d)]; saveNames();
+    const oldK = lc(old), newK = lc(dst);
+    // marks, links and board entries kept against the path move with the file
+    if (notesState.loose[oldK]){ notesState.loose[newK] = notesState.loose[oldK]; delete notesState.loose[oldK]; }
+    const swap = o => o ? JSON.parse(JSON.stringify(o).split('"p:' + oldK + '"').join('"p:' + newK + '"')) : o;
+    if (notesState.looseXref) notesState.looseXref = swap(notesState.looseXref);
+    if (notesState.looseBoard) notesState.looseBoard = swap(notesState.looseBoard);
+    const e = projEntry(d);
+    d.path = dst; d.orig = base; d.name = base;
+    if (e){ e.abs = dst; e.name = base; saveProjectSoon(); }
+    saveLooseSoon();
+    panes.forEach(p => { if (p.doc === d){ p.refreshSelect(); const n = p.el.querySelector(".docname"); if (n) n.textContent = base; } });
+    if (active.doc === d) document.title = base + " · PDF Reader";
+    renderList(); notesSoon(); repaintAll();
+  }
+  document.addEventListener("keydown", e => {
+    if (!rn || !rn.bar.contains(document.activeElement)) return;
+    if (e.key === "Enter" && document.activeElement.classList.contains("rn-input")){ e.preventDefault(); doRename(); }
+    else if (e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); closeRenameBar(); }
+  }, true);
+  panesEl.addEventListener("click", e => {
+    if (!rn) return;
+    if (e.target.closest(".rn-go")) doRename();
+    else if (e.target.closest(".rn-skip")){ const nx = nextForRename(rn.d); if (nx) openRenameBar(nx); }
+    else if (e.target.closest(".rn-close")) closeRenameBar();
+  });
   /* ---- v3.9: View button, selecting several documents, printing several ---- */
   function selChanged(){ renderList(); }
   function toggleSel(d){
@@ -4660,6 +4816,17 @@ body.has-wintitle .bundle{top:36px}
     b.addEventListener("click", () => { if (!$("appMenu").hidden && menuAnchor === b) closeMenu(); else openMenuAt(b, viewItems()); });
     slot.appendChild(b);
   })();
+  /* drag a window's title bar onto another window to swap them */
+  panes.forEach(p => {
+    const t = p.el.querySelector(".titlebar"); if (!t) return;
+    t.draggable = true; t.title = "Drag onto another window to swap them";
+    t.addEventListener("dragstart", e => {
+      if (!p.doc || !comparing || e.target.closest("select, button")){ e.preventDefault(); return; }
+      dragPane = p; dragDoc = p.doc; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", p.doc.name);
+      p.el.classList.add("pane-dragging");
+    });
+    t.addEventListener("dragend", () => { dragPane = null; dragDoc = null; p.el.classList.remove("pane-dragging"); panes.forEach(q => q.el.classList.remove("dropping")); });
+  });
   async function closePane(p){
     const vp = visiblePanes(); if (vp.length < 2 || !vp.includes(p)) return;
     const keep = vp.filter(q => q !== p).map(q => q.doc);
@@ -4868,6 +5035,7 @@ body.has-wintitle .bundle{top:36px}
       { label: "Save marked-up copy…", ic: "marked", doc: true, run: paneAct("markedup"), desk: true },
       { label: "Stamp annexures", ic: "stamp", doc: true, run: paneAct("stamp"), desk: true },
       { label: "Show in folder", ic: "folder", doc: true, run: paneAct("showfolder"), desk: true },
+      { label: "Rename files…", ic: "marked", kbd: "F2", doc: true, run: () => openRenameBar(active.doc), desk: true },
       { sep: true },
       { label: "Print…", ic: "print", kbd: "Ctrl+P", doc: true, run: paneAct("print") },
       { label: "Print all open documents…", ic: "print", doc: true, run: () => printAllOpen() },

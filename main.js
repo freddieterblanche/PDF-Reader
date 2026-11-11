@@ -469,6 +469,29 @@ if (!app.requestSingleInstanceLock()) {
     const safeName = n => String(n || "Project").replace(/[<>:"/\\|?*\x00-\x1f]/g, " ").replace(/\s+/g, " ").trim().replace(/[. ]+$/, "").slice(0, 120) || "Project";
     function uniqueIn(dir, base) { let p = path.join(dir, base + ".pdfrproj"), i = 2; while (fs.existsSync(p)) p = path.join(dir, base + " (" + (i++) + ").pdfrproj"); return p; }
     ipcMain.handle("library-info", () => libInfo());
+    /* Rename an open document's file in its own folder. The document is held in memory, so the file is not locked. */
+    ipcMain.handle("file-rename", (_e, from, newName) => {
+      const src = path.resolve(String(from || ""));
+      if (!known.has(src) && !known.has(String(from))) throw new Error("Only documents you have opened can be renamed.");
+      if (!fs.existsSync(src)) throw new Error("The file is no longer where it was opened from.");
+      let n = String(newName || "").replace(/[<>:"/\\|?*\x00-\x1f]/g, " ").replace(/\s+/g, " ").trim().replace(/\.pdf$/i, "").replace(/[. ]+$/, "");
+      if (!n) throw new Error("Type a name first.");
+      n += ".pdf";
+      const dst = path.join(path.dirname(src), n);
+      if (dst === src) return src;
+      if (dst.toLowerCase() !== src.toLowerCase() && fs.existsSync(dst)) throw new Error("There is already a file called " + n + " in that folder.");
+      try { fs.renameSync(src, dst); }
+      catch (e) {
+        if (e.code === "EBUSY" || e.code === "EPERM" || e.code === "EACCES") throw new Error("Windows would not let the file be renamed. It may be open in another program, such as Adobe or Outlook. Close it there and try again.");
+        throw e;
+      }
+      known.add(dst);
+      loadRecent();
+      let ch = false;
+      recent.forEach(r => { if (r.path.toLowerCase() === src.toLowerCase()) { r.path = dst; r.name = n; ch = true; } });
+      if (ch) saveRecent();
+      return dst;
+    });
     ipcMain.handle("library-list", () => {
       const d = libDir(); let names = [];
       try { names = fs.readdirSync(d).filter(n => /\.pdfrproj$/i.test(n)); } catch (e) { return []; }

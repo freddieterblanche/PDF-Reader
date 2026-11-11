@@ -38,6 +38,7 @@ contextBridge.exposeInMainWorld("pdfReader", {
   projectCreate: name => ipcRenderer.invoke("project-create", name),
   projectLocate: (name, others) => ipcRenderer.invoke("project-locate", name, others),
   libraryInfo: () => ipcRenderer.invoke("library-info"),
+  fileRename: (from, name) => ipcRenderer.invoke("file-rename", from, name),
   libraryList: () => ipcRenderer.invoke("library-list"),
   libraryChoose: () => ipcRenderer.invoke("library-choose"),
   libraryShow: () => ipcRenderer.invoke("library-show"),
