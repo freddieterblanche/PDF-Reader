@@ -750,6 +750,8 @@ body.has-wintitle .bundle{top:36px}
 .set-ver .ver{border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--muted);font-family:var(--mono);font-size:12px;padding:2px 7px;cursor:pointer}
 .keep-off{display:none}
 
+/* v3.11.1 Box is the main marking tool; Lines lives in More */
+.toolseg [data-act="lines"]{display:none}
 /* v3.11 bookmarks */
 .bmarks{flex:none;width:250px;overflow:auto;background:var(--rail);border-right:1px solid var(--line);padding:10px 8px 16px;display:flex;flex-direction:column;gap:4px}
 .bmarks[hidden]{display:none}
@@ -951,7 +953,7 @@ body.has-wintitle .bundle{top:36px}
         <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
         <div class="set-sec desktop-only"><span class="set-lab">Projects Library</span><div class="set-lib"><span class="lib-path" id="libPath">…</span><button class="linkbtn" type="button" id="libChange">Change…</button></div></div>
         <button class="set-link" type="button" id="helpBtn"><span>Keyboard shortcuts</span><kbd>?</kbd></button>
-        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.11.0</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
+        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.11.1</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
       </div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -1172,6 +1174,11 @@ body.has-wintitle .bundle{top:36px}
         <div><span>Admitted</span><kbd>A</kbd></div><div><span>Disputed</span><kbd>D</kbd></div><div><span>Highlight</span><kbd>H</kbd></div>
         <div><span>Comment</span><kbd>C</kbd></div><div><span>Link to another passage</span><kbd>L</kbd></div><div><span>Add to an issue</span><kbd>I</kbd></div>
         <div><span>Send to the workspace</span><kbd>W</kbd></div><div><span>Delete a selected mark</span><kbd>Delete</kbd></div><div><span>Undo</span><kbd>Ctrl+Z</kbd></div>
+        <h3>Box tool</h3>
+        <div><span>Box tool on or off</span><kbd>B</kbd></div><div><span>Box without switching tools</span><kbd>Alt + drag</kbd></div>
+        <h3>Bookmarks and files</h3>
+        <div><span>Bookmark this page</span><kbd>Ctrl+D</kbd></div><div><span>Bookmarks panel</span><kbd>Ctrl+B</kbd></div>
+        <div><span>Rename the file</span><kbd>F2</kbd></div><div><span>Menu</span><kbd>Alt+M</kbd></div>
       </div>
       <div class="help-col">
         <h3>Documents</h3>
@@ -1227,6 +1234,7 @@ body.has-wintitle .bundle{top:36px}
               <button class="mitem" type="button" role="menuitem" data-act="thumbs" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg><span>Page thumbnails</span></button>
               <button class="mitem desktop-only" type="button" role="menuitem" data-act="organise"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg><span>Organise pages</span></button>
               <button class="mitem" type="button" role="menuitem" data-act="ws" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Workspace</span><kbd>Ctrl+Shift+W</kbd></button>
+              <button class="mitem" type="button" role="menuitem" data-act="lines" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg><span>Lines tool (start and end)</span></button>
               <div class="msep" role="separator"></div>
               <button class="mitem desktop-only" type="button" role="menuitem" data-act="saveas"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Save as…</span><kbd>Ctrl+S</kbd></button>
               <button class="mitem desktop-only" type="button" role="menuitem" data-act="markedup"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Save marked-up copy…</span></button>
@@ -2455,12 +2463,12 @@ body.has-wintitle .bundle{top:36px}
     visiblePanes().forEach(p => { if (p !== pane && p.tool && tool) setTool(p, null); });
     pane.tool = tool; pane.lineStart = null; clearLineCaret();
     pane.el.classList.toggle("tool-lines", tool === "lines"); pane.el.classList.toggle("tool-box", tool === "box");
-    pane.el.querySelector('[data-act="lines"]').setAttribute("aria-pressed", String(tool === "lines"));
+    pane.el.querySelectorAll('[data-act="lines"]').forEach(b => b.setAttribute("aria-pressed", String(tool === "lines")));
     pane.el.querySelector('[data-act="box"]').setAttribute("aria-pressed", String(tool === "box"));
     syncToolSeg(pane);
     if (tool){ hideMarkBar(); window.getSelection().removeAllRanges(); }
     hint(tool === "lines" ? "Lines: click where the passage starts, then where it ends. Esc to stop."
-      : tool === "box" ? "Box: drag a rectangle over the text to mark. Esc to stop." : "");
+      : tool === "box" ? "Box: drag a rectangle over the text to mark. B or Esc to stop. Tip: Alt+drag works in Select mode too." : "");
   }
   function clearLineCaret(){ document.querySelectorAll(".lm-caret").forEach(x => x.remove()); }
   /* the text position under the pointer, or the nearest end of the line beside it */
@@ -4500,10 +4508,10 @@ body.has-wintitle .bundle{top:36px}
         ic: '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>' }
     ]},
     { name: "Analyse", tools: [
-      { id: "lines", name: "Underline passages", desc: "Click a start and an end: admitted, disputed or highlight", c: "#2f5bdb", act: "lines", state: p => p.tool === "lines",
-        ic: '<path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/><path d="M3 21h18"/>' },
-      { id: "box", name: "Box highlight", desc: "Drag a rectangle over a block of text", c: "#7c3aed", act: "box", state: p => p.tool === "box",
+      { id: "box", name: "Mark with a box", desc: "Drag over a line or paragraph: admitted, disputed or highlight (B)", c: "#7c3aed", act: "box", state: p => p.tool === "box",
         ic: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 3"/><path d="M8 9h8"/><path d="M8 13h8"/>' },
+      { id: "lines", name: "Lines tool", desc: "Click a start and an end: admitted, disputed or highlight", c: "#2f5bdb", act: "lines", state: p => p.tool === "lines",
+        ic: '<path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/><path d="M3 21h18"/>' },
       { id: "notes", name: "Facts and issues", desc: "Admitted and disputed facts, issues, highlights", c: "#0e7490", act: "notes", state: () => !$("notes").hidden,
         ic: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M15 3v18"/><path d="M6.5 8h5"/><path d="M6.5 12h5"/>' },
       { id: "ws", name: "Workspace board", desc: "Lay out facts, excerpts and notes on a board", c: "#b45309", act: "ws", state: () => !!(typeof wsState !== "undefined" && wsState.open),
@@ -5440,6 +5448,20 @@ body.has-wintitle .bundle{top:36px}
     e.preventDefault(); setActive(pane);
     if (pane.tool === "box") boxDown(pane, e); else lineClick(pane, e);
   }, true);
+  /* Alt+drag on a page draws a box without switching tools */
+  document.addEventListener("mousedown", e => {
+    if (e.button !== 0 || !e.altKey) return;
+    const pane = visiblePanes().find(p => !p.tool && !p.stamping && p.stage.contains(e.target)); if (!pane || !pane.doc) return;
+    if (!e.target.closest(".page") || e.target.closest(".mk-tab,.stp")) return;
+    e.preventDefault(); e.stopPropagation(); setActive(pane); boxDown(pane, e);
+  }, true);
+  document.addEventListener("keydown", e => {
+    if ((e.key !== "b" && e.key !== "B") || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.target.closest && e.target.closest("input, textarea, select, [contenteditable]")) return;
+    if (!$("markBar").hidden) return;
+    const pane = active; if (!pane || !pane.doc) return;
+    e.preventDefault(); setTool(pane, pane.tool === "box" ? null : "box");
+  });
   document.addEventListener("keydown", e => {
     if (e.key !== "Escape") return;
     const pane = visiblePanes().find(p => p.tool); if (!pane) return;
