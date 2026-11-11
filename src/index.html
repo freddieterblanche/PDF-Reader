@@ -750,6 +750,35 @@ body.has-wintitle .bundle{top:36px}
 .set-ver .ver{border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--muted);font-family:var(--mono);font-size:12px;padding:2px 7px;cursor:pointer}
 .keep-off{display:none}
 
+/* v3.11 bookmarks */
+.bmarks{flex:none;width:250px;overflow:auto;background:var(--rail);border-right:1px solid var(--line);padding:10px 8px 16px;display:flex;flex-direction:column;gap:4px}
+.bmarks[hidden]{display:none}
+.bm-head{display:flex;align-items:center;gap:6px;padding:2px 4px 6px}
+.bm-head strong{flex:1;font-size:14px}
+.bm-add{font:inherit;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:5px;border:1px solid color-mix(in srgb,#2f5bdb 35%,var(--line));background:var(--surface);color:#2f5bdb;border-radius:7px;padding:4px 9px;cursor:pointer}
+.bm-add:hover{border-color:#2f5bdb;background:color-mix(in srgb,#2f5bdb 8%,var(--surface))}
+.bm-sec{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 6px 3px}
+.bm-row{display:grid;grid-template-columns:16px 1fr auto;gap:7px;align-items:start;width:100%;text-align:left;font:inherit;font-size:13.5px;color:var(--ink);background:none;border:1px solid transparent;border-radius:7px;padding:6px 6px;cursor:pointer;line-height:1.3}
+.bm-row:hover{background:var(--hover)}
+.bm-row.current{background:color-mix(in srgb,#2f5bdb 10%,transparent);border-color:color-mix(in srgb,#2f5bdb 35%,transparent)}
+.bm-row .ic{width:14px;height:14px;margin-top:2px;color:#2f5bdb}
+.bm-row.pdf .ic{color:var(--muted)}
+.bm-title{min-width:0;overflow-wrap:anywhere}
+.bm-pg{font-family:var(--mono);font-size:11.5px;color:var(--muted);padding-top:2px}
+.bm-acts{display:none;gap:2px}
+.bm-row:hover .bm-acts,.bm-row:focus-within .bm-acts{display:flex}
+.bm-row:hover .bm-pg,.bm-row:focus-within .bm-pg{display:none}
+.bm-act{border:0;background:none;padding:2px;border-radius:5px;cursor:pointer;color:var(--muted);display:flex}
+.bm-act:hover{background:var(--surface);color:var(--ink)}
+.bm-act.del:hover{color:#d64545}
+.bm-act svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bm-edit{width:100%;font:inherit;font-size:13.5px;border:1px solid #2f5bdb;border-radius:6px;padding:4px 6px;background:var(--surface);color:var(--ink)}
+.bm-kids{margin-left:14px;display:flex;flex-direction:column;gap:2px}
+.bm-tw{border:0;background:none;padding:0;width:16px;height:16px;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;margin-top:1px}
+.bm-tw svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.4;transition:transform .12s}
+.bm-tw.open svg{transform:rotate(90deg)}
+.bm-empty{font-size:12.5px;color:var(--muted);padding:4px 6px;line-height:1.45}
+.bmbtn[aria-pressed="true"]{color:#2f5bdb;background:color-mix(in srgb,#2f5bdb 12%,transparent)}
 /* v3.10 rename files while open */
 .renamebar{flex:none;border-bottom:1px solid var(--line);background:color-mix(in srgb,#2f5bdb 5%,var(--surface));padding:10px 14px 9px;display:flex;flex-direction:column;gap:7px}
 .renamebar[hidden]{display:none}
@@ -922,7 +951,7 @@ body.has-wintitle .bundle{top:36px}
         <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
         <div class="set-sec desktop-only"><span class="set-lab">Projects Library</span><div class="set-lib"><span class="lib-path" id="libPath">…</span><button class="linkbtn" type="button" id="libChange">Change…</button></div></div>
         <button class="set-link" type="button" id="helpBtn"><span>Keyboard shortcuts</span><kbd>?</kbd></button>
-        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.10.0</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
+        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.11.0</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
       </div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -1188,6 +1217,7 @@ body.has-wintitle .bundle{top:36px}
         </div>
         <div class="viewslot"></div>
         <div class="tools">
+          <button class="btn ghost iconbtn bmbtn" type="button" aria-label="Bookmarks" aria-pressed="false" title="Bookmarks (Ctrl+B). Ctrl+D bookmarks this page."><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
           <button class="btn ghost iconbtn" type="button" data-act="find" aria-label="Find" title="Find in document (Ctrl+F)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
           <button class="btn ghost iconbtn" type="button" data-act="print" aria-label="Print" title="Print (Ctrl+P)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg></button>
           <button class="btn ghost iconbtn" type="button" data-act="notes" aria-pressed="false" aria-label="Facts and notes panel" title="Facts, issues, highlights and comments (Ctrl+Shift+N)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M15 3v18"/></svg></button>
@@ -1241,6 +1271,7 @@ body.has-wintitle .bundle{top:36px}
     </div>
     <div class="body">
       <div class="thumbs" hidden></div>
+      <div class="bmarks" hidden></div>
       <div class="stage" tabindex="-1"></div>
     </div>
   </section>
@@ -1599,7 +1630,7 @@ body.has-wintitle .bundle{top:36px}
     if (!window.pdfReader || !notesState.loaded) return;
     const out = {}; Object.keys(notesState.loose).forEach(k => { if (notesState.loose[k].length) out[k] = notesState.loose[k]; });
     if (notesState.looseBoard && notesState.looseBoard.items.length) out["*board"] = notesState.looseBoard;
-    const lx = notesState.looseXref; if (lx && (lx.links.length || lx.issues.length || Object.keys(lx.kinds).length || Object.keys(lx.stamps || {}).length)) out["*xref"] = lx;
+    const lx = notesState.looseXref; if (lx && (lx.links.length || lx.issues.length || Object.keys(lx.kinds).length || Object.keys(lx.stamps || {}).length || Object.keys(lx.bookmarks || {}).some(k => lx.bookmarks[k].length))) out["*xref"] = lx;
     window.pdfReader.notesSave(out).catch(e => toast("Could not save your marks: " + errText(e)));
   }
   function saveLooseSoon(){ if (!window.pdfReader) return; clearTimeout(notesState.saveT); notesState.saveT = setTimeout(saveLooseNow, notesState.loaded ? 500 : 1500); }
@@ -4483,6 +4514,8 @@ body.has-wintitle .bundle{top:36px}
     { name: "Find and output", tools: [
       { id: "find", name: "Find text", desc: "Search this document", c: "#0f766e", act: "find",
         ic: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>' },
+      { id: "bookmarks", name: "Bookmarks", desc: "Mark pages to jump back to, and see the PDF's own bookmarks", c: "#2f5bdb", run: () => { if (!active || !active.doc){ toast("Open a document first."); return; } toggleBookmarks(active); },
+        ic: '<path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>' },
       { id: "thumbs", name: "Page thumbnails", desc: "Show small pages beside the document", c: "#475569", act: "thumbs", state: p => !!p.thumbsOn,
         ic: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/>' },
       { id: "printall", name: "Print all open documents", desc: "Send every open PDF to the printer in one go", c: "#1f9d55", nodoc: true, run: () => printAllOpen(),
@@ -4547,6 +4580,230 @@ body.has-wintitle .bundle{top:36px}
 
 
 
+
+  /* ---- v3.11 bookmarks: your own, plus the PDF's own outline ---- */
+  const BMI = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+  const BMI_PDF = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h10"/><path d="M4 18h13"/></svg>';
+  const SV = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';
+  function bmList(d){
+    const X = xref(); X.bookmarks = X.bookmarks || {};
+    const k = docRef(d); return X.bookmarks[k] || (X.bookmarks[k] = []);
+  }
+  function bmSave(){ boardChanged(); }
+  async function bmDefaultName(d, n){
+    try {
+      const tc = await textFor(d, n);
+      const rows = [];
+      tc.items.forEach(it => {
+        if (!it.str || !it.str.trim()) return;
+        const y = Math.round(it.transform[5]); let r = rows.find(q => Math.abs(q.y - y) <= 3);
+        if (!r){ r = { y, parts: [] }; rows.push(r); } r.parts.push({ x: it.transform[4], s: it.str });
+      });
+      rows.sort((a, b) => b.y - a.y);
+      const lines = rows.map(r => r.parts.sort((a, b) => a.x - b.x).map(q => q.s).join(" ").replace(/\s+/g, " ").trim());
+      const ann = lines.find(l => /^"?(ANNEXURE|ANNEX)\b/i.test(l) || /^"[A-Z]{1,4}\s?\d{0,3}"$/.test(l));
+      if (ann) return ann.replace(/^"|"$/g, "").slice(0, 80);
+      const head = lines.find(l => l.length >= 6 && l.length <= 90 && l === l.toUpperCase() && /[A-Z]{3}/.test(l) && !/HIGH COURT|DIVISION|CASE NO/.test(l));
+      if (head) return sentenceCase(head);
+    } catch(e){}
+    return "Page " + n;
+  }
+  async function addBookmark(p, at){
+    if (!p || !p.doc){ toast("Open a document first."); return; }
+    const d = p.doc, n = at || p.page;
+    const list = bmList(d);
+    if (list.some(b => b.page === n)){ if (!p.bmOn) toggleBookmarks(p, true); toast("Page " + n + " is already bookmarked."); return; }
+    const b = { id: "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), page: n, title: await bmDefaultName(d, n) };
+    list.push(b); list.sort((a, c) => a.page - c.page); bmSave();
+    if (!p.bmOn) toggleBookmarks(p, true);
+    renderBookmarks(p, b.id);
+    toast("Bookmarked page " + n + ". Type a name and press Enter, or just carry on reading.");
+  }
+  function toggleBookmarks(p, on){
+    if (!p) return;
+    p.bmOn = on === undefined ? !p.bmOn : !!on;
+    try { localStorage.setItem("bmOn", p.bmOn ? "1" : "0"); } catch(e){}
+    const el = p.el.querySelector(".bmarks"); el.hidden = !p.bmOn;
+    p.el.querySelector(".bmbtn").setAttribute("aria-pressed", String(p.bmOn));
+    if (p.bmOn) renderBookmarks(p);
+    requestAnimationFrame(() => { if (p.doc) p.layout(true); });
+  }
+  async function outlineOf(d){
+    if (d._outline !== undefined) return d._outline;
+    let ol = null; try { ol = await d.pdf.getOutline(); } catch(e){}
+    const resolve = async items => {
+      const out = [];
+      for (const it of items || []){
+        let page = null;
+        try {
+          let dest = it.dest;
+          if (typeof dest === "string") dest = await d.pdf.getDestination(dest);
+          if (Array.isArray(dest) && dest[0]) page = (typeof dest[0] === "object" ? await d.pdf.getPageIndex(dest[0]) : dest[0]) + 1;
+        } catch(e){}
+        out.push({ title: (it.title || "").trim() || "(untitled)", page, kids: await resolve(it.items) });
+      }
+      return out;
+    };
+    d._outline = ol && ol.length ? await resolve(ol) : [];
+    return d._outline;
+  }
+  async function renderBookmarks(p, editId){
+    const el = p.el.querySelector(".bmarks"); if (!p.bmOn || !p.doc) return;
+    const d = p.doc; el.textContent = "";
+    const head = document.createElement("div"); head.className = "bm-head";
+    const h = document.createElement("strong"); h.textContent = "Bookmarks";
+    const add = document.createElement("button"); add.type = "button"; add.className = "bm-add"; add.title = "Bookmark the page you are on (Ctrl+D)";
+    add.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Add page ' + p.page;
+    add.addEventListener("click", () => addBookmark(p));
+    head.append(h, add); el.appendChild(head);
+    const mine = bmList(d);
+    const sec = t => { const x = document.createElement("div"); x.className = "bm-sec"; x.textContent = t; el.appendChild(x); };
+    sec("Yours");
+    if (!mine.length){ const e = document.createElement("div"); e.className = "bm-empty"; e.textContent = "None yet. Press Ctrl+D on any page, or Add, to bookmark it."; el.appendChild(e); }
+    mine.forEach(b => {
+      const row = document.createElement("div"); row.className = "bm-row" + (b.page === p.page ? " current" : ""); row.tabIndex = 0; row.dataset.page = b.page;
+      row.setAttribute("role", "button"); row.title = "Go to page " + b.page;
+      const t = document.createElement("span"); t.className = "bm-title";
+      const right = document.createElement("span");
+      const pg = document.createElement("span"); pg.className = "bm-pg"; pg.textContent = b.page;
+      const acts = document.createElement("span"); acts.className = "bm-acts";
+      const ren = document.createElement("button"); ren.type = "button"; ren.className = "bm-act"; ren.title = "Rename"; ren.setAttribute("aria-label", "Rename bookmark");
+      ren.innerHTML = SV('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>');
+      const del = document.createElement("button"); del.type = "button"; del.className = "bm-act del"; del.title = "Remove bookmark"; del.setAttribute("aria-label", "Remove bookmark");
+      del.innerHTML = SV('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>');
+      acts.append(ren, del); right.append(pg, acts);
+      const edit = () => {
+        const inp = document.createElement("input"); inp.className = "bm-edit"; inp.value = b.title; t.textContent = ""; t.appendChild(inp);
+        let done = false;
+        const fin = keep => { if (done) return; done = true; if (keep){ b.title = inp.value.trim() || "Page " + b.page; bmSave(); } renderBookmarks(p); };
+        inp.addEventListener("keydown", e => { e.stopPropagation(); if (e.key === "Enter"){ e.preventDefault(); fin(true); } else if (e.key === "Escape"){ e.preventDefault(); fin(false); } });
+        inp.addEventListener("blur", () => fin(true)); inp.addEventListener("click", e => e.stopPropagation());
+        requestAnimationFrame(() => { inp.focus(); inp.select(); });
+      };
+      t.textContent = b.title;
+      row.innerHTML = BMI; row.append(t, right);
+      row.addEventListener("click", e => { if (e.target.closest(".bm-act, .bm-edit")) return; p.goTo(b.page, true); });
+      row.addEventListener("dblclick", e => { if (!e.target.closest(".bm-edit")) edit(); });
+      row.addEventListener("keydown", e => { if (e.target !== row) return; if (e.key === "Enter"){ p.goTo(b.page, true); } else if (e.key === "F2"){ e.preventDefault(); edit(); } else if (e.key === "Delete"){ e.preventDefault(); del.click(); } });
+      ren.addEventListener("click", e => { e.stopPropagation(); edit(); });
+      del.addEventListener("click", e => {
+        e.stopPropagation(); const i = mine.indexOf(b); if (i < 0) return;
+        mine.splice(i, 1); bmSave(); renderBookmarks(p);
+        toast("Bookmark removed.");
+      });
+      el.appendChild(row);
+      if (b.id === editId) edit();
+    });
+    const ol = await outlineOf(d);
+    if (p.doc !== d || !p.bmOn) return;
+    if (ol.length){
+      sec("In this PDF");
+      const draw = (items, host, depth) => items.forEach(it => {
+        const wrap = document.createElement("div");
+        const row = document.createElement("div"); row.className = "bm-row pdf"; row.tabIndex = 0; row.setAttribute("role", "button");
+        if (it.page) row.title = "Go to page " + it.page;
+        let kids = null;
+        if (it.kids.length){
+          const tw = document.createElement("button"); tw.type = "button"; tw.className = "bm-tw" + (depth < 1 ? " open" : ""); tw.setAttribute("aria-label", "Show or hide");
+          tw.innerHTML = '<svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>';
+          tw.addEventListener("click", e => { e.stopPropagation(); tw.classList.toggle("open"); kids.hidden = !tw.classList.contains("open"); });
+          row.appendChild(tw);
+        } else row.insertAdjacentHTML("beforeend", BMI_PDF);
+        const t = document.createElement("span"); t.className = "bm-title"; t.textContent = it.title;
+        const pg = document.createElement("span"); pg.className = "bm-pg"; pg.textContent = it.page || "";
+        row.append(t, pg);
+        row.addEventListener("click", () => { if (it.page) p.goTo(it.page, true); });
+        row.addEventListener("keydown", e => { if (e.key === "Enter" && it.page) p.goTo(it.page, true); });
+        wrap.appendChild(row);
+        if (it.kids.length){ kids = document.createElement("div"); kids.className = "bm-kids"; kids.hidden = depth >= 1; draw(it.kids, kids, depth + 1); wrap.appendChild(kids); }
+        host.appendChild(wrap);
+      });
+      draw(ol, el, 0);
+    }
+  }
+  function markBookmark(p){
+    if (!p.bmOn) return;
+    const el = p.el.querySelector(".bmarks");
+    el.querySelectorAll(".bm-row:not(.pdf)").forEach(r => r.classList.toggle("current", +r.dataset.page === p.page));
+    const add = el.querySelector(".bm-add"); if (add) add.lastChild.textContent = "Add page " + p.page;
+  }
+  panes.forEach(p => {
+    p.el.querySelector(".bmbtn").addEventListener("click", () => { setActive(p); if (!p.doc){ toast("Open a document first."); return; } toggleBookmarks(p); });
+    let last = 0;
+    p.stage.addEventListener("scroll", () => { if (p.bmOn && p.page !== last){ last = p.page; markBookmark(p); } }, { passive: true });
+    const orig = p.show.bind(p);
+    p.show = async function(d){ const r = await orig(d); if (this.bmOn) renderBookmarks(this); return r; };
+  });
+  try { if (localStorage.getItem("bmOn") === "1") requestAnimationFrame(() => panes.forEach(p => { if (p.el.isConnected) { p.bmOn = true; p.el.querySelector(".bmarks").hidden = false; p.el.querySelector(".bmbtn").setAttribute("aria-pressed", "true"); } })); } catch(e){}
+  document.addEventListener("keydown", e => {
+    if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return;
+    if (e.target.closest && e.target.closest("input, textarea, select, [contenteditable]")) return;
+    if (e.key === "b" || e.key === "B"){ e.preventDefault(); if (active && active.doc) toggleBookmarks(active); }
+    else if (e.key === "d" || e.key === "D"){ e.preventDefault(); addBookmark(active); }
+  });
+
+  /* right-click on a page or a thumbnail: bookmark it, and a few everyday actions */
+  function openMenuAtPoint(x, y, items){
+    closeMenu(); toggleSettings(false); closeMores();
+    const m = $("appMenu"); buildMenu(m, items, 0); m.hidden = false;
+    m.style.left = Math.max(8, Math.min(window.innerWidth - m.offsetWidth - 8, x)) + "px";
+    m.style.top = Math.max(8, Math.min(window.innerHeight - m.offsetHeight - 8, y)) + "px";
+  }
+  let ctxRange = null;
+  document.addEventListener("mousedown", e => {
+    if (e.button !== 2) return;
+    const sl = window.getSelection();
+    ctxRange = sl.rangeCount && !sl.isCollapsed ? sl.getRangeAt(0).cloneRange() : null;
+  }, true);
+  panes.forEach(p => {
+    p.el.addEventListener("contextmenu", e => {
+      const pg = e.target.closest(".page[data-n], .thumb[data-n]");
+      if (!pg || !p.doc || e.target.closest("input, textarea")) return;
+      e.preventDefault(); setActive(p);
+      const n = +pg.dataset.n, list = bmList(p.doc), has = list.find(b => b.page === n);
+      const gs = window.getSelection();
+      if ((gs.isCollapsed || !String(gs).trim()) && ctxRange && p.el.contains(ctxRange.commonAncestorContainer)){ gs.removeAllRanges(); gs.addRange(ctxRange); }
+      ctxRange = null;
+      const sel = String(window.getSelection() || "").trim();
+      const items = [
+        has ? { label: "Remove bookmark on page " + n, ic: "marked", run: () => { list.splice(list.indexOf(has), 1); bmSave(); if (p.bmOn) renderBookmarks(p); toast("Bookmark on page " + n + " removed."); } }
+            : { label: "Bookmark page " + n, svg: '<path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>', color: "#2f5bdb", kbd: "Ctrl+D", run: () => addBookmark(p, n) },
+        { label: p.bmOn ? "Hide bookmarks" : "Show bookmarks", kbd: "Ctrl+B", ic: "view", run: () => toggleBookmarks(p) }
+      ];
+      const desk = !!window.pdfReader;
+      if (sel){
+        const range = window.getSelection().getRangeAt(0).cloneRange();
+        const mk = (k, c) => () => { const g = window.getSelection(); g.removeAllRanges(); g.addRange(range); showMarkBar(p); barAct(k, c || (k === "hl" ? "yellow" : undefined)); };
+        const dot = c => '<circle cx="12" cy="12" r="6" fill="' + c + '" stroke="none"/>';
+        items.unshift(
+          { head: "Selected text" },
+          { label: "Admitted", kbd: "A", svg: '<path d="M4 19h16"/>', color: "#1f9d55", run: mk("adm") },
+          { label: "Disputed", kbd: "D", svg: '<path d="M4 19h16"/>', color: "#d64545", run: mk("dis") },
+          { label: "Highlight", kbd: "H", svg: dot("#ffd43b"), color: "#e0a800", run: mk("hl") },
+          { label: "Add a comment", kbd: "C", svg: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>', run: mk("comment") },
+          { label: "Link to another document", kbd: "L", svg: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>', color: "#4f46e5", run: mk("link") },
+          { label: "Add to an issue", kbd: "I", svg: '<path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4z"/><circle cx="7.5" cy="7.5" r="1"/>', run: mk("issue") },
+          { label: "Send to the workspace", kbd: "W", svg: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>', run: mk("ws") },
+          { label: "Copy with page reference", svg: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>', run: mk("copy") },
+          { label: "Copy", kbd: "Ctrl+C", svg: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>', run: () => document.execCommand("copy") },
+          { sep: true }, { head: "Page " + n });
+      }
+      items.push(
+        { label: "Fit width", kbd: "Ctrl+0", ic: "view", run: paneAct("fit") },
+        paneCount === 1 ? { label: "Compare side by side", svg: '<rect x="2" y="4" width="9" height="16" rx="1.5"/><rect x="13" y="4" width="9" height="16" rx="1.5"/>', color: "#4f46e5", run: () => setPaneCount(2) } : null,
+        { sep: true },
+        { label: "Find…", ic: "find", kbd: "Ctrl+F", run: paneAct("find") },
+        { label: "Print this page…", ic: "print", run: async () => { await p.goTo(n, true); openPrint(p); const c = $("prCurrent"); if (c){ c.checked = true; c.dispatchEvent(new Event("change", { bubbles: true })); } } },
+        { label: "Print…", ic: "print", kbd: "Ctrl+P", run: paneAct("print") },
+        desk ? { sep: true } : null,
+        desk && p.doc.path ? { label: "Rename file…", ic: "marked", kbd: "F2", run: () => openRenameBar(p.doc) } : null,
+        desk ? { label: "Stamp annexures", ic: "stamp", run: paneAct("stamp") } : null,
+        desk && p.doc.path ? { label: "Show in folder", ic: "folder", run: paneAct("showfolder") } : null);
+      for (let i = items.length - 1; i >= 0; i--) if (!items[i]) items.splice(i, 1);
+      $("markBar").hidden = true;
+      openMenuAtPoint(e.clientX, e.clientY, items);
+    });
+  });
   /* ---- v3.10 rename the files themselves while they are open, one after another ---- */
   let rn = null;
   const pad2 = n => String(n).padStart(2, "0");
@@ -4801,6 +5058,7 @@ body.has-wintitle .bundle{top:36px}
       { label: "Keep page numbers in step", check: !!linked.checked, dis: paneCount === 1, run: () => { linked.checked = !linked.checked; linked.dispatchEvent(new Event("change", { bubbles: true })); } },
       { sep: true },
       { label: "Page thumbnails", check: !!(active && active.thumbsOn), doc: true, run: paneAct("thumbs") },
+      { label: "Bookmarks", kbd: "Ctrl+B", check: !!(active && active.bmOn), doc: true, run: () => toggleBookmarks(active) },
       { label: "Fit width", kbd: "Ctrl+0", doc: true, run: paneAct("fit") },
       { label: "Sidebar", kbd: "Ctrl+\\", check: !$("app").classList.contains("collapsed"), run: () => toggleRail() },
       { sep: true },
