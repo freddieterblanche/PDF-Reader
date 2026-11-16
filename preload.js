@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld("pdfReader", {
   printDialog: opts => ipcRenderer.invoke("print-dialog", opts),
   pathForFile: file => { try { return webUtils.getPathForFile(file) || ""; } catch (e) { return ""; } },
   onOpenFiles: cb => ipcRenderer.on("open-files", (_e, files) => cb(files)),
+  onEmailProgress: cb => ipcRenderer.on("email-progress", (_e, info) => cb(info)),
   ocrPage: data => ipcRenderer.invoke("ocr-page", data),
   recentList: () => ipcRenderer.invoke("recent-list"),
   recentPin: (p, on) => ipcRenderer.invoke("recent-pin", p, on),

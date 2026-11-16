@@ -953,7 +953,7 @@ body.has-wintitle .bundle{top:36px}
         <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
         <div class="set-sec desktop-only"><span class="set-lab">Projects Library</span><div class="set-lib"><span class="lib-path" id="libPath">…</span><button class="linkbtn" type="button" id="libChange">Change…</button></div></div>
         <button class="set-link" type="button" id="helpBtn"><span>Keyboard shortcuts</span><kbd>?</kbd></button>
-        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.11.1</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
+        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.12.0</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
       </div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -961,7 +961,7 @@ body.has-wintitle .bundle{top:36px}
         <div class="proj-pop" id="projPop" hidden role="dialog" aria-label="Projects"></div>
       </div>
       <div class="openwrap">
-        <div class="opensplit"><button class="btn primary openmain" id="openBtn" type="button" title="Open PDFs (Ctrl+O)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>Open</button><button class="btn primary opencaret desktop-only" id="recentBtn" type="button" aria-expanded="false" aria-label="Recent documents and new bundle" title="Recent documents, new bundle"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></div>
+        <div class="opensplit"><button class="btn primary openmain" id="openBtn" type="button" title="Open PDFs or emails (.eml, .msg) (Ctrl+O)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>Open</button><button class="btn primary opencaret desktop-only" id="recentBtn" type="button" aria-expanded="false" aria-label="Recent documents and new bundle" title="Recent documents, new bundle"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></div>
         <button class="btn bundlebtn desktop-only" id="bundleBtn" type="button" title="Make a bundle: combine PDFs into one paginated bundle with annexure labels"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M9 7h7"/><path d="M9 11h5"/></svg>Make a bundle</button>
         <span class="keep-off"><button class="btn" id="combineBtn" type="button" title="Bundle maker: combine documents into one numbered bundle" hidden><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>Bundle</button></span>
         <div class="recent-pop" id="recentPop" hidden role="dialog" aria-label="Recent documents">
@@ -1305,7 +1305,7 @@ body.has-wintitle .bundle{top:36px}
   function emptyHTML(){
     return docs.length
       ? '<div class="empty-state"><span class="sheet" aria-hidden="true"></span><p>Choose a document from the left panel, drag one here, or drop a PDF file here.</p><button class="btn" type="button" data-open>Open PDFs</button></div>'
-      : (setTimeout(fillInlineRecent, 0), '<div class="empty-state"><span class="sheet" aria-hidden="true"></span><p><strong>No documents open</strong></p><p>Open one or more PDFs, or drag them here or onto the sidebar.</p><button class="btn primary" type="button" data-open>Open PDFs</button><div class="recent-inline" data-recent-inline></div></div>');
+      : (setTimeout(fillInlineRecent, 0), '<div class="empty-state"><span class="sheet" aria-hidden="true"></span><p><strong>No documents open</strong></p><p>Open one or more PDFs or emails, or drag them here or onto the sidebar.</p><button class="btn primary" type="button" data-open>Open PDFs</button><div class="recent-inline" data-recent-inline></div></div>');
   }
   /* ---- Save as: keep a copy of any document (for example one opened from an email) in a folder of your choice.
      Files opened from Outlook live in a hidden temporary folder, so the dialog then starts in the last folder used. ---- */
@@ -4380,8 +4380,8 @@ body.has-wintitle .bundle{top:36px}
   }
 
   function handleFiles(files, target){
-    const pdfs = [...files].filter(f => f.type === "application/pdf" || /\.pdf$/i.test(f.name));
     const D = window.pdfReader;
+    const pdfs = [...files].filter(f => f.type === "application/pdf" || /\.pdf$/i.test(f.name) || (D && /\.(eml|msg)$/i.test(f.name)));
     Promise.all(pdfs.map(async f => {
       const fp = D ? D.pathForFile(f) : "";
       if (fp){ const got = await D.readFiles([fp]); if (got[0]) return addDoc(got[0].name, got[0].data, false, got[0].path); }
@@ -5628,6 +5628,13 @@ body.has-wintitle .bundle{top:36px}
       else toast("You have the latest version (" + r.current + ").");
     });
     window.pdfReader.onOpenFiles(list => openNative(list));
+    if (window.pdfReader.onEmailProgress) window.pdfReader.onEmailProgress(i => {
+      if (i.name){ toast("Converting email " + i.n + (i.of > 1 ? " of " + i.of : "") + " to PDF: " + i.name + "…", true); return; }
+      const folder = i.folder ? i.folder.split(/[\\/]/).filter(Boolean).pop() : "";
+      const msg = (i.done ? "Saved " + i.done + (i.done === 1 ? " email" : " emails") + " as PDF" + (folder ? " in " + folder : "") + "." : "")
+        + (i.fails && i.fails.length ? " Could not convert " + i.fails.join("; ") + "." : "");
+      if (msg) toast(msg.trim());
+    });
     window.pdfReader.initialFiles().then(list => { if (list && list.length) openNative(list); });
   }
 })();

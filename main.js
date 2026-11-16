@@ -11,7 +11,8 @@ const pending = [];          // files passed on the command line before the wind
 const known = new Set();     // files the user has opened; only these may be printed
 
 const isPdf = p => typeof p === "string" && /\.pdf$/i.test(p) && fs.existsSync(p);
-const pdfArgs = argv => argv.slice(1).filter(isPdf).map(p => path.resolve(p));
+const isEmail = p => typeof p === "string" && /\.(eml|msg)$/i.test(p) && fs.existsSync(p);
+const pdfArgs = argv => argv.slice(1).filter(p => isPdf(p) || isEmail(p)).map(p => path.resolve(p));
 /* Projects: a .pdfrproj file in the matter folder lists the project's documents and holds your marks and notes */
 const isProj = p => typeof p === "string" && /\.pdfrproj$/i.test(p) && fs.existsSync(p);
 const projArgs = argv => argv.slice(1).filter(isProj).map(p => path.resolve(p));
@@ -239,10 +240,53 @@ function createWindow() {
   win.loadFile(path.join(__dirname, "src", "index.html"));
 }
 
-function sendFiles(paths) {
-  const files = [];
-  for (const p of paths) { try { files.push(readPdf(p)); } catch (e) {} }
+async function sendFiles(paths) {
+  const files = await openPaths(paths);
   if (files.length && win) win.webContents.send("open-files", files);
+}
+
+/* ---- Emails: an .eml or .msg is laid out like an Outlook printout and saved as a PDF beside it ---- */
+async function emailToPdf(file) {
+  const E = require("./email");
+  const m = await E.readEmail(file);
+  let st = null; try { st = fs.statSync(file); } catch (e) {}
+  const name = E.pdfName(m, st ? st.mtime : null);
+  const tmp = path.join(os.tmpdir(), "pdf-reader-email"); fs.mkdirSync(tmp, { recursive: true });
+  const htmlFile = path.join(tmp, Date.now() + "-" + Math.random().toString(36).slice(2) + ".html");
+  fs.writeFileSync(htmlFile, E.pageHtml(m));
+  const { session } = require("electron");
+  const ses = session.fromPartition("email-render");
+  if (!ses.__blocked) { ses.__blocked = true; ses.webRequest.onBeforeRequest((d, cb) => cb({ cancel: !/^(file|data|devtools):/i.test(d.url) })); }
+  const w = new BrowserWindow({ show: false, width: 900, height: 1200, webPreferences: { session: ses, javascript: false, sandbox: true, contextIsolation: true, nodeIntegration: false } });
+  let pdf;
+  try {
+    await w.loadFile(htmlFile);
+    pdf = await w.webContents.printToPDF({ pageSize: "A4", printBackground: true, preferCSSPageSize: true, displayHeaderFooter: true,
+      headerTemplate: "<span></span>",
+      footerTemplate: '<div style="font:8px Arial,sans-serif;color:#666;width:100%;text-align:center;margin-bottom:4mm">Page <span class="pageNumber"></span> of <span class="totalPages"></span></div>' });
+  } finally { w.destroy(); try { fs.unlinkSync(htmlFile); } catch (e) {} }
+  // saved beside the email; if that folder cannot be written to, in Documents\Converted emails
+  let out = E.uniquePath(path.dirname(file), name);
+  try { fs.writeFileSync(out, pdf, { flag: "wx" }); }
+  catch (e) {
+    const alt = path.join(app.getPath("documents"), "Converted emails"); fs.mkdirSync(alt, { recursive: true });
+    out = E.uniquePath(alt, name); fs.writeFileSync(out, pdf, { flag: "wx" });
+  }
+  return out;
+}
+async function openPaths(paths) {
+  const out = [], list = (Array.isArray(paths) ? paths : []).map(String);
+  const emails = list.filter(isEmail); let n = 0, ok = 0; const fails = [];
+  for (const p of list) {
+    try {
+      if (isEmail(p)) {
+        n++; if (win) win.webContents.send("email-progress", { n, of: emails.length, name: path.basename(p) });
+        const pdf = await emailToPdf(p); const r = readPdf(pdf); r.fromEmail = path.basename(p); out.push(r); ok++;
+      } else if (isPdf(p)) out.push(readPdf(p));
+    } catch (e) { if (isEmail(p)) fails.push(path.basename(p) + ": " + (e && e.message || e)); }
+  }
+  if (emails.length && win) win.webContents.send("email-progress", { done: ok, fails, folder: out.find(r => r.fromEmail) ? path.dirname(out.find(r => r.fromEmail).path) : "" });
+  return out;
 }
 
 if (!app.requestSingleInstanceLock()) {
@@ -266,29 +310,19 @@ if (!app.requestSingleInstanceLock()) {
     Menu.setApplicationMenu(null);
     nativeTheme.on("updated", () => { if (win) { try { win.setTitleBarOverlay(titleOverlay()); win.setBackgroundColor(titleOverlay().color); } catch (e) {} } });
 
-    ipcMain.handle("initial-files", () => {
-      const out = [];
-      for (const p of pending.splice(0)) { try { out.push(readPdf(p)); } catch (e) {} }
-      return out;
-    });
+    ipcMain.handle("initial-files", () => openPaths(pending.splice(0)));
 
     ipcMain.handle("open-dialog", async () => {
       const r = await dialog.showOpenDialog(win, {
-        title: "Open PDFs",
+        title: "Open PDFs and emails",
         properties: ["openFile", "multiSelections"],
-        filters: [{ name: "PDF documents", extensions: ["pdf"] }]
+        filters: [{ name: "PDFs and emails", extensions: ["pdf", "eml", "msg"] }, { name: "PDF documents", extensions: ["pdf"] }, { name: "Emails (.eml, .msg)", extensions: ["eml", "msg"] }]
       });
       if (r.canceled) return [];
-      const out = [];
-      for (const p of r.filePaths) { try { out.push(readPdf(p)); } catch (e) {} }
-      return out;
+      return openPaths(r.filePaths);
     });
 
-    ipcMain.handle("read-files", (_e, paths) => {
-      const out = [];
-      for (const p of (Array.isArray(paths) ? paths : [])) if (isPdf(p)) { try { out.push(readPdf(p)); } catch (e) {} }
-      return out;
-    });
+    ipcMain.handle("read-files", (_e, paths) => openPaths((Array.isArray(paths) ? paths : []).filter(p => isPdf(p) || isEmail(p))));
 
     ipcMain.handle("write-temp", (_e, name, data) => {
       const dir = path.join(os.tmpdir(), "pdf-reader-print");
