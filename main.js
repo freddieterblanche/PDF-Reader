@@ -336,6 +336,36 @@ if (!app.requestSingleInstanceLock()) {
 
     ipcMain.handle("show-in-folder", (_e, p) => { if (known.has(p)) shell.showItemInFolder(p); });
 
+    /* v3.13: a new Outlook message with the PDF attached (classic Outlook's /a switch).
+       A copy with signatures or text on the pages is written to a temp folder under its own name first. */
+    ipcMain.handle("email-pdf", async (_e, o) => {
+      o = o || {};
+      let file = "";
+      if (o.data) {
+        const dir = path.join(os.tmpdir(), "pdf-reader-mail", String(Date.now()));
+        fs.mkdirSync(dir, { recursive: true });
+        const safe = String(o.name || "document.pdf").replace(/[<>:"/\\|?*\x00-\x1f]/g, "_").slice(0, 150) || "document.pdf";
+        file = path.join(dir, /\.pdf$/i.test(safe) ? safe : safe + ".pdf");
+        fs.writeFileSync(file, Buffer.from(o.data));
+      } else if (o.path && known.has(o.path) && fs.existsSync(o.path)) file = o.path;
+      else throw new Error("That file could not be found.");
+      const outlook = await new Promise(res => {
+        execFile("reg", ["query", "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\OUTLOOK.EXE", "/ve"], { windowsHide: true }, (err, out) => {
+          const m = !err && /REG_SZ\s+(.+)/.exec(String(out || ""));
+          res(m ? m[1].trim().replace(/^"|"$/g, "") : "");
+        });
+      });
+      if (outlook && fs.existsSync(outlook)) {
+        const { spawn } = require("child_process");
+        const ch = spawn(outlook, ["/a", file], { detached: true, stdio: "ignore", windowsHide: false });
+        ch.on("error", () => {}); ch.unref();
+        return { ok: true, via: "outlook", file };
+      }
+      known.add(file); shell.showItemInFolder(file);
+      await shell.openExternal("mailto:?subject=" + encodeURIComponent(path.basename(file, ".pdf")));
+      return { ok: true, via: "mailto", file };
+    });
+
     ipcMain.handle("get-printers", async () => {
       let printers = [];
       try {
@@ -583,8 +613,10 @@ if (!app.requestSingleInstanceLock()) {
     ipcMain.handle("notes-save", (_e, obj) => { writeAtomic(notesFile(), JSON.stringify(obj || {})); return true; });
     /* Arial Bold for Bates numbers and annexure labels: read from the Windows fonts folder (Liberation Sans Bold, its metric twin, elsewhere) */
     ipcMain.handle("font-read", (_e, name) => {
-      if (name !== "arial-bold") return null;
-      const cands = [path.join(process.env.WINDIR || "C:\\Windows", "Fonts", "arialbd.ttf"), "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", "/Library/Fonts/Arial Bold.ttf", "/System/Library/Fonts/Supplemental/Arial Bold.ttf"];
+      const F = path.join(process.env.WINDIR || "C:\\Windows", "Fonts");
+      const cands = name === "arial-bold" ? [path.join(F, "arialbd.ttf"), "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", "/Library/Fonts/Arial Bold.ttf", "/System/Library/Fonts/Supplemental/Arial Bold.ttf"]
+        : name === "arial" ? [path.join(F, "arial.ttf"), "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", "/Library/Fonts/Arial.ttf", "/System/Library/Fonts/Supplemental/Arial.ttf"] : null;
+      if (!cands) return null;
       for (const c of cands) { try { return fs.readFileSync(c); } catch (e) {} }
       return null;
     });

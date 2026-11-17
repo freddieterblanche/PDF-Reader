@@ -1,6 +1,6 @@
 # PDF Reader
 
-A Windows PDF reader for Terblanche Inc.: side-by-side reading of up to three documents, remembered reading positions, fast printing, search, page thumbnails, and page organising (delete, reorder, rotate, extract, insert, combine, split).
+A Windows PDF reader for Terblanche Inc.: side-by-side reading of up to three documents, remembered reading positions, fast printing, search, page thumbnails, and page organising (delete, reorder, rotate, extract, insert, combine, split), Fill & Sign, redaction, read aloud, email to Outlook and rotate view.
 
 ## Building the installer
 

@@ -735,6 +735,43 @@ body.has-wintitle .bundle{top:36px}
 .lm-caret::before{content:"";position:absolute;left:-4px;top:-6px;width:11px;height:6px;border-radius:2px;background:var(--accent)}
 @keyframes lmblink{50%{opacity:.35}}
 .box-band{position:absolute;z-index:5;border:1.5px dashed var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);pointer-events:none}
+/* v3.13 page objects: text, signatures, drawings and redactions */
+.page{container-type:size}
+.objLayer{position:absolute;inset:0;z-index:3;pointer-events:none;container-type:size}
+.ob{pointer-events:auto;cursor:move}
+.ob-text{position:absolute;white-space:pre;font-family:Arial,"Liberation Sans",sans-serif;line-height:1.2;padding:0 .1em;border-radius:2px;outline-offset:1px;min-width:.5em}
+.ob-text.editing{cursor:text;outline:1.5px solid var(--accent);background:rgba(255,255,255,.75)}
+.ob-sign{position:absolute}
+.ob-sign img{display:block;width:100%;height:100%;pointer-events:none;user-select:none}
+.ob-redact{position:absolute;border:1.5px solid #e03131;background:repeating-linear-gradient(135deg,rgba(224,49,49,.28) 0 6px,rgba(224,49,49,.1) 6px 12px)}
+.ob.sel{outline:1.5px dashed var(--accent);outline-offset:2px}
+.ob-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.ob-svg path{fill:none;stroke-linecap:round;stroke-linejoin:round;pointer-events:visibleStroke}
+.ob-selbox{position:absolute;outline:1.5px dashed var(--accent);pointer-events:none}
+.ob-live{position:absolute;inset:0;width:100%;height:100%;z-index:6;pointer-events:none}
+.ob-live path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.ob-rs{position:absolute;right:-6px;bottom:-6px;width:11px;height:11px;border-radius:2px;background:var(--accent);border:2px solid #fff;cursor:nwse-resize}
+.rd-band{border-color:#e03131;background:rgba(224,49,49,.15)}
+.pane.tool-obj .textLayer{pointer-events:none}
+.pane.tool-text .stage,.pane.tool-text .page,.pane.tool-date .page{cursor:text}
+.pane.tool-sign .page,.pane.tool-init .page{cursor:copy}
+.pane.tool-pen .page,.pane.tool-redact .page{cursor:crosshair}
+.pane.tool-pen .ob{pointer-events:none}
+.rd-count{font-size:13.5px;color:var(--muted)}
+.fs-cols{display:inline-flex;gap:6px}
+.fs-col{width:20px;height:20px;border-radius:50%;border:2px solid var(--surface);background:var(--c);box-shadow:0 0 0 1px var(--line-strong);cursor:pointer;padding:0}
+.fs-col[aria-pressed="true"]{box-shadow:0 0 0 2px var(--accent)}
+.sb-row select{font:inherit;font-size:13.5px;height:28px;border:1px solid var(--line-strong);border-radius:7px;background:var(--surface);color:var(--ink);padding:0 6px}
+/* rotate view: marks and objects turn with the page */
+.vrot90 .markLayer,.vrot90 .objLayer{inset:auto;left:0;top:0;width:100cqh;height:100cqw;transform-origin:0 0;transform:translate(100cqw,0) rotate(90deg)}
+.vrot180 .markLayer,.vrot180 .objLayer{transform-origin:0 0;transform:translate(100cqw,100cqh) rotate(180deg)}
+.vrot270 .markLayer,.vrot270 .objLayer{inset:auto;left:0;top:0;width:100cqh;height:100cqw;transform-origin:0 0;transform:translate(0,100cqh) rotate(270deg)}
+.vrot90 .mk-tab,.vrot90 .stp,.vrot180 .mk-tab,.vrot180 .stp,.vrot270 .mk-tab,.vrot270 .stp{display:none}
+.sigmodal{width:min(640px,94vw)}
+#sigPad{display:block;width:100%;aspect-ratio:3/1;border:1px dashed var(--line-strong);border-radius:8px;background:#fff;touch-action:none;cursor:crosshair;margin:6px 0 4px}
+.readbar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:8px;padding:6px 8px 6px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line);box-shadow:0 10px 30px rgba(16,24,40,.18);font-size:13.5px}
+.readbar select{font:inherit;font-size:13px;height:28px;border:1px solid var(--line-strong);border-radius:7px;background:var(--surface);color:var(--ink)}
+.readbar .btn{height:28px;padding:0 10px}
 .toolhint{position:fixed;z-index:41;left:50%;bottom:22px;transform:translateX(-50%);padding:8px 14px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.25);pointer-events:none}
 
 /* v3.5: cleaner layout */
@@ -953,7 +990,7 @@ body.has-wintitle .bundle{top:36px}
         <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
         <div class="set-sec desktop-only"><span class="set-lab">Projects Library</span><div class="set-lib"><span class="lib-path" id="libPath">…</span><button class="linkbtn" type="button" id="libChange">Change…</button></div></div>
         <button class="set-link" type="button" id="helpBtn"><span>Keyboard shortcuts</span><kbd>?</kbd></button>
-        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.12.1</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
+        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.13.0</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
       </div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -1073,6 +1110,21 @@ body.has-wintitle .bundle{top:36px}
     <div class="foot"><button class="btn" type="button" id="nameNo">Cancel</button><button class="btn primary" type="button" id="nameYes">Create</button></div>
   </div>
 </div>
+<div class="modal-back" id="sigModal" hidden>
+  <div class="modal sigmodal" role="dialog" aria-modal="true" aria-labelledby="sigTitle">
+    <h2 id="sigTitle">Your signature</h2>
+    <p class="sub">Draw it with the mouse, a touchpad or a pen, or use a picture of it (a scan or photo on white paper works; the white is removed). It is kept on this computer for next time.</p>
+    <canvas id="sigPad" width="900" height="300"></canvas>
+    <input type="file" id="sigFileIn" accept="image/png,image/jpeg" hidden>
+    <div class="foot"><button class="btn ghost" type="button" id="sigClear">Clear</button><button class="btn ghost" type="button" id="sigFile">Use a picture…</button><span style="flex:1"></span><button class="btn" type="button" id="sigCancel">Cancel</button><button class="btn primary" type="button" id="sigOk">Save</button></div>
+  </div>
+</div>
+<div class="readbar" id="readBar" hidden role="region" aria-label="Read aloud">
+  <span id="rbText">Reading</span>
+  <select id="rbRate" aria-label="Speed"><option value="0.8">Slow</option><option value="1">Normal</option><option value="1.25">Faster</option><option value="1.5">Fast</option></select>
+  <button class="btn" type="button" id="rbPause">Pause</button>
+  <button class="btn primary" type="button" id="rbStop">Stop</button>
+</div>
 <div class="modal-back" id="confirmModal" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
     <h2 id="confirmTitle"></h2>
@@ -1187,6 +1239,10 @@ body.has-wintitle .bundle{top:36px}
         <h3>Panels and tools</h3>
         <div><span>Facts panel</span><kbd>Ctrl+Shift+N</kbd></div><div><span>Workspace</span><kbd>Ctrl+Shift+W</kbd></div><div><span>Sidebar</span><kbd>Ctrl+\</kbd></div>
         <div><span>Stamp the page on screen</span><kbd>S</kbd></div><div><span>Stop a tool</span><kbd>Esc</kbd></div><div><span>This list</span><kbd>?</kbd></div>
+        <h3>View and reading</h3>
+        <div><span>Rotate view</span><kbd>Ctrl+Shift+plus / minus</kbd></div><div><span>Read aloud on or off</span><kbd>Ctrl+Shift+Y</kbd></div>
+        <h3>Fill &amp; Sign</h3>
+        <div><span>Change text you added</span><kbd>Double-click</kbd></div><div><span>Remove what you added</span><kbd>Delete</kbd></div>
       </div>
     </div>
   </div>
@@ -1221,6 +1277,7 @@ body.has-wintitle .bundle{top:36px}
           <button class="btn ghost" type="button" data-act="lines" aria-pressed="false" title="Lines: click where a passage starts, then where it ends"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg><span class="tlabel">Lines</span></button>
           <button class="btn ghost" type="button" data-act="box" aria-pressed="false" title="Box: drag a rectangle over a block of text or part of a scanned page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 3"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h6"/></svg><span class="tlabel">Box</span></button>
           <button class="btn ghost desktop-only" type="button" data-act="stamp" aria-pressed="false" title="Stamp: number annexures FA1, FA2 … by clicking the pages where they start"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 22h14"/><path d="M19.27 13.73A2.5 2.5 0 0 0 17.5 13h-11A2.5 2.5 0 0 0 4 15.5V17a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1.5c0-.66-.26-1.3-.73-1.77Z"/><path d="M14 13V8.5C14 7 15 7 15 5a3 3 0 0 0-6 0c0 2 1 2 1 3.5V13"/></svg><span class="tlabel">Stamp</span></button>
+          <button class="btn ghost" type="button" data-act="fs" aria-pressed="false" title="Fill &amp; Sign: type text, add the date, sign, initial or draw on the page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c3-3 5-8 7-8s-1 9 2 9 4-5 6-5 1 3 3 3"/><path d="M3 21h18"/></svg><span class="tlabel">Sign</span></button>
         </div>
         <div class="viewslot"></div>
         <div class="tools">
@@ -1235,6 +1292,12 @@ body.has-wintitle .bundle{top:36px}
               <button class="mitem desktop-only" type="button" role="menuitem" data-act="organise"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg><span>Organise pages</span></button>
               <button class="mitem" type="button" role="menuitem" data-act="ws" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Workspace</span><kbd>Ctrl+Shift+W</kbd></button>
               <button class="mitem" type="button" role="menuitem" data-act="lines" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg><span>Lines tool (start and end)</span></button>
+              <button class="mitem desktop-only" type="button" role="menuitem" data-act="redact" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="5" rx="1" fill="currentColor"/><path d="M3 14h18"/><rect x="3" y="17" width="11" height="3" rx="1" fill="currentColor"/></svg><span>Redact</span></button>
+              <div class="msep" role="separator"></div>
+              <button class="mitem" type="button" role="menuitem" data-act="rotr"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg><span>Rotate view clockwise</span><kbd>Ctrl+Shift++</kbd></button>
+              <button class="mitem" type="button" role="menuitem" data-act="rotl"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>Rotate view anticlockwise</span><kbd>Ctrl+Shift+−</kbd></button>
+              <button class="mitem" type="button" role="menuitem" data-act="read"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg><span>Read aloud</span><kbd>Ctrl+Shift+Y</kbd></button>
+              <button class="mitem desktop-only" type="button" role="menuitem" data-act="email"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><span>Email this PDF…</span></button>
               <div class="msep" role="separator"></div>
               <button class="mitem desktop-only" type="button" role="menuitem" data-act="saveas"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Save as…</span><kbd>Ctrl+S</kbd></button>
               <button class="mitem desktop-only" type="button" role="menuitem" data-act="markedup"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Save marked-up copy…</span></button>
@@ -1276,6 +1339,37 @@ body.has-wintitle .bundle{top:36px}
       </div>
       <div class="sb-help">Click each page where an annexure starts, or press S for the page on screen. The numbers always run in page order: stamp a page you missed and the later annexures renumber themselves. Click a stamp to remove it, or Clear all to start again. Your PDF only changes when you save a stamped copy.</div>
       <div class="sb-list"></div>
+    </div>
+    <div class="stampbar fsbar" hidden>
+      <div class="sb-row">
+        <strong class="sb-title">Fill &amp; Sign</strong>
+        <div class="seg sb-size fs-tools" role="group" aria-label="Fill and sign tools">
+          <button class="btn" type="button" data-fs="text" aria-pressed="false" title="Type text on the page">Text</button>
+          <button class="btn" type="button" data-fs="date" aria-pressed="false" title="Add today's date">Date</button>
+          <button class="btn" type="button" data-fs="sign" aria-pressed="false" title="Add your signature">Signature</button>
+          <button class="btn" type="button" data-fs="init" aria-pressed="false" title="Add your initials">Initials</button>
+          <button class="btn" type="button" data-fs="pen" aria-pressed="false" title="Draw freehand">Pen</button>
+        </div>
+        <div class="fs-cols" role="group" aria-label="Colour"><button class="fs-col" type="button" data-fc="black" aria-label="Black" style="--c:#111111"></button><button class="fs-col" type="button" data-fc="blue" aria-label="Blue" style="--c:#1d4ed8"></button><button class="fs-col" type="button" data-fc="red" aria-label="Red" style="--c:#c92a2a"></button></div>
+        <label class="fs-size-l">Size <select class="fs-size" aria-label="Text size"><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>14</option><option>16</option><option>20</option><option>24</option></select></label>
+        <label class="fs-pen-l" hidden>Line <select class="fs-pen" aria-label="Pen thickness"><option value="1">Fine</option><option value="2">Medium</option><option value="4">Thick</option></select></label>
+        <span class="sb-sp"></span>
+        <button class="btn ghost" type="button" data-act="fssig" title="Draw or choose your signature and initials again">Change signature</button>
+        <button class="btn primary" type="button" data-act="fssave">Save signed copy…</button>
+        <button class="btn ghost" type="button" data-act="fsclose">Done</button>
+      </div>
+      <div class="sb-help">Choose a tool, then click on the page. Drag anything you added to move it; drag a corner to resize; Delete removes it; Ctrl+Z undoes. Your PDF only changes when you save a signed copy, and Email this PDF attaches it with what you added.</div>
+    </div>
+    <div class="stampbar rdbar" hidden>
+      <div class="sb-row">
+        <strong class="sb-title">Redact</strong>
+        <span class="rd-count"></span>
+        <span class="sb-sp"></span>
+        <button class="btn ghost" type="button" data-act="rdclear">Clear all</button>
+        <button class="btn primary" type="button" data-act="rdsave">Apply and save redacted copy…</button>
+        <button class="btn ghost" type="button" data-act="rdclose">Done</button>
+      </div>
+      <div class="sb-help">Drag over names, numbers or passages that must be removed. Drag a marked area to move it, drag its corner to resize, Delete removes it. The words are permanently removed only in the copy you save; this document stays as it is.</div>
     </div>
     <div class="body">
       <div class="thumbs" hidden></div>
@@ -1664,7 +1758,8 @@ body.has-wintitle .bundle{top:36px}
   function repaintAll(){ visiblePanes().forEach(p => { if (p.doc) p.stage.querySelectorAll(".page").forEach(el => paintMarks(p, el)); }); }
   function paintMarks(pane, el){
     const d = pane.doc, n = +el.dataset.n;
-    const list = d ? marksOf(d).filter(m => m.page === n) : [];
+    const all = d ? marksOf(d).filter(m => m.page === n) : [], list = all.filter(m => !isObj(m));
+    paintObjs(pane, el, all.filter(isObj));
     let layer = el.querySelector(".markLayer");
     paintTabs(pane, el, list); paintStamps(pane, el);
     if (!list.length){ if (layer) layer.remove(); return; }
@@ -1750,7 +1845,7 @@ body.has-wintitle .bundle{top:36px}
     });
     return parts;
   }
-  const fam = t => t === "hl" ? "hl" : t === "ref" ? "ref" : "fact";
+  const fam = t => t === "hl" ? "hl" : t === "ref" ? "ref" : t === "adm" || t === "dis" ? "fact" : t;
   const area = r => r[2] * r[3];
   const inter = (p, q) => Math.max(0, Math.min(p[0] + p[2], q[0] + q[2]) - Math.max(p[0], q[0])) * Math.max(0, Math.min(p[1] + p[3], q[1] + q[3]) - Math.max(p[1], q[1]));
   /* marking the same words again replaces the old mark (for example, Disputed to Admitted) */
@@ -1758,7 +1853,7 @@ body.has-wintitle .bundle{top:36px}
   function existingMark(pane){
     const d = pane.doc, parts = selectionParts(pane); if (!d || parts.length !== 1) return null;
     const p = parts[0], probe = { page: p.page, rects: p.rects };
-    return marksOf(d).filter(m => m.page === p.page).find(m => covered(m, probe) && covered(probe, m)) || null;
+    return marksOf(d).filter(m => m.page === p.page && !isObj(m)).find(m => covered(m, probe) && covered(probe, m)) || null;
   }
   /* for the workspace: use the mark already on these words (keeps Admitted or Disputed), or highlight them */
   function markForCard(pane){
@@ -1767,6 +1862,7 @@ body.has-wintitle .bundle{top:36px}
     return addMarks(pane, "hl", "yellow");
   }
   function addMarks(pane, type, color){
+    if (pane.viewRot){ toast("Turn the page view back to normal to mark (Ctrl+Shift+minus)."); return null; }
     const d = pane.doc, parts = selectionParts(pane); if (!d || !parts.length) return null;
     pushUndo(d);
     const arr = marksOf(d), made = [], group = parts.length > 1 ? newId() : undefined;
@@ -1791,7 +1887,7 @@ body.has-wintitle .bundle{top:36px}
     if (!el) return null;
     const r = el.getBoundingClientRect(), fx = (x - r.left) / r.width, fy = (y - r.top) / r.height, n = +el.dataset.n;
     const px = 3 / r.width, py = 3 / r.height;
-    const list = marksOf(pane.doc).filter(m => m.page === n);
+    const list = marksOf(pane.doc).filter(m => m.page === n && !isObj(m));
     for (let i = list.length - 1; i >= 0; i--){
       const m = list[i];
       if (m.rects.some(q => fx >= q[0] - px && fx <= q[0] + q[2] + px && fy >= q[1] - py && fy <= q[1] + q[3] + py * 2)) return m;
@@ -1939,7 +2035,7 @@ body.has-wintitle .bundle{top:36px}
     $("factsFilter").querySelectorAll("[data-f]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.f === notesState.filter)));
     if (notesState.tab === "issues"){ $("factsFilter").hidden = true; renderIssuesTab(); return; }
     let adm = 0, dis = 0, hl = 0, com = 0;
-    scopeDocs().forEach(d => marksOf(d).forEach(m => { if (m.type === "adm") adm++; else if (m.type === "dis") dis++; else { hl++; if (m.comment) com++; } }));
+    scopeDocs().forEach(d => marksOf(d).forEach(m => { if (isObj(m)) return; if (m.type === "adm") adm++; else if (m.type === "dis") dis++; else { hl++; if (m.comment) com++; } }));
     const sum = $("factsSum");
     if (facts){
       sum.innerHTML = '<div class="fs-row"><span class="a"><b>' + adm + '</b>admitted</span><span class="d"><b>' + dis + '</b>disputed</span></div>' +
@@ -1998,7 +2094,8 @@ body.has-wintitle .bundle{top:36px}
   async function saveMarkedUp(){
     const D = window.pdfReader, d = active.doc;
     if (!D || !d || !d.pdf){ toast("Open the document first."); return; }
-    const list = marksOf(d); if (!list.length){ toast(d.name + " has no marks yet."); return; }
+    const list = marksOf(d).filter(m => m.type !== "redact"); if (!list.length){ toast(d.name + " has no marks yet."); return; }
+    if (objEditing) document.activeElement.blur();
     let last = ""; try { last = localStorage.getItem("lastSaveDir") || ""; } catch(e){}
     const dir = d.path && !isTempPath(d.path) ? dirOf(d.path) : last;
     const path = await D.saveDialog({ title: "Save a marked-up copy", defaultPath: joinPath(dir, cleanName(d.name) + " (marked up).pdf") });
@@ -2011,7 +2108,7 @@ body.has-wintitle .bundle{top:36px}
       const hex = h => rgb(parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255);
       const multiply = PDFLib.BlendMode ? PDFLib.BlendMode.Multiply : undefined;
       for (const m of list){
-        if (m.type === "ref") continue;
+        if (m.type === "ref" || isObj(m)) continue;
         if (m.page < 1 || m.page > out.getPageCount()) continue;
         const pg = out.getPage(m.page - 1), vp = (await d.pdf.getPage(m.page)).getViewport({ scale: 1 });
         const pt = (fx, fy) => { const q = vp.convertToPdfPoint(fx * vp.width, fy * vp.height); return { x: q[0], y: q[1] }; };
@@ -2033,6 +2130,7 @@ body.has-wintitle .bundle{top:36px}
           pg.node.addAnnot(an);
         }
       }
+      await burnObjs(out, d, list);
       const saved = await D.writePdf({ path, data: await out.save(), mode: "new" });
       try { localStorage.setItem("lastSaveDir", dirOf(saved)); } catch(e){}
       toast("Saved " + saved.split(/[\\/]/).pop() + ". Print it or send it with the marks on the pages.");
@@ -2459,16 +2557,28 @@ body.has-wintitle .bundle{top:36px}
   function hint(t){ const h = $("toolHint"); if (!t){ h.hidden = true; return; } h.textContent = t; h.hidden = false; }
   function setTool(pane, tool){
     if (tool && (!pane.doc || !pane.doc.pdf)){ toast("Open a document first."); return; }
+    if (tool && pane.viewRot){ toast("Turn the page view back to normal first (Ctrl+Shift+minus)."); return; }
     if (tool && pane.stamping) toggleStamp(pane, false);
+    if (objEditing) document.activeElement.blur();
+    if (pane.fsOn && tool !== null && !{ text: 1, date: 1, sign: 1, init: 1, pen: 1 }[tool]) toggleFs(pane, false);
+    if (pane.rdOn && tool !== null && tool !== "redact") toggleRedact(pane, false);
     visiblePanes().forEach(p => { if (p !== pane && p.tool && tool) setTool(p, null); });
     pane.tool = tool; pane.lineStart = null; clearLineCaret();
-    pane.el.classList.toggle("tool-lines", tool === "lines"); pane.el.classList.toggle("tool-box", tool === "box");
+    ["lines", "box", "text", "date", "sign", "init", "pen", "redact"].forEach(t => pane.el.classList.toggle("tool-" + t, tool === t));
+    pane.el.classList.toggle("tool-obj", !!OBJ_TOOLS[tool]);
+    if (pane.fsbar && !pane.fsbar.hidden) fillFsBar(pane);
     pane.el.querySelectorAll('[data-act="lines"]').forEach(b => b.setAttribute("aria-pressed", String(tool === "lines")));
     pane.el.querySelector('[data-act="box"]').setAttribute("aria-pressed", String(tool === "box"));
     syncToolSeg(pane);
     if (tool){ hideMarkBar(); window.getSelection().removeAllRanges(); }
     hint(tool === "lines" ? "Lines: click where the passage starts, then where it ends. Esc to stop."
-      : tool === "box" ? "Box: drag a rectangle over the text to mark. B or Esc to stop. Tip: Alt+drag works in Select mode too." : "");
+      : tool === "box" ? "Box: drag a rectangle over the text to mark. B or Esc to stop. Tip: Alt+drag works in Select mode too."
+      : tool === "text" ? "Text: click where you want to type. Double-click text you added to change it."
+      : tool === "date" ? "Date: click where today's date should go."
+      : tool === "sign" ? "Signature: click where to sign. Drag it to move, drag its corner to resize."
+      : tool === "init" ? "Initials: click where to initial. Click each page that needs them."
+      : tool === "pen" ? "Pen: draw on the page with the mouse or a stylus. Esc to stop."
+      : tool === "redact" ? "Redact: drag over anything that must be removed. It is only removed in the copy you save." : "");
   }
   function clearLineCaret(){ document.querySelectorAll(".lm-caret").forEach(x => x.remove()); }
   /* the text position under the pointer, or the nearest end of the line beside it */
@@ -2515,6 +2625,7 @@ body.has-wintitle .bundle{top:36px}
     hint("Choose Admitted, Disputed or a colour (A, D or H). Then click the next start point, or Esc to stop.");
   }
   function boxDown(pane, e){
+    if (pane.viewRot){ toast("Turn the page view back to normal to mark (Ctrl+Shift+minus)."); return; }
     const el = e.target.closest(".page"); if (!el) return;
     const sx = e.clientX, sy = e.clientY, band = document.createElement("div"); band.className = "box-band"; el.appendChild(band);
     hideMarkBar();
@@ -2563,6 +2674,497 @@ body.has-wintitle .bundle{top:36px}
     marksOf(d).push(m); marksChanged(d);
     editMark(pane, d, m, x, y);
     hint("Marked. Press A or D to make it Admitted or Disputed, or pick a colour. Drag another box, or Esc to stop.");
+  }
+
+  /* ---- v3.13: Fill & Sign (text, date, signature, initials, pen), redaction, read aloud, email, rotate view.
+     Page objects live in the same list as marks (so they follow projects, undo and page changes),
+     but they never appear in the facts, highlights or issues lists. ---- */
+  const OBJ_TYPES = { ink: 1, text: 1, sign: 1, redact: 1 };
+  const isObj = m => !!(m && OBJ_TYPES[m.type]);
+  const OBJ_TOOLS = { text: 1, date: 1, sign: 1, init: 1, pen: 1, redact: 1 };
+  const PEN_COLORS = { black: "#111111", blue: "#1d4ed8", red: "#c92a2a" };
+  const SVGNS = "http://www.w3.org/2000/svg";
+  let objSel = null, objEditing = null;
+  const fsPrefs = (() => { const def = { color: "black", size: 11, pen: 2 }; try { return Object.assign(def, JSON.parse(localStorage.getItem("fsPrefs") || "{}")); } catch(e){ return def; } })();
+  const saveFsPrefs = () => { try { localStorage.setItem("fsPrefs", JSON.stringify(fsPrefs)); } catch(e){} };
+  const SIG_KEY = { sign: "sigImage", init: "initImage" };
+  const getSig = k => { try { return localStorage.getItem(SIG_KEY[k]) || ""; } catch(e){ return ""; } };
+  const setSig = (k, v) => { try { if (v) localStorage.setItem(SIG_KEY[k], v); else localStorage.removeItem(SIG_KEY[k]); } catch(e){} };
+  const objsOf = d => marksOf(d).filter(isObj);
+  const fsObjsOf = d => marksOf(d).filter(m => m.type === "text" || m.type === "sign" || m.type === "ink");
+  const longDate = () => new Date().toLocaleDateString("en-ZA", { day: "numeric", month: "long", year: "numeric" });
+  const pageOf = (pane, n) => pane.stage.querySelector('.page[data-n="' + n + '"]');
+  const fr = v => +(+v).toFixed(5);
+
+  function paintObjs(pane, el, list){
+    let L = el.querySelector(".objLayer");
+    if (!list.length){ if (L) L.remove(); return; }
+    if (!L){ L = document.createElement("div"); L.className = "objLayer"; el.appendChild(L); }
+    if (objEditing && L.contains(objEditing.el)) return;
+    L.textContent = "";
+    const W = 1000, H = 1000 * (+el.dataset.bh || 842) / (+el.dataset.bw || 595), pct = v => (v * 100).toFixed(3) + "%";
+    let svg = null;
+    list.forEach(m => {
+      const on = !!objSel && objSel.id === m.id, r = m.rects[0];
+      if (m.type === "ink"){
+        if (!svg){ svg = document.createElementNS(SVGNS, "svg"); svg.setAttribute("class", "ob-svg"); svg.setAttribute("viewBox", "0 0 " + W + " " + H.toFixed(2)); svg.setAttribute("preserveAspectRatio", "none"); L.appendChild(svg); }
+        m.paths.forEach(pts => {
+          const p = document.createElementNS(SVGNS, "path"); let dd = "";
+          for (let i = 0; i < pts.length; i += 2) dd += (i ? "L" : "M") + (pts[i] * W).toFixed(1) + " " + (pts[i + 1] * H).toFixed(1);
+          if (pts.length === 2) dd += "l0.1 0";
+          p.setAttribute("d", dd); p.setAttribute("stroke", PEN_COLORS[m.color] || "#111"); p.setAttribute("stroke-width", (m.w * W).toFixed(2));
+          p.setAttribute("class", "ob ob-pen"); p.dataset.id = m.id; svg.appendChild(p);
+        });
+        if (on){ const b = document.createElement("div"); b.className = "ob-selbox"; b.style.left = pct(r[0]); b.style.top = pct(r[1]); b.style.width = pct(r[2]); b.style.height = pct(r[3]); L.appendChild(b); }
+        return;
+      }
+      const b = document.createElement("div");
+      b.className = "ob ob-" + m.type + (on ? " sel" : ""); b.dataset.id = m.id;
+      b.style.left = pct(r[0]); b.style.top = pct(r[1]);
+      if (m.type === "text"){
+        b.textContent = m.text; b.style.fontSize = (m.fs * 100).toFixed(4) + "cqh"; b.style.color = PEN_COLORS[m.color] || "#111";
+      } else {
+        b.style.width = pct(r[2]); b.style.height = pct(r[3]);
+        if (m.type === "sign"){ const im = new Image(); im.src = m.img; im.alt = ""; im.draggable = false; b.appendChild(im); }
+        else b.title = "Redaction: removed when you save the redacted copy";
+        if (on){ const h = document.createElement("span"); h.className = "ob-rs"; b.appendChild(h); }
+      }
+      L.appendChild(b);
+    });
+  }
+  function selectObj(d, m){
+    const prev = objSel && objSel.d; objSel = m ? { d, id: m.id } : null;
+    if (prev && prev !== d) repaintDoc(prev);
+    if (d) repaintDoc(d);
+  }
+  function deleteObj(d, id){
+    const arr = marksOf(d), i = arr.findIndex(x => x.id === id); if (i < 0) return;
+    pushUndo(d); arr.splice(i, 1); objSel = null; marksChanged(d);
+    toast("Deleted. Ctrl+Z brings it back.");
+  }
+  function pagePoint(el, x, y){ const r = el.getBoundingClientRect(); return { fx: (x - r.left) / r.width, fy: (y - r.top) / r.height, r }; }
+
+  /* tools: a click or drag on a page */
+  function objToolDown(pane, e){
+    const el = e.target.closest(".page"); if (!el) return;
+    const d = pane.doc, n = +el.dataset.n, t = pane.tool, P = pagePoint(el, e.clientX, e.clientY);
+    if (t === "pen") return penDown(pane, el, e);
+    if (t === "redact") return redactDown(pane, el, e);
+    if (t === "text" || t === "date"){
+      const fs = fsPrefs.size / (+el.dataset.bh || 842);
+      const m = { id: newId(), type: "text", page: n, text: t === "date" ? longDate() : "", fs: fr(fs), color: fsPrefs.color,
+        rects: [[fr(Math.max(0, P.fx)), fr(Math.max(0, P.fy - fs * 0.6)), 0.1, fr(fs * 1.2)]], created: new Date().toISOString() };
+      pushUndo(d); marksOf(d).push(m); objSel = { d, id: m.id };
+      if (t === "date"){ marksChanged(d); measureText(pane, d, m); hint("Date added. Drag it to move it, or click elsewhere to add another."); return; }
+      repaintDoc(d); startEdit(pane, d, m, true); return;
+    }
+    if (t === "sign" || t === "init"){
+      const img = getSig(t); if (!img){ openSigPad(t, () => hint("Now click where to place your " + (t === "sign" ? "signature." : "initials."))); return; }
+      const im = new Image(); im.onload = () => {
+        const pw = P.r.width, ph = P.r.height, wpx = pw * (t === "sign" ? 0.26 : 0.09), hpx = wpx * im.naturalHeight / Math.max(1, im.naturalWidth);
+        const w = wpx / pw, h = hpx / ph;
+        const m = { id: newId(), type: "sign", kind: t, page: n, img, rects: [[fr(Math.min(1 - w, Math.max(0, P.fx - w / 2))), fr(Math.min(1 - h, Math.max(0, P.fy - h / 2))), fr(w), fr(h)]], created: new Date().toISOString() };
+        pushUndo(d); marksOf(d).push(m); objSel = { d, id: m.id }; marksChanged(d);
+        hint("Placed. Drag to move it, or drag the corner to resize. Delete removes it.");
+      };
+      im.src = img;
+    }
+  }
+  function penDown(pane, el, e){
+    const d = pane.doc, n = +el.dataset.n, rr = el.getBoundingClientRect();
+    const svg = document.createElementNS(SVGNS, "svg"); svg.setAttribute("class", "ob-live");
+    svg.setAttribute("viewBox", "0 0 " + rr.width + " " + rr.height);
+    const path = document.createElementNS(SVGNS, "path"); path.setAttribute("stroke", PEN_COLORS[fsPrefs.color] || "#111");
+    path.setAttribute("stroke-width", String(fsPrefs.pen * rr.width / (+el.dataset.bw || 595))); svg.appendChild(path); el.appendChild(svg);
+    const pts = []; let dd = "";
+    const add = (x, y) => { const px = x - rr.left, py = y - rr.top, k = pts.length;
+      if (k && Math.hypot(px - pts[k - 2] * rr.width, py - pts[k - 1] * rr.height) < 1.5) return;
+      pts.push(Math.max(0, Math.min(1, px / rr.width)), Math.max(0, Math.min(1, py / rr.height))); dd += (k ? "L" : "M") + px.toFixed(1) + " " + py.toFixed(1); path.setAttribute("d", dd + (k ? "" : "l0.1 0")); };
+    add(e.clientX, e.clientY);
+    const move = ev => add(ev.clientX, ev.clientY);
+    const up = () => {
+      document.removeEventListener("mousemove", move, true); document.removeEventListener("mouseup", up, true); svg.remove();
+      if (pts.length < 2) return;
+      const P = pts.map(fr);
+      let x0 = 1, y0 = 1, x1 = 0, y1 = 0; for (let i = 0; i < P.length; i += 2){ x0 = Math.min(x0, P[i]); x1 = Math.max(x1, P[i]); y0 = Math.min(y0, P[i + 1]); y1 = Math.max(y1, P[i + 1]); }
+      const w = fsPrefs.pen / (+el.dataset.bw || 595), pad = w;
+      /* strokes drawn within a few seconds of each other on the same page join into one drawing */
+      const arr = marksOf(d), last = arr[arr.length - 1];
+      pushUndo(d);
+      if (last && last.type === "ink" && last.page === n && last.color === fsPrefs.color && Math.abs(last.w - w) < 1e-6 && Date.now() - (last._t || 0) < 4000){
+        last.paths.push(P); const r = last.rects[0], a = Math.min(r[0], x0 - pad), b = Math.min(r[1], y0 - pad);
+        last.rects = [[fr(a), fr(b), fr(Math.max(r[0] + r[2], x1 + pad) - a), fr(Math.max(r[1] + r[3], y1 + pad) - b)]]; last._t = Date.now();
+      } else arr.push({ id: newId(), type: "ink", page: n, color: fsPrefs.color, w: fr(w), paths: [P], rects: [[fr(x0 - pad), fr(y0 - pad), fr(x1 - x0 + 2 * pad), fr(y1 - y0 + 2 * pad)]], _t: Date.now(), created: new Date().toISOString() });
+      marksChanged(d);
+    };
+    document.addEventListener("mousemove", move, true); document.addEventListener("mouseup", up, true);
+  }
+  function redactDown(pane, el, e){
+    const d = pane.doc, n = +el.dataset.n, sx = e.clientX, sy = e.clientY, band = document.createElement("div"); band.className = "box-band rd-band"; el.appendChild(band);
+    const draw = (x, y) => { const pr = el.getBoundingClientRect(); band.style.left = (Math.min(sx, x) - pr.left) + "px"; band.style.top = (Math.min(sy, y) - pr.top) + "px"; band.style.width = Math.abs(x - sx) + "px"; band.style.height = Math.abs(y - sy) + "px"; };
+    draw(sx, sy);
+    const move = ev => draw(ev.clientX, ev.clientY);
+    const up = ev => {
+      document.removeEventListener("mousemove", move, true); document.removeEventListener("mouseup", up, true); band.remove();
+      const pr = el.getBoundingClientRect();
+      const l = Math.max(pr.left, Math.min(sx, ev.clientX)), r = Math.min(pr.right, Math.max(sx, ev.clientX)), t = Math.max(pr.top, Math.min(sy, ev.clientY)), b = Math.min(pr.bottom, Math.max(sy, ev.clientY));
+      if (r - l < 4 || b - t < 4) return;
+      pushUndo(d);
+      marksOf(d).push({ id: newId(), type: "redact", page: n, rects: [[fr((l - pr.left) / pr.width), fr((t - pr.top) / pr.height), fr((r - l) / pr.width), fr((b - t) / pr.height)]], created: new Date().toISOString() });
+      marksChanged(d); fillRedactBar(pane);
+    };
+    document.addEventListener("mousemove", move, true); document.addEventListener("mouseup", up, true);
+  }
+
+  /* text boxes: type straight onto the page; Enter starts a new line, Esc or a click elsewhere finishes */
+  function measureText(pane, d, m){
+    const el = pageOf(pane, m.page), b = el && el.querySelector('.ob-text[data-id="' + m.id + '"]'); if (!b) return;
+    const pr = el.getBoundingClientRect(), r = b.getBoundingClientRect();
+    m.rects[0][2] = fr(r.width / pr.width); m.rects[0][3] = fr(r.height / pr.height);
+  }
+  function startEdit(pane, d, m, fresh){
+    const el = pageOf(pane, m.page), b = el && el.querySelector('.ob-text[data-id="' + m.id + '"]'); if (!b) return;
+    if (!fresh) pushUndo(d);
+    objEditing = { pane, d, m, el: b };
+    b.contentEditable = "plaintext-only"; b.classList.add("editing"); b.spellcheck = true; b.focus();
+    const s = window.getSelection(), rg = document.createRange(); rg.selectNodeContents(b); rg.collapse(false); s.removeAllRanges(); s.addRange(rg);
+    hint("Type your text. Enter for a new line, Esc or click elsewhere when done.");
+    const finish = () => {
+      if (!objEditing || objEditing.m !== m) return;
+      b.removeEventListener("blur", finish); b.removeEventListener("keydown", key);
+      const txt = b.innerText.replace(/ /g, " ").replace(/\n+$/, "");
+      objEditing = null; b.contentEditable = "false"; b.classList.remove("editing");
+      if (!txt.trim()){ const arr = marksOf(d), i = arr.indexOf(m); if (i >= 0) arr.splice(i, 1); if (fresh) markUndo.pop(); objSel = null; marksChanged(d); return; }
+      m.text = txt; measureText(pane, d, m); marksChanged(d);
+    };
+    const key = ev => {
+      if (ev.key === "Escape" || (ev.key === "Enter" && (ev.ctrlKey || ev.metaKey))){ ev.preventDefault(); ev.stopPropagation(); b.blur(); }
+      ev.stopPropagation();
+    };
+    b.addEventListener("blur", finish); b.addEventListener("keydown", key);
+  }
+
+  /* select, move and resize objects with the mouse */
+  document.addEventListener("mousedown", e => {
+    if (e.button !== 0) return;
+    const ob = e.target.closest && e.target.closest(".ob"); if (!ob || ob.classList.contains("editing")) return;
+    const pane = visiblePanes().find(p => p.stage.contains(ob)); if (!pane || !pane.doc || pane.tool === "pen") return;
+    const d = pane.doc, m = marksOf(d).find(x => x.id === ob.dataset.id); if (!m) return;
+    e.preventDefault(); e.stopImmediatePropagation(); setActive(pane);
+    if (objEditing) document.activeElement.blur();
+    hideMarkBar(); window.getSelection().removeAllRanges();
+    selectObj(d, m);
+    const el = pageOf(pane, m.page), pr = el.getBoundingClientRect(), r0 = m.rects[0].slice(), sx = e.clientX, sy = e.clientY;
+    const resize = !!e.target.closest(".ob-rs"); let moved = false, undone = false;
+    const move = ev => {
+      const dx = (ev.clientX - sx) / pr.width, dy = (ev.clientY - sy) / pr.height;
+      if (!moved && Math.abs(ev.clientX - sx) + Math.abs(ev.clientY - sy) < 3) return;
+      if (!undone){ pushUndo(d); undone = true; } moved = true;
+      const r = m.rects[0];
+      if (resize){
+        let w = Math.max(0.01, r0[2] + dx), h = Math.max(0.006, r0[3] + dy);
+        if (m.type === "sign"){ const k = r0[3] / r0[2] * (pr.height ? 1 : 1); h = w * k; }
+        r[2] = fr(Math.min(w, 1 - r0[0])); r[3] = fr(Math.min(h, 1 - r0[1]));
+      } else {
+        const nx = Math.max(-0.02, Math.min(1 - r0[2] * 0.2, r0[0] + dx)), ny = Math.max(-0.02, Math.min(1 - r0[3] * 0.2, r0[1] + dy));
+        if (m.type === "ink"){ const ox = nx - r[0], oy = ny - r[1]; m.paths = m.paths.map(pts => pts.map((v, i) => fr(v + (i % 2 ? oy : ox)))); }
+        r[0] = fr(nx); r[1] = fr(ny);
+      }
+      repaintDoc(d);
+    };
+    const up = () => {
+      document.removeEventListener("mousemove", move, true); document.removeEventListener("mouseup", up, true);
+      if (moved){ marksChanged(d); return; }
+      if (e.detail >= 2 && m.type === "text") startEdit(pane, d, m, false);
+    };
+    document.addEventListener("mousemove", move, true); document.addEventListener("mouseup", up, true);
+  }, true);
+  document.addEventListener("dblclick", e => {
+    const ob = e.target.closest && e.target.closest(".ob-text"); if (!ob || ob.classList.contains("editing")) return;
+    const pane = visiblePanes().find(p => p.stage.contains(ob)); if (!pane || !pane.doc) return;
+    const m = marksOf(pane.doc).find(x => x.id === ob.dataset.id); if (m) startEdit(pane, pane.doc, m, false);
+  }, true);
+  document.addEventListener("mousedown", e => {
+    if (!objSel || (e.target.closest && e.target.closest(".ob,.fsbar,.rdbar"))) return;
+    const d = objSel.d; objSel = null; repaintDoc(d);
+  });
+  document.addEventListener("keydown", e => {
+    if (!objSel || objEditing || (e.target.closest && e.target.closest("input,textarea,select,[contenteditable]"))) return;
+    if (e.key === "Delete" || e.key === "Backspace"){ e.preventDefault(); e.stopImmediatePropagation(); deleteObj(objSel.d, objSel.id); }
+    else if (e.key === "Escape"){ const d = objSel.d; objSel = null; repaintDoc(d); }
+  }, true);
+
+  /* the Fill & Sign and Redact bars */
+  function toggleFs(pane, on){
+    if (on === undefined) on = !pane.fsOn;
+    if (on && (!pane.doc || !pane.doc.pdf)){ toast("Open a document first."); return; }
+    if (on && pane.viewRot){ toast("Turn the page view back to normal first (Ctrl+Shift+minus)."); return; }
+    if (on && pane.rdOn) toggleRedact(pane, false);
+    pane.fsOn = on; pane.fsbar.hidden = !on;
+    pane.el.querySelectorAll('[data-act="fs"]').forEach(b => b.setAttribute("aria-pressed", String(on)));
+    if (on){ fillFsBar(pane); setTool(pane, pane.fsTool || "text"); }
+    else if (OBJ_TOOLS[pane.tool]) setTool(pane, null);
+  }
+  function fillFsBar(pane){
+    const b = pane.fsbar;
+    b.querySelectorAll("[data-fs]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.fs === pane.tool)));
+    b.querySelectorAll("[data-fc]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.fc === fsPrefs.color)));
+    b.querySelector(".fs-size").value = String(fsPrefs.size);
+    b.querySelector(".fs-pen").value = String(fsPrefs.pen);
+    b.querySelector(".fs-size-l").hidden = pane.tool === "pen" || pane.tool === "sign" || pane.tool === "init";
+    b.querySelector(".fs-pen-l").hidden = pane.tool !== "pen";
+  }
+  function initFsBar(pane){
+    const b = pane.fsbar;
+    b.addEventListener("click", e => {
+      const t = e.target.closest("[data-fs]"); if (t){ setTool(pane, t.dataset.fs); pane.fsTool = t.dataset.fs; fillFsBar(pane);
+        if ((t.dataset.fs === "sign" || t.dataset.fs === "init") && !getSig(t.dataset.fs)) openSigPad(t.dataset.fs, () => hint("Now click where to place your " + (t.dataset.fs === "sign" ? "signature." : "initials."))); return; }
+      const c = e.target.closest("[data-fc]"); if (c){ fsPrefs.color = c.dataset.fc; saveFsPrefs(); fillFsBar(pane); recolorSel(); }
+    });
+    b.querySelector(".fs-size").addEventListener("change", e => { fsPrefs.size = +e.target.value || 11; saveFsPrefs(); resizeSelText(pane); });
+    b.querySelector(".fs-pen").addEventListener("change", e => { fsPrefs.pen = +e.target.value || 2; saveFsPrefs(); });
+  }
+  function selObj(){ return objSel ? marksOf(objSel.d).find(x => x.id === objSel.id) : null; }
+  function recolorSel(){ const m = selObj(); if (m && (m.type === "text" || m.type === "ink")){ pushUndo(objSel.d); m.color = fsPrefs.color; marksChanged(objSel.d); } }
+  function resizeSelText(pane){
+    const m = selObj(); if (!m || m.type !== "text") return;
+    const el = pageOf(pane, m.page); pushUndo(objSel.d); m.fs = fr(fsPrefs.size / (+(el && el.dataset.bh) || 842)); marksChanged(objSel.d); measureText(pane, objSel.d, m);
+  }
+  function toggleRedact(pane, on){
+    if (on === undefined) on = !pane.rdOn;
+    if (on && (!pane.doc || !pane.doc.pdf)){ toast("Open a document first."); return; }
+    if (on && pane.viewRot){ toast("Turn the page view back to normal first (Ctrl+Shift+minus)."); return; }
+    if (on && pane.fsOn) toggleFs(pane, false);
+    pane.rdOn = on; pane.rdbar.hidden = !on;
+    pane.el.querySelectorAll('[data-act="redact"]').forEach(b => b.setAttribute("aria-pressed", String(on)));
+    if (on){ fillRedactBar(pane); setTool(pane, "redact"); } else if (pane.tool === "redact") setTool(pane, null);
+  }
+  function fillRedactBar(pane){
+    if (!pane.rdbar || !pane.doc) return;
+    const list = marksOf(pane.doc).filter(m => m.type === "redact"), pages = new Set(list.map(m => m.page));
+    pane.rdbar.querySelector(".rd-count").textContent = list.length ? list.length + (list.length === 1 ? " area" : " areas") + " on " + pages.size + (pages.size === 1 ? " page" : " pages") : "Nothing marked yet";
+  }
+  async function clearRedactions(pane){
+    const d = pane.doc, n = marksOf(d).filter(m => m.type === "redact").length; if (!n) return;
+    if (!(await askConfirm("Clear all redaction areas?", "This removes the " + n + " marked " + (n === 1 ? "area" : "areas") + " from " + d.name + ". Ctrl+Z brings them back.", "Clear all"))) return;
+    pushUndo(d); const arr = marksOf(d); for (let i = arr.length - 1; i >= 0; i--) if (arr[i].type === "redact") arr.splice(i, 1);
+    marksChanged(d); fillRedactBar(pane);
+  }
+
+  /* the signature pad: draw, or use a picture; white backgrounds become clear */
+  function openSigPad(kind, after){
+    const M = $("sigModal"), c = $("sigPad"), ctx = c.getContext("2d");
+    $("sigTitle").textContent = kind === "init" ? "Your initials" : "Your signature";
+    ctx.clearRect(0, 0, c.width, c.height); let inked = false, img = null;
+    const old = getSig(kind); if (old){ const im = new Image(); im.onload = () => { fitImg(im); }; im.src = old; }
+    function fitImg(im){ ctx.clearRect(0, 0, c.width, c.height); const k = Math.min((c.width - 40) / im.naturalWidth, (c.height - 40) / im.naturalHeight); const w = im.naturalWidth * k, h = im.naturalHeight * k; ctx.drawImage(im, (c.width - w) / 2, (c.height - h) / 2, w, h); inked = true; img = im; }
+    let drawing = false, lx = 0, ly = 0;
+    const pos = e => { const r = c.getBoundingClientRect(); return [(e.clientX - r.left) * c.width / r.width, (e.clientY - r.top) * c.height / r.height]; };
+    c.onpointerdown = e => { drawing = true; c.setPointerCapture(e.pointerId); [lx, ly] = pos(e); ctx.beginPath(); ctx.arc(lx, ly, 2.2, 0, 7); ctx.fillStyle = "#111"; ctx.fill(); inked = true; img = null; };
+    c.onpointermove = e => { if (!drawing) return; const [x, y] = pos(e); ctx.strokeStyle = "#111"; ctx.lineWidth = 4.5; ctx.lineCap = ctx.lineJoin = "round"; ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(x, y); ctx.stroke(); lx = x; ly = y; };
+    c.onpointerup = () => { drawing = false; };
+    $("sigClear").onclick = () => { ctx.clearRect(0, 0, c.width, c.height); inked = false; img = null; };
+    $("sigFile").onclick = () => $("sigFileIn").click();
+    $("sigFileIn").onchange = () => { const f = $("sigFileIn").files[0]; $("sigFileIn").value = ""; if (!f) return; const u = URL.createObjectURL(f), im = new Image(); im.onload = () => { fitImg(im); URL.revokeObjectURL(u); }; im.src = u; };
+    const close = () => { M.hidden = true; document.removeEventListener("keydown", key, true); };
+    const key = e => { if (e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); close(); } };
+    document.addEventListener("keydown", key, true);
+    $("sigCancel").onclick = close;
+    $("sigOk").onclick = () => {
+      if (!inked){ toast("Draw your " + (kind === "init" ? "initials" : "signature") + " first, or choose an image."); return; }
+      const out = trimInk(c); if (!out){ toast("Nothing to save. Draw again."); return; }
+      setSig(kind, out); close(); toast((kind === "init" ? "Initials" : "Signature") + " saved on this computer."); if (after) after();
+    };
+    M.hidden = false;
+  }
+  /* crop to the ink and make near-white pixels transparent, so a scanned signature sits cleanly on the page */
+  function trimInk(c){
+    const ctx = c.getContext("2d"), W = c.width, H = c.height, id = ctx.getImageData(0, 0, W, H), a = id.data;
+    let x0 = W, y0 = H, x1 = -1, y1 = -1;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++){
+      const i = (y * W + x) * 4, lum = (a[i] * 0.3 + a[i + 1] * 0.59 + a[i + 2] * 0.11);
+      if (a[i + 3] > 20 && lum > 215) a[i + 3] = 0;
+      if (a[i + 3] > 20){ if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    }
+    if (x1 < 0) return "";
+    const pad = 6; x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(W - 1, x1 + pad); y1 = Math.min(H - 1, y1 + pad);
+    ctx.putImageData(id, 0, 0);
+    const o = document.createElement("canvas"); o.width = x1 - x0 + 1; o.height = y1 - y0 + 1;
+    o.getContext("2d").drawImage(c, x0, y0, o.width, o.height, 0, 0, o.width, o.height);
+    return o.toDataURL("image/png");
+  }
+
+  /* writing objects into a PDF */
+  let arialReg = null;
+  async function bodyFont(out){
+    try {
+      if (!arialReg && window.pdfReader && window.fontkit){ const b = await window.pdfReader.fontRead("arial"); if (b) arialReg = new Uint8Array(b); }
+      if (arialReg){ out.registerFontkit(window.fontkit); return { font: await out.embedFont(arialReg, { subset: true }), uni: true }; }
+    } catch(e){}
+    return { font: await out.embedFont(PDFLib.StandardFonts.Helvetica), uni: false };
+  }
+  const hexRgb = h => PDFLib.rgb(parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255);
+  const dataBytes = u => { const s = atob(u.split(",")[1] || ""), b = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i); return b; };
+  async function burnObjs(out, d, list){
+    const { degrees, LineCapStyle } = PDFLib;
+    let F = null; const imgs = new Map();
+    for (const m of list){
+      if (m.type !== "text" && m.type !== "sign" && m.type !== "ink") continue;
+      if (m.page < 1 || m.page > out.getPageCount()) continue;
+      const pg = out.getPage(m.page - 1), vp = (await d.pdf.getPage(m.page)).getViewport({ scale: 1 });
+      const rot = ((vp.rotation % 360) + 360) % 360;
+      const pt = (fx, fy) => { const q = vp.convertToPdfPoint(fx * vp.width, fy * vp.height); return { x: q[0], y: q[1] }; };
+      const r = m.rects[0];
+      if (m.type === "text"){
+        F = F || await bodyFont(out);
+        const size = m.fs * vp.height, col = hexRgb(PEN_COLORS[m.color] || "#111111"), padx = 0.1 * size / vp.width;
+        String(m.text || "").split("\n").forEach((ln, i) => {
+          if (!ln.trim()) return;
+          let t = ln; if (!F.uni) t = ocrText(ln) || " ";
+          const p = pt(r[0] + padx, r[1] + (size * (0.947 + 1.2 * i)) / vp.height);
+          try { pg.drawText(t, { x: p.x, y: p.y, size, font: F.font, color: col, rotate: degrees(rot) }); } catch(e){ pg.drawText(ocrText(ln), { x: p.x, y: p.y, size, font: F.font, color: col, rotate: degrees(rot) }); }
+        });
+      } else if (m.type === "sign"){
+        let im = imgs.get(m.img); if (!im){ im = await out.embedPng(dataBytes(m.img)); imgs.set(m.img, im); }
+        const p = pt(r[0], r[1] + r[3]);
+        pg.drawImage(im, { x: p.x, y: p.y, width: r[2] * vp.width, height: r[3] * vp.height, rotate: degrees(rot) });
+      } else {
+        const col = hexRgb(PEN_COLORS[m.color] || "#111111"), th = m.w * vp.width;
+        m.paths.forEach(P => {
+          if (P.length === 2){ const a = pt(P[0], P[1]); pg.drawCircle({ x: a.x, y: a.y, size: th / 2, color: col }); return; }
+          for (let i = 2; i < P.length; i += 2) pg.drawLine({ start: pt(P[i - 2], P[i - 1]), end: pt(P[i], P[i + 1]), thickness: th, color: col, lineCap: LineCapStyle.Round });
+        });
+      }
+    }
+  }
+  async function signedBytes(d){
+    const out = await PDFLib.PDFDocument.load(await d.pdf.getData(), { ignoreEncryption: true });
+    await burnObjs(out, d, fsObjsOf(d));
+    return out.save();
+  }
+  async function saveSigned(pane){
+    const D = window.pdfReader, d = pane.doc; if (!D || !d || !d.pdf) return;
+    if (!fsObjsOf(d).length){ toast("Add text, a date, your signature or a drawing first."); return; }
+    if (objEditing) document.activeElement.blur();
+    let last = ""; try { last = localStorage.getItem("lastSaveDir") || ""; } catch(e){}
+    const dir = d.path && !isTempPath(d.path) ? dirOf(d.path) : last;
+    const path = await D.saveDialog({ title: "Save the signed copy", defaultPath: joinPath(dir, cleanName(d.name) + " (signed).pdf") });
+    if (!path) return;
+    toast("Saving…", true);
+    try {
+      const saved = await D.writePdf({ path, data: await signedBytes(d), mode: "new" });
+      try { localStorage.setItem("lastSaveDir", dirOf(saved)); } catch(e){}
+      toast("Saved " + saved.split(/[\\/]/).pop() + ". Your original is unchanged, and you can still move or change what you added.");
+    } catch(e){ toast("Could not save the signed copy: " + errText(e)); }
+  }
+  /* true redaction: each page with a redaction is redrawn as a picture with the areas blacked out,
+     so the words underneath are gone from the file, not just covered */
+  async function saveRedacted(pane){
+    const D = window.pdfReader, d = pane.doc; if (!D || !d || !d.pdf) return;
+    const list = marksOf(d).filter(m => m.type === "redact" && m.page >= 1 && m.page <= d.pdf.numPages);
+    if (!list.length){ toast("Drag over what must be removed first."); return; }
+    const pages = [...new Set(list.map(m => m.page))].sort((a, b) => a - b);
+    if (!(await askConfirm("Save a redacted copy?", "The marked areas are removed for good from the copy. The " + pages.length + (pages.length === 1 ? " page" : " pages") + " with redactions become pictures of the page, so their remaining text can no longer be searched or copied until OCR reads them again. Your original is not changed.", "Choose where to save"))) return;
+    let last = ""; try { last = localStorage.getItem("lastSaveDir") || ""; } catch(e){}
+    const dir = d.path && !isTempPath(d.path) ? dirOf(d.path) : last;
+    const path = await D.saveDialog({ title: "Save the redacted copy", defaultPath: joinPath(dir, cleanName(d.name) + " (redacted).pdf") });
+    if (!path) return;
+    try {
+      const out = await PDFLib.PDFDocument.load(await d.pdf.getData(), { ignoreEncryption: true });
+      for (const n of pages){
+        toast("Redacting page " + n + "…", true);
+        const page = await d.pdf.getPage(n), v1 = page.getViewport({ scale: 1 });
+        let sc = 200 / 72; if (v1.width * v1.height * sc * sc > 14e6) sc = Math.sqrt(14e6 / (v1.width * v1.height));
+        const vp = page.getViewport({ scale: sc }), c = document.createElement("canvas"); c.width = Math.ceil(vp.width); c.height = Math.ceil(vp.height);
+        const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+        await page.render({ canvasContext: ctx, viewport: vp, annotationMode: window.pdfjsLib.AnnotationMode ? window.pdfjsLib.AnnotationMode.ENABLE : undefined }).promise;
+        ctx.fillStyle = "#000";
+        list.filter(m => m.page === n).forEach(m => m.rects.forEach(r => ctx.fillRect(Math.floor(r[0] * c.width) - 1, Math.floor(r[1] * c.height) - 1, Math.ceil(r[2] * c.width) + 2, Math.ceil(r[3] * c.height) + 2)));
+        const blob = await new Promise(res => c.toBlob(res, "image/jpeg", 0.9)); c.width = c.height = 0;
+        const jpg = await out.embedJpg(new Uint8Array(await blob.arrayBuffer()));
+        const np = out.insertPage(n - 1, [v1.width, v1.height]); np.drawImage(jpg, { x: 0, y: 0, width: v1.width, height: v1.height });
+        out.removePage(n);
+      }
+      ["Title", "Subject", "Keywords"].forEach(k => { try { out["set" + k](k === "Keywords" ? [] : ""); } catch(e){} });
+      toast("Saving…", true);
+      const saved = await D.writePdf({ path, data: await out.save(), mode: "new" });
+      try { localStorage.setItem("lastSaveDir", dirOf(saved)); } catch(e){}
+      toast("Saved " + saved.split(/[\\/]/).pop() + " with " + list.length + (list.length === 1 ? " area" : " areas") + " removed. Check it before you send it.");
+    } catch(e){ toast("Could not save the redacted copy: " + errText(e)); }
+  }
+
+  /* email: a new Outlook message with this PDF attached (with any signature and text on the pages) */
+  async function emailDoc(pane){
+    const D = window.pdfReader, d = pane && pane.doc; if (!D || !d || !d.pdf){ toast("Open a document first."); return; }
+    if (objEditing) document.activeElement.blur();
+    try {
+      const signed = fsObjsOf(d).length > 0;
+      toast("Opening Outlook…", true);
+      const r = signed || !d.path || isTempPath(d.path)
+        ? await D.emailPdf({ name: cleanName(d.name) + ".pdf", data: signed ? await signedBytes(d) : await d.pdf.getData() })
+        : await D.emailPdf({ path: d.path });
+      toast(r && r.via === "outlook" ? "A new Outlook message is open with " + cleanName(d.name) + ".pdf attached" + (signed ? ", including your signature and text." : ".")
+        : "Outlook was not found, so your mail program was opened and the file is shown in its folder. Drag it into the message.");
+    } catch(e){ toast("Could not start an email: " + errText(e)); }
+  }
+
+  /* read aloud with the Windows voices, page by page from the page on screen */
+  const RA = { on: false, pane: null, page: 0, paused: false, rate: 1 };
+  try { RA.rate = +localStorage.getItem("readRate") || 1; } catch(e){}
+  function pickVoice(){
+    const vs = speechSynthesis.getVoices(); if (!vs.length) return null;
+    return vs.find(v => /en-ZA/i.test(v.lang)) || vs.find(v => /en-GB/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || vs[0];
+  }
+  async function pageWords(d, n){
+    const tc = await (await d.pdf.getPage(n)).getTextContent();
+    let s = ""; tc.items.forEach(it => { s += it.str + (it.hasEOL ? "\n" : (it.str && !/\s$/.test(it.str) ? " " : "")); });
+    return s.replace(/-\n(\w)/g, "$1").replace(/[ \t]*\n[ \t]*/g, " ").replace(/\s+/g, " ").trim();
+  }
+  function chunks(s){
+    const out = []; (s.match(/[^.!?;:]+[.!?;:]*\s*/g) || [s]).forEach(p => { while (p.length > 220){ const i = p.lastIndexOf(" ", 220); out.push(p.slice(0, i > 60 ? i : 220)); p = p.slice(i > 60 ? i : 220); } if (p.trim()) out.push(p); });
+    return out;
+  }
+  async function readFrom(pane, n){
+    const d = pane.doc; if (!d || !d.pdf) return;
+    RA.on = true; RA.pane = pane; RA.page = n; RA.paused = false; showReadBar();
+    if (n > d.pdf.numPages){ stopRead(); toast("Finished reading " + d.name + "."); return; }
+    pane.goTo(n); updReadBar();
+    const text = await pageWords(d, n), parts = chunks(text);
+    if (!RA.on || RA.pane !== pane || RA.page !== n) return;
+    if (!parts.length){ readFrom(pane, n + 1); return; }
+    const v = pickVoice();
+    parts.forEach((p, i) => {
+      const u = new SpeechSynthesisUtterance(p); if (v) u.voice = v; u.rate = RA.rate;
+      if (i === parts.length - 1) u.onend = () => { if (RA.on && RA.pane === pane && RA.page === n) readFrom(pane, n + 1); };
+      speechSynthesis.speak(u);
+    });
+  }
+  function startRead(pane){
+    if (!("speechSynthesis" in window)){ toast("Reading aloud is not available on this computer."); return; }
+    if (!pane || !pane.doc || !pane.doc.pdf){ toast("Open a document first."); return; }
+    speechSynthesis.cancel(); readFrom(pane, pane.page || 1);
+  }
+  function stopRead(){ RA.on = false; RA.paused = false; try { speechSynthesis.cancel(); } catch(e){} $("readBar").hidden = true; }
+  function pauseRead(){
+    if (!RA.on) return;
+    if (RA.paused){ speechSynthesis.resume(); RA.paused = false; } else { speechSynthesis.pause(); RA.paused = true; }
+    updReadBar();
+  }
+  function showReadBar(){ $("readBar").hidden = false; updReadBar(); }
+  function updReadBar(){
+    $("rbText").textContent = "Reading page " + RA.page + (RA.pane && RA.pane.doc ? " of " + RA.pane.doc.pdf.numPages : "");
+    $("rbPause").textContent = RA.paused ? "Resume" : "Pause"; $("rbRate").value = String(RA.rate);
+  }
+  function toggleRead(pane){ if (RA.on) stopRead(); else startRead(pane || active); }
+
+  /* rotate the view only: the file is not changed. Marks turn with the page; marking waits until it is upright */
+  function rotateView(pane, by){
+    if (!pane || !pane.doc || !pane.doc.pdf){ toast("Open a document first."); return; }
+    if (pane.fsOn) toggleFs(pane, false); if (pane.rdOn) toggleRedact(pane, false); if (pane.tool) setTool(pane, null);
+    pane.viewRot = (((pane.viewRot || 0) + by) % 360 + 360) % 360;
+    pane.el.classList.remove("vrot90", "vrot180", "vrot270"); if (pane.viewRot) pane.el.classList.add("vrot" + pane.viewRot);
+    pane.layout(true);
+    toast(pane.viewRot ? "View turned " + pane.viewRot + "°. The file is not changed. To mark, turn it back (Ctrl+Shift+minus)." : "View back to normal.");
   }
 
   function burnText(page, font, text, size, mx, my){
@@ -3029,7 +3631,7 @@ body.has-wintitle .bundle{top:36px}
         const row = el("pp-doc" + (e.missing && !d ? " missing" : ""));
         const b = document.createElement("button"); b.type = "button"; b.className = "pp-item"; b.title = e.abs || ""; b.innerHTML = svg("doc");
         const main = el("pp-main"), nm = el("pp-name", d ? d.name : e.name);
-        const ms = P.notes[e.id] || []; let a = 0, x = 0, h = 0; ms.forEach(m => { if (m.type === "adm") a++; else if (m.type === "dis") x++; else h++; });
+        const ms = P.notes[e.id] || []; let a = 0, x = 0, h = 0; ms.forEach(m => { if (m.type === "adm") a++; else if (m.type === "dis") x++; else if (!isObj(m)) h++; });
         const bits = []; if (a) bits.push(a + " admitted"); if (x) bits.push(x + " disputed"); if (h) bits.push(h + (h === 1 ? " highlight" : " highlights"));
         const meta = el("pp-meta", (d ? "Open" : e.missing ? "Not found" : "Closed, click to open") + (bits.length ? " · " + bits.join(", ") : ""));
         main.append(nm, meta); b.appendChild(main);
@@ -3161,7 +3763,10 @@ body.has-wintitle .bundle{top:36px}
         const f = ({ prev:()=>this.goTo(this.page-1), next:()=>this.goTo(this.page+1), in:()=>this.zoom(1.2), out:()=>this.zoom(1/1.2),
            fit:()=>{ this.fit = true; this.layout(true); }, print:()=>openPrint(this), toggle:()=>toggleRail(),
            find:()=>this.openFind(), findnext:()=>this.stepMatch(1), findprev:()=>this.stepMatch(-1), findclose:()=>this.closeFind(),
-           thumbs:()=>this.toggleThumbs(), organise:()=>this.openOrganise(), saveas:()=>saveDocAs(this), notes:()=>toggleNotes(), ws:()=>toggleWs(), stamp:()=>toggleStamp(this), stampsave:()=>saveStamped(this), stampclose:()=>toggleStamp(this, false), select:()=>{ if (this.stamping) toggleStamp(this, false); setTool(this, null); },
+           thumbs:()=>this.toggleThumbs(), organise:()=>this.openOrganise(), saveas:()=>saveDocAs(this), notes:()=>toggleNotes(), ws:()=>toggleWs(), stamp:()=>toggleStamp(this), stampsave:()=>saveStamped(this), stampclose:()=>toggleStamp(this, false), select:()=>{ if (this.stamping) toggleStamp(this, false); if (this.fsOn) toggleFs(this, false); if (this.rdOn) toggleRedact(this, false); setTool(this, null); },
+           fs:()=>toggleFs(this), fsclose:()=>toggleFs(this, false), fssave:()=>saveSigned(this), fssig:()=>openSigPad("sign", () => openSigPad("init")),
+           redact:()=>toggleRedact(this), rdclose:()=>toggleRedact(this, false), rdsave:()=>saveRedacted(this), rdclear:()=>clearRedactions(this),
+           rotr:()=>rotateView(this, 90), rotl:()=>rotateView(this, -90), read:()=>toggleRead(this), email:()=>emailDoc(this),
            more:()=>toggleMore(this), markedup:()=>{ setActive(this); saveMarkedUp(); }, showfolder:()=>{ if (this.doc && this.doc.path && window.pdfReader) window.pdfReader.showInFolder(this.doc.path); else toast("This document is not saved in a folder yet. Use Save as."); }, stampclear:()=>clearStamps(this), lines:()=>setTool(this, this.tool === "lines" ? null : "lines"), box:()=>setTool(this, this.tool === "box" ? null : "box") })[a.dataset.act];
         if (a.closest(".moremenu")) closeMores();
         if (f) f();
@@ -3169,6 +3774,8 @@ body.has-wintitle .bundle{top:36px}
       this.el.querySelector(".toolbar").addEventListener("click", onAct);
       this.findbar.addEventListener("click", onAct);
       this.stampbar = this.el.querySelector(".stampbar"); this.stampbar.addEventListener("click", onAct); initStampBar(this);
+      this.fsbar = this.el.querySelector(".fsbar"); this.fsbar.addEventListener("click", onAct); initFsBar(this);
+      this.rdbar = this.el.querySelector(".rdbar"); this.rdbar.addEventListener("click", onAct);
       this.findinput.addEventListener("input", () => { clearTimeout(this.findT); this.findT = setTimeout(() => this.runSearch(this.findinput.value), 250); });
       this.findinput.addEventListener("keydown", e => {
         if (e.key === "Enter"){ e.preventDefault(); clearTimeout(this.findT);
@@ -3256,7 +3863,9 @@ body.has-wintitle .bundle{top:36px}
       }
       this.savePos();
       const changed = d !== this.doc;
-      this.doc = d; this.refreshSelect(); renderList(); notesSoon(); if (this.stamping) fillStampBar(this); if (this.lineStart){ this.lineStart = null; clearLineCaret(); }
+      if (changed && this.viewRot){ this.viewRot = 0; this.el.classList.remove("vrot90", "vrot180", "vrot270"); }
+      if (changed && RA.on && RA.pane === this) stopRead();
+      this.doc = d; this.refreshSelect(); renderList(); notesSoon(); if (this.stamping) fillStampBar(this); if (this.rdOn) fillRedactBar(this); if (this.lineStart){ this.lineStart = null; clearLineCaret(); }
       if (changed && this.find){ this.find = null; this.el.querySelector(".findcount").textContent = ""; if (!this.findbar.hidden && this.findinput.value.trim()) setTimeout(() => this.runSearch(this.findinput.value), 50); }
       if (d.error){ this.stage.innerHTML = '<p class="placeholder err"></p>'; this.stage.firstChild.textContent = "This file could not be opened as a PDF. " + d.error; return; }
       if (!d.pdf){ this.stage.innerHTML = '<p class="placeholder">Opening…</p>'; return; }
@@ -3278,7 +3887,7 @@ body.has-wintitle .bundle{top:36px}
       const place = restore || (keepPlace ? this.currentPlace() : { page: 1, offset: 0 });
       this.cancelRender(); if (this.obs) this.obs.disconnect();
       const first = await d.pdf.getPage(1); if (d !== this.doc) return;
-      const base = first.getViewport({ scale: 1 });
+      const base = first.getViewport({ scale: 1, rotation: (first.rotate + (this.viewRot || 0)) % 360 });
       if (this.fit){ this.scale = Math.max(0.1 * UNITS, Math.min(4 * UNITS, (this.stage.clientWidth - 32) / base.width)); }
       this.el.querySelector(".zoom").textContent = Math.round(this.scale / UNITS * 100) + "%";
       this.el.querySelector(".total").textContent = "/ " + d.pdf.numPages;
@@ -3332,7 +3941,7 @@ body.has-wintitle .bundle{top:36px}
       try {
         const page = await d.pdf.getPage(n);
         if (d !== this.doc || scale !== this.scale || !this.vis.has(el)){ el.dataset.drawn = ""; return; }
-        const vp = page.getViewport({ scale });
+        const vp = page.getViewport({ scale, rotation: (page.rotate + (this.viewRot || 0)) % 360 });
         let r = window.devicePixelRatio || 1;
         const maxPx = 16e6; if (vp.width * vp.height * r * r > maxPx) r = Math.sqrt(maxPx / (vp.width * vp.height));
         const c = document.createElement("canvas"); c.width = Math.floor(vp.width * r); c.height = Math.floor(vp.height * r);
@@ -3349,7 +3958,7 @@ body.has-wintitle .bundle{top:36px}
       try {
         const page = await d.pdf.getPage(+el.dataset.n);
         if (d !== this.doc || scale !== this.scale) return;
-        await this.drawText(el, page.getViewport({ scale }), d);
+        await this.drawText(el, page.getViewport({ scale, rotation: (page.rotate + (this.viewRot || 0)) % 360 }), d);
       } catch(e){ el._tl = null; }
     }
     evict(){
@@ -4423,12 +5032,15 @@ body.has-wintitle .bundle{top:36px}
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p" && active.doc && active.doc.pdf){ e.preventDefault(); openPrint(active); return; }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "o"){ e.preventDefault(); openFiles(); return; }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s" && active.doc && active.doc.pdf){ e.preventDefault(); saveDocAs(active); return; }
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.code === "Equal" || e.code === "NumpadAdd")){ e.preventDefault(); rotateView(active, 90); return; }
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.code === "Minus" || e.code === "NumpadSubtract")){ e.preventDefault(); rotateView(active, -90); return; }
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "y"){ e.preventDefault(); toggleRead(active); return; }
     if ((e.ctrlKey || e.metaKey) && (e.key === "=" || e.key === "+")){ e.preventDefault(); active.zoom(1.2); return; }
     if ((e.ctrlKey || e.metaKey) && (e.key === "-" || e.key === "_")){ e.preventDefault(); active.zoom(1/1.2); return; }
     if ((e.ctrlKey || e.metaKey) && e.key === "0" && active.doc){ e.preventDefault(); active.fit = true; active.layout(true); return; }
     if ((e.ctrlKey || e.metaKey) && e.key === "1" && active.doc){ e.preventDefault(); active.zoom(UNITS / active.scale); return; }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "w" && active.doc && !e.target.closest("input")){ e.preventDefault(); removeDoc(active.doc); return; }
-    if (!$("printModal").hidden || e.target.closest("input,select")) return;
+    if (!$("printModal").hidden || e.target.closest("input,select,[contenteditable]")) return;
     if (e.key === "ArrowRight" || e.key === "PageDown"){ active.goTo(active.page+1, true); e.preventDefault(); }
     if (e.key === "ArrowLeft" || e.key === "PageUp"){ active.goTo(active.page-1, true); e.preventDefault(); }
   });
@@ -4507,6 +5119,14 @@ body.has-wintitle .bundle{top:36px}
       { id: "proj", name: "Projects", desc: "Keep a matter's documents, marks and notes together", c: "#64748b", desk: true, nodoc: true, run: () => $("projBtn").click(),
         ic: '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>' }
     ]},
+    { name: "Fill, sign and protect", tools: [
+      { id: "fs", name: "Fill & Sign", desc: "Type text, add the date, sign, initial or draw on the page", c: "#6d28d9", act: "fs", state: p => !!p.fsOn,
+        ic: '<path d="M3 17c3-3 5-8 7-8s-1 9 2 9 4-5 6-5 1 3 3 3"/><path d="M3 21h18"/>' },
+      { id: "redact", name: "Redact", desc: "Remove names, numbers or passages for good in a copy", c: "#e03131", desk: true, act: "redact", state: p => !!p.rdOn,
+        ic: '<rect x="3" y="5" width="18" height="5" rx="1"/><path d="M3 14h18"/><rect x="3" y="17" width="11" height="3" rx="1"/>' },
+      { id: "email", name: "Email this PDF", desc: "A new Outlook message with this document attached", c: "#0e7490", desk: true, act: "email",
+        ic: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>' }
+    ]},
     { name: "Analyse", tools: [
       { id: "box", name: "Mark with a box", desc: "Drag over a line or paragraph: admitted, disputed or highlight (B)", c: "#7c3aed", act: "box", state: p => p.tool === "box",
         ic: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 3"/><path d="M8 9h8"/><path d="M8 13h8"/>' },
@@ -4524,6 +5144,10 @@ body.has-wintitle .bundle{top:36px}
         ic: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>' },
       { id: "bookmarks", name: "Bookmarks", desc: "Mark pages to jump back to, and see the PDF's own bookmarks", c: "#2f5bdb", run: () => { if (!active || !active.doc){ toast("Open a document first."); return; } toggleBookmarks(active); },
         ic: '<path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>' },
+      { id: "read", name: "Read aloud", desc: "Read the document out loud from this page (Ctrl+Shift+Y)", c: "#4f46e5", act: "read", state: () => RA.on,
+        ic: '<path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/>' },
+      { id: "rotr", name: "Rotate view", desc: "Turn sideways pages for reading; the file is not changed (Ctrl+Shift+plus)", c: "#475569", act: "rotr",
+        ic: '<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>' },
       { id: "thumbs", name: "Page thumbnails", desc: "Show small pages beside the document", c: "#475569", act: "thumbs", state: p => !!p.thumbsOn,
         ic: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/>' },
       { id: "printall", name: "Print all open documents", desc: "Send every open PDF to the printer in one go", c: "#1f9d55", nodoc: true, run: () => printAllOpen(),
@@ -4578,6 +5202,10 @@ body.has-wintitle .bundle{top:36px}
   $("toolFind").addEventListener("input", renderTools);
   $("toolFind").addEventListener("keydown", e => { if (e.key === "Enter"){ const f = $("toolGroups").querySelector(".trow"); if (f) f.click(); } else if (e.key === "Escape"){ $("toolFind").value = ""; renderTools(); } });
   $("bundleBtn").addEventListener("click", openBundle);
+  $("rbStop").addEventListener("click", stopRead);
+  $("rbPause").addEventListener("click", pauseRead);
+  $("rbRate").addEventListener("change", e => { RA.rate = +e.target.value || 1; try { localStorage.setItem("readRate", String(RA.rate)); } catch(err){} if (RA.on && RA.pane){ speechSynthesis.cancel(); readFrom(RA.pane, RA.page); } });
+  if ("speechSynthesis" in window) speechSynthesis.getVoices();
   document.addEventListener("keydown", e => {
     if (e.ctrlKey && e.shiftKey && !e.altKey && (e.key === "T" || e.key === "t")){
       e.preventDefault(); if (document.getElementById("app").classList.contains("collapsed")) toggleRail();
@@ -5300,6 +5928,9 @@ body.has-wintitle .bundle{top:36px}
       { label: "Save as…", ic: "save", kbd: "Ctrl+S", doc: true, run: paneAct("saveas"), desk: true },
       { label: "Save marked-up copy…", ic: "marked", doc: true, run: paneAct("markedup"), desk: true },
       { label: "Stamp annexures", ic: "stamp", doc: true, run: paneAct("stamp"), desk: true },
+      { label: "Fill & Sign", ic: "marked", doc: true, run: paneAct("fs") },
+      { label: "Redact…", ic: "marked", doc: true, run: paneAct("redact"), desk: true },
+      { label: "Email this PDF…", ic: "save", doc: true, run: paneAct("email"), desk: true },
       { label: "Show in folder", ic: "folder", doc: true, run: paneAct("showfolder"), desk: true },
       { label: "Rename files…", ic: "marked", kbd: "F2", doc: true, run: () => openRenameBar(active.doc), desk: true },
       { sep: true },
@@ -5317,6 +5948,9 @@ body.has-wintitle .bundle{top:36px}
         { label: "Fit width", kbd: "Ctrl+0", doc: true, run: paneAct("fit") },
         { label: "Zoom in", kbd: "Ctrl++", doc: true, run: paneAct("in") },
         { label: "Zoom out", kbd: "Ctrl+−", doc: true, run: paneAct("out") },
+        { label: "Rotate view clockwise", kbd: "Ctrl+Shift++", doc: true, run: paneAct("rotr") },
+        { label: "Rotate view anticlockwise", kbd: "Ctrl+Shift+−", doc: true, run: paneAct("rotl") },
+        { label: "Read aloud", kbd: "Ctrl+Shift+Y", check: RA.on, doc: true, run: paneAct("read") },
         { sep: true },
         { label: "Sidebar", kbd: "Ctrl+\\", check: !$("app").classList.contains("collapsed"), run: () => toggleRail() },
         { sep: true },
@@ -5445,8 +6079,10 @@ body.has-wintitle .bundle{top:36px}
     const pane = visiblePanes().find(p => p.tool && p.stage.contains(e.target)); if (!pane || !pane.doc) return;
     if (e.target.closest(".mk-tab,.stp")) return;
     if (!e.target.closest(".page")) return;
+    if (OBJ_TOOLS[pane.tool] && objEditing){ e.preventDefault(); document.activeElement.blur(); return; }
     e.preventDefault(); setActive(pane);
-    if (pane.tool === "box") boxDown(pane, e); else lineClick(pane, e);
+    if (OBJ_TOOLS[pane.tool]) objToolDown(pane, e);
+    else if (pane.tool === "box") boxDown(pane, e); else lineClick(pane, e);
   }, true);
   /* Alt+drag on a page draws a box without switching tools */
   document.addEventListener("mousedown", e => {
@@ -5467,6 +6103,9 @@ body.has-wintitle .bundle{top:36px}
     const pane = visiblePanes().find(p => p.tool); if (!pane) return;
     if (!$("markBar").hidden) return;
     if (pane.lineStart){ pane.lineStart = null; clearLineCaret(); hint("Lines: click where the passage starts, then where it ends. Esc to stop."); return; }
+    if (objSel) return;
+    if (pane.fsOn){ toggleFs(pane, false); return; }
+    if (pane.rdOn){ toggleRedact(pane, false); return; }
     setTool(pane, null);
   });
   /* ---- v3.3 wiring: annexure stamper ---- */
@@ -5546,7 +6185,7 @@ body.has-wintitle .bundle{top:36px}
   $("mbComment").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)){ e.preventDefault(); hideMarkBar(); } });
   $("mbComment").addEventListener("blur", () => commitComment());
   document.addEventListener("mouseup", e => {
-    if (e.button !== 0 || !e.target.closest || e.target.closest("#markBar,.mk-tab,#xPop,#kindPop,#linkBanner,.pane.stamping .stage,.stampbar,.pane.tool-lines .stage,.pane.tool-box .stage")) return;
+    if (e.button !== 0 || !e.target.closest || e.target.closest("#markBar,.mk-tab,#xPop,#kindPop,#linkBanner,.pane.stamping .stage,.stampbar,.pane.tool-lines .stage,.pane.tool-box .stage,.pane.tool-obj .stage,.ob")) return;
     /* a selection made in a document shows the bar even if the mouse was let go over a panel */
     const outside = !!e.target.closest("#notes,#ws,.toolbar,.findbar,.organiser,.modal-back,.bundle,.rail");
     const pane = outside ? null : visiblePanes().find(p => p.stage.contains(e.target));

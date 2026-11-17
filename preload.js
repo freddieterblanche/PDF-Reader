@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld("pdfReader", {
   readFiles: paths => ipcRenderer.invoke("read-files", paths),
   writeTemp: (name, data) => ipcRenderer.invoke("write-temp", name, data),
   showInFolder: p => ipcRenderer.invoke("show-in-folder", p),
+  emailPdf: o => ipcRenderer.invoke("email-pdf", o),
   getPrinters: () => ipcRenderer.invoke("get-printers"),
   print: opts => ipcRenderer.invoke("print", opts),
   printDialog: opts => ipcRenderer.invoke("print-dialog", opts),
