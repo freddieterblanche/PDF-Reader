@@ -1,0 +1,21 @@
+name: Publish release
+on:
+  push:
+    branches: [updates]
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: updates
+      - name: Create the release from latest.json
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VER=$(python3 -c "import json;print(json.load(open('latest.json'))['version'])")
+          python3 -c "import json;print(json.load(open('latest.json'))['notes'])" > notes.txt
+          if gh release view "v$VER" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then echo "v$VER already published"; exit 0; fi
+          gh release create "v$VER" "PDF-Reader-Setup-$VER.exe" -R "$GITHUB_REPOSITORY" --target main --title "PDF Reader $VER" --notes-file notes.txt

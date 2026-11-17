@@ -1,0 +1,7 @@
+{
+  "version": "3.13.1",
+  "file": "PDF-Reader-Setup-3.13.1.exe",
+  "sha256": "a9e919d7a8359e0fc532d9a0e2edfec91be41283653d3ce0369ad15096694b3f",
+  "size": 94792635,
+  "notes": "Close buttons on the Pages and Bookmarks panels. Highlights now sit behind the text, so the words stay sharp and black."
+}
