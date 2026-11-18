@@ -485,9 +485,9 @@ body.has-wintitle .bundle{top:36px}
 :root{--adm:#1f9d55;--dis:#d64545;--adm-ink:#17824a;--dis-ink:#c53030}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--adm-ink:#4fd18b;--dis-ink:#ff8a80}}
 :root[data-theme="dark"]{--adm-ink:#4fd18b;--dis-ink:#ff8a80}
-.markLayer{position:absolute;inset:0;z-index:1;pointer-events:none}
+.markLayer{position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:multiply}
 .mk{position:absolute;border-radius:2px}
-.mk-hl{background:var(--hl);opacity:.45;mix-blend-mode:multiply}
+.mk-hl{background:var(--hl);opacity:.6}
 .mk-adm{background:rgba(31,157,85,.10);box-shadow:0 2px 0 var(--adm)}
 .mk-dis{background:rgba(214,69,69,.10);box-shadow:0 2px 0 var(--dis)}
 .mk-adm.r90{box-shadow:-2px 0 0 var(--adm)} .mk-dis.r90{box-shadow:-2px 0 0 var(--dis)}
@@ -794,6 +794,11 @@ body.has-wintitle .bundle{top:36px}
 .bmarks[hidden]{display:none}
 .bm-head{display:flex;align-items:center;gap:6px;padding:2px 4px 6px}
 .bm-head strong{flex:1;font-size:14px}
+/* v3.13.1 close buttons on the page and bookmark panels */
+.panel-x{flex:none;display:inline-grid;place-items:center;width:26px;height:26px;border:0;border-radius:6px;background:none;color:var(--muted);cursor:pointer;padding:0}
+.panel-x:hover{background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--ink)}
+.th-head{position:sticky;top:-12px;z-index:2;align-self:stretch;display:flex;align-items:center;gap:4px;margin:-12px -8px 0;padding:6px 4px 6px 10px;background:var(--rail);border-bottom:1px solid var(--line)}
+.th-head strong{flex:1;font-size:13px;font-weight:600}
 .bm-add{font:inherit;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:5px;border:1px solid color-mix(in srgb,#2f5bdb 35%,var(--line));background:var(--surface);color:#2f5bdb;border-radius:7px;padding:4px 9px;cursor:pointer}
 .bm-add:hover{border-color:#2f5bdb;background:color-mix(in srgb,#2f5bdb 8%,var(--surface))}
 .bm-sec{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 6px 3px}
@@ -990,7 +995,7 @@ body.has-wintitle .bundle{top:36px}
         <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
         <div class="set-sec desktop-only"><span class="set-lab">Projects Library</span><div class="set-lib"><span class="lib-path" id="libPath">…</span><button class="linkbtn" type="button" id="libChange">Change…</button></div></div>
         <button class="set-link" type="button" id="helpBtn"><span>Keyboard shortcuts</span><kbd>?</kbd></button>
-        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.13.0</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
+        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.13.1</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
       </div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -2115,9 +2120,9 @@ body.has-wintitle .bundle{top:36px}
         for (const r of m.rects){
           const a = pt(r[0], r[1]), b = pt(r[0] + r[2], r[1] + r[3]);
           const box = { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), width: Math.abs(a.x - b.x), height: Math.abs(a.y - b.y) };
-          if (m.type === "hl") pg.drawRectangle(Object.assign({}, box, { color: hex(HL[m.color] || HL.yellow), opacity: 0.45, blendMode: multiply }));
+          if (m.type === "hl") pg.drawRectangle(Object.assign({}, box, { color: hex(HL[m.color] || HL.yellow), opacity: 0.6, blendMode: multiply }));
           else {
-            pg.drawRectangle(Object.assign({}, box, { color: COL[m.type], opacity: 0.1 }));
+            pg.drawRectangle(Object.assign({}, box, { color: COL[m.type], opacity: 0.1, blendMode: multiply }));
             const L = r[0], T = r[1], R = r[0] + r[2], B = r[1] + r[3];
             const ends = m.rot === 90 ? [[L, T], [L, B]] : m.rot === 180 ? [[L, T], [R, T]] : m.rot === 270 ? [[R, T], [R, B]] : [[L, B], [R, B]];
             pg.drawLine({ start: pt(ends[0][0], ends[0][1]), end: pt(ends[1][0], ends[1][1]), thickness: 1.4, color: COL[m.type] });
@@ -4144,6 +4149,10 @@ body.has-wintitle .bundle{top:36px}
       if (!this.thumbsOn || !d || !d.pdf){ return; }
       if (this.thumbDoc === d && this.thumbs.childElementCount){ this.markThumb(); return; }
       this.thumbDoc = d; this.thumbs.innerHTML = "";
+      const th = document.createElement("div"); th.className = "th-head";
+      th.innerHTML = '<strong>Pages</strong><button type="button" class="panel-x" title="Close page thumbnails" aria-label="Close page thumbnails"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button>';
+      th.querySelector("button").addEventListener("click", () => { setActive(this); this.toggleThumbs(); });
+      this.thumbs.appendChild(th);
       if (this.thumbObs) this.thumbObs.disconnect();
       this.thumbObs = new IntersectionObserver(es => es.forEach(en => {
         const b = en.target; b._vis = en.isIntersecting;
@@ -5291,7 +5300,10 @@ body.has-wintitle .bundle{top:36px}
     const add = document.createElement("button"); add.type = "button"; add.className = "bm-add"; add.title = "Bookmark the page you are on (Ctrl+D)";
     add.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Add page ' + p.page;
     add.addEventListener("click", () => addBookmark(p));
-    head.append(h, add); el.appendChild(head);
+    const x = document.createElement("button"); x.type = "button"; x.className = "panel-x"; x.title = "Close bookmarks (Ctrl+B)"; x.setAttribute("aria-label", "Close bookmarks");
+    x.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>';
+    x.addEventListener("click", () => { setActive(p); toggleBookmarks(p, false); });
+    head.append(h, add, x); el.appendChild(head);
     const mine = bmList(d);
     const sec = t => { const x = document.createElement("div"); x.className = "bm-sec"; x.textContent = t; el.appendChild(x); };
     sec("Yours");
