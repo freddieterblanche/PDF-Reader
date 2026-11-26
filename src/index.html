@@ -799,6 +799,11 @@ body.has-wintitle .bundle{top:36px}
 .panel-x:hover{background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--ink)}
 .th-head{position:sticky;top:-12px;z-index:2;align-self:stretch;display:flex;align-items:center;gap:4px;margin:-12px -8px 0;padding:6px 4px 6px 10px;background:var(--rail);border-bottom:1px solid var(--line)}
 .th-head strong{flex:1;font-size:13px;font-weight:600}
+/* v3.14 select several thumbnails */
+.th-head .th-count{font-size:11.5px;color:var(--accent);font-weight:600;white-space:nowrap}
+.thumb.sel{background:var(--accent-soft)}
+.thumb.sel .tbox{outline:3px solid var(--accent);outline-offset:1px}
+.thumb.sel .tnum{color:var(--accent);font-weight:700}
 .bm-add{font:inherit;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:5px;border:1px solid color-mix(in srgb,#2f5bdb 35%,var(--line));background:var(--surface);color:#2f5bdb;border-radius:7px;padding:4px 9px;cursor:pointer}
 .bm-add:hover{border-color:#2f5bdb;background:color-mix(in srgb,#2f5bdb 8%,var(--surface))}
 .bm-sec{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 6px 3px}
@@ -995,7 +1000,7 @@ body.has-wintitle .bundle{top:36px}
         <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
         <div class="set-sec desktop-only"><span class="set-lab">Projects Library</span><div class="set-lib"><span class="lib-path" id="libPath">…</span><button class="linkbtn" type="button" id="libChange">Change…</button></div></div>
         <button class="set-link" type="button" id="helpBtn"><span>Keyboard shortcuts</span><kbd>?</kbd></button>
-        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.13.1</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
+        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.14.0</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
       </div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -3790,6 +3795,8 @@ body.has-wintitle .bundle{top:36px}
       /* In the page thumbnails: arrow keys, Page Up/Down, Home and End move page by page */
       this.thumbs.addEventListener("keydown", e => {
         if (!this.doc || !this.doc.pdf) return;
+        if ((e.ctrlKey || e.metaKey) && (e.key === "a" || e.key === "A")){ e.preventDefault(); e.stopPropagation(); const all = []; for (let k = 1; k <= this.doc.pdf.numPages; k++) all.push(k); this.setThumbSel(all); return; }
+        if (e.key === "Escape" && this.thumbSel && this.thumbSel.size > 1){ e.preventDefault(); e.stopPropagation(); this.setThumbSel([this.page]); return; }
         const step = { ArrowDown: 1, ArrowRight: 1, PageDown: 1, ArrowUp: -1, ArrowLeft: -1, PageUp: -1 }[e.key];
         const at = e.target.closest && e.target.closest(".thumb"), cur = at ? +at.dataset.n : this.page;
         let n = step ? cur + step : e.key === "Home" ? 1 : e.key === "End" ? this.doc.pdf.numPages : 0;
@@ -3933,11 +3940,12 @@ body.has-wintitle .bundle{top:36px}
       const next = vis.find(el => el.dataset.drawn !== sc);
       const textNext = next ? null : vis.find(el => el._tl !== sc);
       this.pending = !!(next || textNext); this.pendingAt = Date.now();
+      this.urgent = !!(next && dist(next) < 0);
       if (!this.pending){ this.evict(); lowQ.run(); return; }
       this.busy = true;
       try { if (next) await this.drawPage(next); else await this.drawTextFor(textNext); }
       catch(e){}
-      finally { this.busy = false; }
+      finally { this.busy = false; this.urgent = false; }
       this.pump();
     }
     async drawPage(el){
@@ -4150,11 +4158,12 @@ body.has-wintitle .bundle{top:36px}
       if (this.thumbDoc === d && this.thumbs.childElementCount){ this.markThumb(); return; }
       this.thumbDoc = d; this.thumbs.innerHTML = "";
       const th = document.createElement("div"); th.className = "th-head";
-      th.innerHTML = '<strong>Pages</strong><button type="button" class="panel-x" title="Close page thumbnails" aria-label="Close page thumbnails"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button>';
+      this.thumbSel = new Set(); this.thumbAnchor = 0;
+      th.innerHTML = '<strong>Pages</strong><span class="th-count" hidden></span><button type="button" class="panel-x" title="Close page thumbnails" aria-label="Close page thumbnails"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button>';
       th.querySelector("button").addEventListener("click", () => { setActive(this); this.toggleThumbs(); });
       this.thumbs.appendChild(th);
       if (this.thumbObs) this.thumbObs.disconnect();
-      this.thumbObs = new IntersectionObserver(es => es.forEach(en => {
+      this.thumbObs = new IntersectionObserver(es => [...es].sort((a, b) => b.target.dataset.n - a.target.dataset.n).forEach(en => {
         const b = en.target; b._vis = en.isIntersecting;
         if (en.isIntersecting && !b._queued && !b._done){
           b._queued = true;
@@ -4166,11 +4175,39 @@ body.has-wintitle .bundle{top:36px}
         const b = document.createElement("button"); b.type = "button"; b.className = "thumb"; b.dataset.n = n;
         b.setAttribute("aria-label", "Page " + n);
         b.innerHTML = '<span class="tbox"></span><span class="tnum">' + n + '</span>';
-        b.addEventListener("click", () => this.goTo(n, true));
+        b.addEventListener("click", e => this.thumbClick(n, e));
         this.thumbs.appendChild(b); this.thumbObs.observe(b);
+      }
+      /* the rest of the pages are drawn in the background, so scrolling the strip finds them ready */
+      for (let n = 1; n <= Math.min(d.pdf.numPages, 300); n++){
+        lowQ.later({ wanted: () => { const b = this.thumbs.querySelector('.thumb[data-n="' + n + '"]'); return this.thumbDoc === d && this.thumbsOn && b && !b._done && !b._queued; },
+          run: () => { const b = this.thumbs.querySelector('.thumb[data-n="' + n + '"]'); if (!b) return Promise.resolve(); b._queued = true;
+            return renderThumb(d, n, b.querySelector(".tbox"), { width: 104 }).then(c => { b._queued = false; if (c) b._done = true; }); } });
       }
       this.markThumb();
     }
+    /* v3.14 click selects a page, Ctrl+click adds or removes one, Shift+click selects a run */
+    thumbClick(n, e){
+      if (e && (e.ctrlKey || e.metaKey)){
+        if (!this.thumbSel.size && n !== this.page) this.thumbSel.add(this.page);
+        if (this.thumbSel.has(n)) this.thumbSel.delete(n); else this.thumbSel.add(n);
+        this.thumbAnchor = n; this.paintThumbSel(); return;
+      }
+      if (e && e.shiftKey){
+        const a = this.thumbAnchor || this.page, lo = Math.min(a, n), hi = Math.max(a, n);
+        this.thumbSel = new Set(); for (let k = lo; k <= hi; k++) this.thumbSel.add(k);
+        this.paintThumbSel(); return;
+      }
+      this.setThumbSel([n]); this.goTo(n, true);
+    }
+    setThumbSel(list){ this.thumbSel = new Set(list); this.thumbAnchor = list.length ? list[list.length - 1] : 0; this.paintThumbSel(); }
+    paintThumbSel(){
+      if (!this.thumbSel) this.thumbSel = new Set();
+      this.thumbs.querySelectorAll(".thumb").forEach(t => t.classList.toggle("sel", this.thumbSel.size > 1 && this.thumbSel.has(+t.dataset.n)));
+      const c = this.thumbs.querySelector(".th-count");
+      if (c){ c.hidden = this.thumbSel.size < 2; c.textContent = this.thumbSel.size + " selected"; }
+    }
+    thumbPages(){ return [...(this.thumbSel || [])].sort((a, b) => a - b); }
     markThumb(){
       if (!this.thumbsOn) return;
       const cur = this.thumbs.querySelector(".thumb.current");
@@ -4244,17 +4281,20 @@ body.has-wintitle .bundle{top:36px}
 
   /* Low-priority work (thumbnails, organiser cards): one job at a time, newest first,
      and only while no reading pane is drawing a visible page. */
-  const lowQ = { jobs: [], running: false,
+  /* v3.14 several jobs at once, one per thumbnail worker, so pages decode in parallel */
+  const lowQ = { jobs: [], idle: [], running: 0,
     add(job){ this.jobs.push(job); this.run(); },
-    async run(){
-      if (this.running) return; this.running = true;
+    later(job){ this.idle.push(job); this.run(); },
+    run(){ while (this.running < thumbPool.n && (this.jobs.length || this.idle.length)) this.loop(); },
+    async loop(){
+      this.running++;
       try {
-        while (this.jobs.length){
-          if (visiblePanes().some(p => p.busy || (p.pending && Date.now() - (p.pendingAt || 0) < 4000))){ await new Promise(r => setTimeout(r, 120)); continue; }
-          const job = this.jobs.pop();
+        while (this.jobs.length || this.idle.length){
+          if (visiblePanes().some(p => p.urgent)){ await new Promise(r => setTimeout(r, 40)); continue; }
+          const job = this.jobs.length ? this.jobs.pop() : this.idle.shift();
           if (job.wanted()) await job.run().catch(() => {});
         }
-      } finally { this.running = false; }
+      } finally { this.running--; }
     } };
   /* ---- OCR: scanned pages are recognised in the background, the text is written into the PDF as an
      invisible layer (as Acrobat does), the original is backed up, and the document reloads in place. ---- */
@@ -4364,17 +4404,45 @@ body.has-wintitle .bundle{top:36px}
     tc.items.forEach(it => { if (it.str === undefined) return; offs.push(s.length); s += it.str; if (it.hasEOL) s += " "; });
     return { s, offs };
   }
+  /* v3.14 thumbnails are drawn by their own PDF.js workers, apart from the reading pane, so
+     scanned pages decode side by side on separate processor cores */
+  const thumbPool = { n: Math.max(1, Math.min(3, (navigator.hardwareConcurrency || 2) - 1)), workers: [] };
+  const thumbWorker = i => thumbPool.workers[i] || (thumbPool.workers[i] = new lib.PDFWorker({ name: "thumbs" + i }));
+  function thumbDocs(d){
+    const c = d._tdocs;
+    if (c && c.pdf === d.pdf) return c.list;
+    dropThumbDocs(d);
+    const src = d.pdf, k = (d.size || 0) > 150e6 ? 1 : thumbPool.n;
+    const data = src.getData();
+    const list = []; for (let i = 0; i < k; i++) list.push(data.then(b => lib.getDocument({ data: b.slice(), worker: thumbWorker(i) }).promise).catch(() => src));
+    d._tdocs = { pdf: src, list, rr: 0 };
+    return list;
+  }
+  function dropThumbDocs(d){
+    const c = d._tdocs; d._tdocs = null;
+    if (c) c.list.forEach(p => p.then(x => { if (x !== c.pdf) x.destroy(); }).catch(() => {}));
+  }
+  async function thumbPdf(d){
+    const list = thumbDocs(d), c = d._tdocs;
+    try { return await list[c.rr++ % list.length]; } catch(e){ return d.pdf; }
+  }
   async function renderThumb(d, n, box, o){
     try {
-      const page = await d.pdf.getPage(n), rot = ((page.rotate + (o.rot || 0)) % 360 + 360) % 360;
+      const ck = n + "|" + (o.rot || 0) + "|" + (o.fit || "w" + o.width), cache = d._thumbs || (d._thumbs = { pdf: d.pdf, m: new Map() });
+      if (cache.pdf !== d.pdf){ cache.pdf = d.pdf; cache.m.clear(); }
+      const hit = cache.m.get(ck);
+      if (hit){ const c = document.createElement("canvas"); c.width = hit.width; c.height = hit.height; c.style.width = hit.style.width; c.style.height = hit.style.height; c.getContext("2d").drawImage(hit, 0, 0); box.innerHTML = ""; box.appendChild(c); return c; }
+      const tp = await thumbPdf(d), page = await (tp && tp.numPages >= n ? tp : d.pdf).getPage(n), rot = ((page.rotate + (o.rot || 0)) % 360 + 360) % 360;
       const v1 = page.getViewport({ scale: 1, rotation: rot });
-      const css = o.fit ? o.fit / Math.max(v1.width, v1.height) : o.width / v1.width, r = window.devicePixelRatio || 1;
+      const css = o.fit ? o.fit / Math.max(v1.width, v1.height) : o.width / v1.width, r = Math.min(1.5, window.devicePixelRatio || 1);
       const vp = page.getViewport({ scale: css * r, rotation: rot });
       const c = document.createElement("canvas"); c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
       c.style.width = Math.floor(v1.width * css) + "px"; c.style.height = Math.floor(v1.height * css) + "px";
-      await page.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
-      box.innerHTML = ""; box.appendChild(c);
-      return c;
+      await page.render({ canvasContext: c.getContext("2d"), viewport: vp, annotationMode: 0 }).promise;
+      cache.m.set(ck, c); if (cache.m.size > 300) cache.m.delete(cache.m.keys().next().value);
+      const show = document.createElement("canvas"); show.width = c.width; show.height = c.height; show.style.width = c.style.width; show.style.height = c.style.height; show.getContext("2d").drawImage(c, 0, 0);
+      box.innerHTML = ""; box.appendChild(show);
+      return show;
     } catch(e){ return null; }
   }
   async function buildPdf(items){
@@ -4993,6 +5061,7 @@ body.has-wintitle .bundle{top:36px}
     panes.forEach(p => { if (p.doc === d){ p.doc = null; const n = docs.find(x => !panes.some(q => q !== p && q.doc === x)); n ? p.show(n) : p.clear(); } });
     d.ocrCancel = true;
     setTimeout(fillInlineRecent, 0);
+    dropThumbDocs(d);
     if (d.pdf) d.pdf.destroy();
     renderList(); notesSoon();
   }
@@ -5390,6 +5459,27 @@ body.has-wintitle .bundle{top:36px}
     else if (e.key === "d" || e.key === "D"){ e.preventDefault(); addBookmark(active); }
   });
 
+  /* v3.14 save selected pages as a new PDF; the original is left as it is */
+  function pageRangeText(list){
+    const out = []; let i = 0;
+    while (i < list.length){ let j = i; while (j + 1 < list.length && list[j + 1] === list[j] + 1) j++; out.push(j > i ? list[i] + "-" + list[j] : String(list[i])); i = j + 1; }
+    return out.join(", ");
+  }
+  async function extractPages(p, pages){
+    const D = window.pdfReader, d = p && p.doc;
+    if (!D || !d || !d.pdf || !pages || !pages.length) return;
+    pages = [...new Set(pages)].sort((a, b) => a - b);
+    const label = (pages.length === 1 ? "page " : "pages ") + pageRangeText(pages);
+    const path = await D.saveDialog({ title: "Save extracted pages", defaultPath: joinPath(dirOf(d.path), cleanName(d.name) + " (" + label + ").pdf") });
+    if (!path) return;
+    toast("Saving " + label + "…");
+    try {
+      const bytes = await buildPdf(pages.map(n => ({ src: d, idx: n - 1, rot: 0 })));
+      const saved = await D.writePdf({ path, data: bytes.slice(), mode: "new" });
+      await openSaved(saved, bytes, null);
+      toast("Saved " + label + " as " + saved.split(/[\\/]/).pop() + ". The original is unchanged and the copy is open in the sidebar.");
+    } catch(e){ toast("Could not save: " + errText(e)); }
+  }
   /* right-click on a page or a thumbnail: bookmark it, and a few everyday actions */
   function openMenuAtPoint(x, y, items){
     closeMenu(); toggleSettings(false); closeMores();
@@ -5409,6 +5499,9 @@ body.has-wintitle .bundle{top:36px}
       if (!pg || !p.doc || e.target.closest("input, textarea")) return;
       e.preventDefault(); setActive(p);
       const n = +pg.dataset.n, list = bmList(p.doc), has = list.find(b => b.page === n);
+      const onThumb = pg.classList.contains("thumb");
+      if (onThumb && !(p.thumbSel && p.thumbSel.has(n))) p.setThumbSel([n]);
+      const exPages = onThumb ? p.thumbPages() : [n];
       const gs = window.getSelection();
       if ((gs.isCollapsed || !String(gs).trim()) && ctxRange && p.el.contains(ctxRange.commonAncestorContainer)){ gs.removeAllRanges(); gs.addRange(ctxRange); }
       ctxRange = null;
@@ -5437,6 +5530,8 @@ body.has-wintitle .bundle{top:36px}
           { sep: true }, { head: "Page " + n });
       }
       items.push(
+        desk ? { label: exPages.length === 1 ? "Extract page " + exPages[0] + "…" : "Extract " + exPages.length + " selected pages…", svg: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 18v-6"/><path d="M9 15l3 3 3-3"/>', color: "#6d28d9", run: () => extractPages(p, exPages) } : null,
+        desk ? { sep: true } : null,
         { label: "Fit width", kbd: "Ctrl+0", ic: "view", run: paneAct("fit") },
         paneCount === 1 ? { label: "Compare side by side", svg: '<rect x="2" y="4" width="9" height="16" rx="1.5"/><rect x="13" y="4" width="9" height="16" rx="1.5"/>', color: "#4f46e5", run: () => setPaneCount(2) } : null,
         { sep: true },
@@ -5446,6 +5541,7 @@ body.has-wintitle .bundle{top:36px}
         desk ? { sep: true } : null,
         desk && p.doc.path ? { label: "Rename file…", ic: "marked", kbd: "F2", run: () => openRenameBar(p.doc) } : null,
         desk ? { label: "Stamp annexures", ic: "stamp", run: paneAct("stamp") } : null,
+        desk && onThumb && exPages.length < p.doc.pdf.numPages ? { label: "Select all pages", kbd: "Ctrl+A", svg: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12l3 3 5-6"/>', run: () => { const all = []; for (let k = 1; k <= p.doc.pdf.numPages; k++) all.push(k); p.setThumbSel(all); } } : null,
         desk && p.doc.path ? { label: "Show in folder", ic: "folder", run: paneAct("showfolder") } : null);
       for (let i = items.length - 1; i >= 0; i--) if (!items[i]) items.splice(i, 1);
       $("markBar").hidden = true;
