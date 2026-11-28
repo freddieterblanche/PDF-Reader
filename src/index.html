@@ -1013,7 +1013,7 @@ body.has-wintitle .bundle{top:36px}
         <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
         <div class="set-sec desktop-only"><span class="set-lab">Projects Library</span><div class="set-lib"><span class="lib-path" id="libPath">…</span><button class="linkbtn" type="button" id="libChange">Change…</button></div></div>
         <button class="set-link" type="button" id="helpBtn"><span>Keyboard shortcuts</span><kbd>?</kbd></button>
-        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.15.0</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
+        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.15.1</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
       </div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -1834,13 +1834,14 @@ body.has-wintitle .bundle{top:36px}
       .filter(q => q.r - q.l > 0.5 && q.b - q.t > 2 && q.b - q.t < H * 0.08 && q.r - q.l < W * 0.98);
     if (!raw.length) return [];
     const hs = raw.map(q => q.b - q.t).sort((a, b) => a - b), h = hs[Math.floor(hs.length / 2)];
-    /* words belong to the same line when they overlap vertically, even if their sizes and baselines wobble */
+    /* words belong to the same line when they overlap vertically, even if their sizes and baselines wobble.
+       Inside a Box, a line is joined right across the gaps (table rows, columns of figures) so it is one solid bar. */
     const lines = [];
     raw.slice().sort((a, b) => a.l - b.l).forEach(q => {
       const qh = q.b - q.t; let best = null, bo = 0;
       lines.forEach(L => {
         const ov = Math.min(L.b, q.b) - Math.max(L.t, q.t);
-        if (ov >= 0.4 * Math.min(qh, L.h0) && q.l <= L.r + 3 * Math.max(qh, L.h0) && ov > bo){ bo = ov; best = L; }
+        if (ov >= 0.4 * Math.min(qh, L.h0) && (clip || q.l <= L.r + 3 * Math.max(qh, L.h0)) && ov > bo){ bo = ov; best = L; }
       });
       if (best){ best.l = Math.min(best.l, q.l); best.r = Math.max(best.r, q.r); best.t = Math.min(best.t, q.t); best.b = Math.max(best.b, q.b); }
       else lines.push({ l: q.l, r: q.r, t: q.t, b: q.b, h0: qh });
