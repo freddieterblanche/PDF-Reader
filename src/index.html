@@ -1013,7 +1013,7 @@ body.has-wintitle .bundle{top:36px}
         <label class="check desktop-only" title="Recognises the text in scanned PDFs when you open them and saves it into the file, so they can be searched and copied. A backup of the original is kept for 30 days."><input type="checkbox" id="ocrAuto" checked> Make scanned PDFs searchable (OCR)</label>
         <div class="set-sec desktop-only"><span class="set-lab">Projects Library</span><div class="set-lib"><span class="lib-path" id="libPath">…</span><button class="linkbtn" type="button" id="libChange">Change…</button></div></div>
         <button class="set-link" type="button" id="helpBtn"><span>Keyboard shortcuts</span><kbd>?</kbd></button>
-        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.15.1</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
+        <div class="set-ver"><span>PDF Reader <button class="ver" id="appVersion" type="button" title="Version. Click to check for updates">v3.15.2</button></span><button class="linkbtn" type="button" id="checkUpd">Check for updates</button></div>
       </div>
       <div class="update" id="updateBar" hidden><span id="updateText"></span><button class="btn primary" type="button" id="updateBtn">Update now</button></div>
       <div class="projwrap desktop-only">
@@ -1298,7 +1298,7 @@ body.has-wintitle .bundle{top:36px}
         <div class="toolseg" role="group" aria-label="Tools">
           <button class="btn ghost" type="button" data-act="select" aria-pressed="true" title="Select: read, select text and click marks"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l7.07 17 2.51-7.39L21 11.07z"/></svg><span class="tlabel">Select</span></button>
           <button class="btn ghost" type="button" data-act="lines" aria-pressed="false" title="Lines: click where a passage starts, then where it ends"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg><span class="tlabel">Lines</span></button>
-          <button class="btn ghost" type="button" data-act="box" aria-pressed="false" title="Box: drag a rectangle over a block of text or part of a scanned page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 3"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h6"/></svg><span class="tlabel">Box</span></button>
+          <button class="btn ghost" type="button" data-act="box" aria-pressed="false" title="Box: drag a rectangle; exactly that area is highlighted"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 3"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h6"/></svg><span class="tlabel">Box</span></button>
           <button class="btn ghost desktop-only" type="button" data-act="stamp" aria-pressed="false" title="Stamp: number annexures FA1, FA2 … by clicking the pages where they start"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 22h14"/><path d="M19.27 13.73A2.5 2.5 0 0 0 17.5 13h-11A2.5 2.5 0 0 0 4 15.5V17a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1.5c0-.66-.26-1.3-.73-1.77Z"/><path d="M14 13V8.5C14 7 15 7 15 5a3 3 0 0 0-6 0c0 2 1 2 1 3.5V13"/></svg><span class="tlabel">Stamp</span></button>
           <button class="btn ghost" type="button" data-act="fs" aria-pressed="false" title="Fill &amp; Sign: type text, add the date, sign, initial or draw on the page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c3-3 5-8 7-8s-1 9 2 9 4-5 6-5 1 3 3 3"/><path d="M3 21h18"/></svg><span class="tlabel">Sign</span></button>
         </div>
@@ -1834,14 +1834,13 @@ body.has-wintitle .bundle{top:36px}
       .filter(q => q.r - q.l > 0.5 && q.b - q.t > 2 && q.b - q.t < H * 0.08 && q.r - q.l < W * 0.98);
     if (!raw.length) return [];
     const hs = raw.map(q => q.b - q.t).sort((a, b) => a - b), h = hs[Math.floor(hs.length / 2)];
-    /* words belong to the same line when they overlap vertically, even if their sizes and baselines wobble.
-       Inside a Box, a line is joined right across the gaps (table rows, columns of figures) so it is one solid bar. */
+    /* words belong to the same line when they overlap vertically, even if their sizes and baselines wobble */
     const lines = [];
     raw.slice().sort((a, b) => a.l - b.l).forEach(q => {
       const qh = q.b - q.t; let best = null, bo = 0;
       lines.forEach(L => {
         const ov = Math.min(L.b, q.b) - Math.max(L.t, q.t);
-        if (ov >= 0.4 * Math.min(qh, L.h0) && (clip || q.l <= L.r + 3 * Math.max(qh, L.h0)) && ov > bo){ bo = ov; best = L; }
+        if (ov >= 0.4 * Math.min(qh, L.h0) && q.l <= L.r + 3 * Math.max(qh, L.h0) && ov > bo){ bo = ov; best = L; }
       });
       if (best){ best.l = Math.min(best.l, q.l); best.r = Math.max(best.r, q.r); best.t = Math.min(best.t, q.t); best.b = Math.max(best.b, q.b); }
       else lines.push({ l: q.l, r: q.r, t: q.t, b: q.b, h0: qh });
@@ -2684,14 +2683,9 @@ body.has-wintitle .bundle{top:36px}
       }
       inside.push(text); rects.push(r);
     });
-    let mrects, text;
-    if (rects.length){
-      mrects = straightRects(el, tl, rects, box); text = inside.join(" ").replace(/\s+/g, " ").trim();
-    }
-    if (!mrects || !mrects.length){
-      mrects = [[(box.l - pr.left) / pr.width, (box.t - pr.top) / pr.height, (box.r - box.l) / pr.width, (box.b - box.t) / pr.height].map(v => +v.toFixed(5))];
-      text = "[Area on page " + n + "]";
-    }
+    /* the mark is exactly the rectangle drawn; the text inside it is kept for the facts list and copying */
+    const mrects = [[(box.l - pr.left) / pr.width, (box.t - pr.top) / pr.height, (box.r - box.l) / pr.width, (box.b - box.t) / pr.height].map(v => +v.toFixed(5))];
+    const text = inside.join(" ").replace(/\s+/g, " ").trim() || "[Area on page " + n + "]";
     pushUndo(d);
     const m = { id: newId(), type: "hl", color: "yellow", page: n, rects: mrects, text, created: new Date().toISOString() };
     const rot = tl ? +(tl.getAttribute("data-main-rotation") || 0) : 0; if (rot) m.rot = rot;
